@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Paper — PYQ Portal</title>
+  <style>
+/* =========================================================
+   PYQ PORTAL — Global Design System
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg-primary:    #070d1a;
+  --bg-secondary:  #0d1b2e;
+  --bg-card:       rgba(255,255,255,0.04);
+  --bg-card-hover: rgba(255,255,255,0.08);
+  --border:        rgba(255,255,255,0.08);
+  --border-glow:   rgba(59,130,246,0.4);
+  --accent:        #3b82f6;
+  --accent-dark:   #1d4ed8;
+  --cyan:          #06b6d4;
+  --purple:        #8b5cf6;
+  --green:         #10b981;
+  --red:           #f43f5e;
+  --text-primary:  #f0f6ff;
+  --text-secondary:#94a3b8;
+  --text-muted:    #475569;
+  --radius:        14px;
+  --radius-sm:     8px;
+  --radius-lg:     20px;
+  --shadow:        0 8px 32px rgba(0,0,0,0.5);
+  --shadow-blue:   0 0 40px rgba(59,130,246,0.15);
+  --transition:    0.25s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+/* ── NAVBAR ── */
+.navbar {
+  position: sticky; top: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background: rgba(7,13,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;
+}
+
+.nav-logo .logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+
+.nav-links {
+  display: flex; align-items: center; gap: 0.25rem;
+}
+
+.nav-links a {
+  padding: 6px 14px; border-radius: var(--radius-sm);
+  font-size: 0.9rem; font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.nav-cta {
+  background: var(--accent) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+.nav-cta:hover { background: var(--accent-dark) !important; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: var(--radius-sm);
+  font-size: 0.95rem; font-weight: 600; font-family: inherit;
+  border: none; cursor: pointer; transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+.btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+.btn-ghost { background: transparent; color: var(--text-secondary); }
+.btn-ghost:hover { color: var(--text-primary); background: var(--bg-card-hover); }
+.btn-danger { background: var(--red); color: white; }
+.btn-success { background: var(--green); color: white; }
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+.btn-lg { padding: 14px 32px; font-size: 1.05rem; }
+
+/* ── GLASS CARD ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+.card:hover { background: var(--bg-card-hover); border-color: rgba(255,255,255,0.12); }
+.card-glow:hover { box-shadow: var(--shadow-blue), var(--shadow); }
+
+/* ── FORM ELEMENTS ── */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.5px; text-transform: uppercase; }
+.form-input, .form-select, .form-textarea {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  transition: var(--transition);
+  width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.07);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.form-select option { background: #1e293b; }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+/* ── DROPZONE ── */
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.05);
+}
+.dropzone .dz-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+.dropzone .dz-label { font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.dropzone .dz-sub { font-size: 0.82rem; color: var(--text-muted); }
+.dropzone.has-file { border-color: var(--green); background: rgba(16,185,129,0.05); }
+.dz-preview { display: flex; align-items: center; gap: 10px; background: rgba(16,185,129,0.1); padding: 10px; border-radius: var(--radius-sm); margin-top: 1rem; }
+.dz-preview-name { font-size: 0.85rem; font-weight: 600; color: var(--green); flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.3px;
+}
+.badge-blue { background: rgba(59,130,246,0.18); color: var(--accent); }
+.badge-cyan { background: rgba(6,182,212,0.18); color: var(--cyan); }
+.badge-purple { background: rgba(139,92,246,0.18); color: var(--purple); }
+.badge-green  { background: rgba(16,185,129,0.18); color: var(--green); }
+.badge-yellow { background: rgba(245,158,11,0.18); color: #f59e0b; }
+.badge-gray { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+
+/* ── TOAST ── */
+#toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  background: #1e293b; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.3s ease forwards;
+  max-width: 360px;
+  font-size: 0.9rem;
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOut { to { transform: translateX(130%); opacity: 0; } }
+.toast.hide { animation: slideOut 0.3s ease forwards; }
+
+/* ── SECTION UTILS ── */
+.section { padding: 4rem 0; }
+.container { max-width: 1160px; margin: 0 auto; padding: 0 1.5rem; }
+.section-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+.section-sub { color: var(--text-secondary); margin-bottom: 2.5rem; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+/* ── TAG ── */
+.tag {
+  display: inline-block; padding: 4px 10px;
+  border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600;
+  background: var(--bg-card-hover); color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+.empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.6; }
+.empty-state h3 { color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 1.15rem; }
+
+/* ── TABS ── */
+.tab-list { display: flex; border-bottom: 1px solid var(--border); gap: 0.25rem; margin-bottom: 1.5rem; }
+.tab-btn {
+  padding: 10px 20px; border: none; background: transparent;
+  color: var(--text-muted); font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; border-bottom: 2px solid transparent; transition: var(--transition);
+  position: relative; top: 1px;
+}
+.tab-btn.active { color: var(--accent); border-color: var(--accent); }
+.tab-btn:hover:not(.active) { color: var(--text-secondary); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── FILE VIEWER ── */
+.file-viewer { width: 100%; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: #111827; }
+.file-viewer iframe { width: 100%; height: 75vh; display: block; border: none; }
+.file-viewer img { width: 100%; height: auto; display: block; object-fit: contain; max-height: 80vh; }
+
+/* ── SEARCH BAR ── */
+.search-bar { position: relative; }
+.search-bar input { padding-left: 42px; }
+.search-bar .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 1rem; }
+
+/* ── PAPER CARD ── */
+.paper-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
+  display: flex; flex-direction: column;
+}
+.paper-card:hover { transform: translateY(-3px); background: var(--bg-card-hover); border-color: rgba(59,130,246,0.3); box-shadow: var(--shadow-blue); }
+.paper-card-header {
+  padding: 1.25rem 1.25rem 0.75rem;
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(6,182,212,0.05));
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
+}
+.paper-card-title { font-weight: 700; font-size: 1rem; line-height: 1.4; }
+.paper-card-body { padding: 1rem 1.25rem; flex: 1; }
+.paper-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.75rem; }
+.paper-card-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.paper-card-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.paper-card-date { font-size: 0.78rem; color: var(--text-muted); }
+
+/* ── STAT CARD ── */
+.stat-card { text-align: center; padding: 1.75rem 1rem; }
+.stat-num { font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+.stat-label { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; }
+
+/* ── HERO ── */
+.hero { padding: 6rem 0 4rem; text-align: center; position: relative; overflow: hidden; }
+.hero-glow {
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 999px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-bottom: 1.5rem; }
+.hero-title { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.15; letter-spacing: -1.5px; margin-bottom: 1.25rem; }
+.hero-title .gradient { background: linear-gradient(135deg, var(--accent), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { font-size: 1.1rem; color: var(--text-secondary); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+footer a { color: var(--accent); }
+footer a:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-auto { grid-template-columns: 1fr; }
+  .hero { padding: 4rem 0 3rem; }
+  .nav-links a:not(.nav-cta) { display: none; }
+}
+
+/* ── PAGE HERO ── */
+.page-hero {
+  padding: 3rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(59,130,246,0.04) 0%, transparent 100%);
+}
+.page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
+.page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
+
+</style>
+  <style>
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.5rem;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .paper-title { font-size: 1.7rem; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
+    .viewer-meta { display: flex; flex-wrap: wrap; gap: 10px; margin: 1rem 0 1.5rem; align-items: center; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+    }
+
+    .info-row h4 {
+      font-size: 0.75rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 0.2rem;
+    }
+    .info-row p { font-size: 0.95rem; font-weight: 600; }
+
+    .exam-cta-card {
+      background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(6,182,212,0.06));
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .exam-cta-card .big-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .exam-cta-card h3 { margin-bottom: 0.25rem; }
+    .exam-cta-card p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; }
+
+    .q-preview {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+
+    .q-preview strong { color: var(--text-primary); }
+    .q-options-mini { margin-top: 0.3rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .q-opt-chip { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; font-size: 0.78rem; }
+
+    .file-viewer { background: var(--bg-secondary); border-radius: var(--radius-sm); overflow: hidden; }
+    .file-viewer iframe { width: 100%; height: 600px; border: none; }
+    .file-viewer img { width: 100%; height: auto; display: block; }
+    .no-file-msg { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.95rem; }
+
+    @media(max-width:768px) { .detail-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <div class="logo-icon">📚</div>
+    PYQ Portal
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="container" id="viewer-content" style="display:none;">
+
+    <a href="browse.html" class="back-link">← Back to Browse</a>
+
+    <div class="detail-grid">
+
+      <!-- LEFT: Sidebar -->
+      <div style="position:sticky; top:80px;">
+
+        <!-- EXAM CTA (shown if questions extracted) -->
+        <div class="exam-cta-card" id="exam-cta" style="display:none;">
+          <div class="big-icon">🎯</div>
+          <h3>Take Online Exam</h3>
+          <p id="exam-cta-desc">Answer questions interactively and get auto-evaluated.</p>
+          <a class="btn btn-primary" style="width:100%; justify-content:center;" id="start-exam-btn" href="#">
+            🚀 Start Exam
+          </a>
+        </div>
+
+        <!-- No exam state -->
+        <div class="card" id="no-exam-card" style="margin-bottom:1rem; text-align:center; padding:1.25rem; display:none;">
+          <div style="font-size:1.5rem; margin-bottom:0.5rem;">🤖</div>
+          <p style="font-size:0.85rem; color:var(--text-muted);">No exam generated. Re-upload with OCR to create an interactive exam.</p>
+        </div>
+
+        <!-- PAPER INFO -->
+        <div class="card" style="margin-bottom:1rem;">
+          <div class="paper-title" id="v-title"></div>
+          <div class="viewer-meta" id="v-badges"></div>
+          <div class="divider"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div class="info-row"><h4>Year</h4><p id="v-year">—</p></div>
+            <div class="info-row"><h4>Board</h4><p id="v-board">—</p></div>
+            <div class="info-row"><h4>Questions</h4><p id="v-qcount">—</p></div>
+            <div class="info-row"><h4>Duration</h4><p id="v-duration">—</p></div>
+          </div>
+          <p style="color:var(--text-secondary); font-size:0.9rem;" id="v-desc"></p>
+          <div class="divider"></div>
+          <p style="font-size:0.78rem; color:var(--text-muted);">Uploaded on <span id="v-date"></span></p>
+        </div>
+
+        <!-- DOWNLOADS -->
+        <div class="card" style="margin-bottom:1rem;">
+          <h4 style="font-size:0.85rem; margin-bottom:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Downloads</h4>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <button class="btn btn-primary btn-sm" onclick="downloadFile('qp')">⬇️ Question Paper</button>
+            <button class="btn btn-outline btn-sm" id="dl-ak" onclick="downloadFile('ak')">⬇️ Answer Key</button>
+          </div>
+        </div>
+
+        <button class="btn btn-danger btn-sm" onclick="deletePaper()" style="width:100%;">🗑️ Delete Paper</button>
+      </div>
+
+      <!-- RIGHT: Content -->
+      <div>
+
+        <!-- Question Preview (if OCR extracted) -->
+        <div id="questions-preview" style="margin-bottom:1.5rem; display:none;">
+          <div class="tab-list" style="margin-bottom:1rem;">
+            <button class="tab-btn active" data-tab="exam-tab">🎯 Questions Preview</button>
+            <button class="tab-btn" data-tab="pdf-tab">📄 PDF Viewer</button>
+          </div>
+          <div class="tab-pane active" id="tab-exam-tab">
+            <div id="q-preview-list"></div>
+            <p style="font-size:0.82rem; color:var(--text-muted); text-align:center; margin-top:0.5rem;">Showing first 5 questions. Take the exam to answer all.</p>
+          </div>
+          <div class="tab-pane" id="tab-pdf-tab">
+            <div class="tab-list" style="margin-bottom:1rem;">
+              <button class="tab-btn active" data-tab2="qp">📄 Question Paper</button>
+              <button class="tab-btn" data-tab2="ak">🔑 Answer Key</button>
+            </div>
+            <div class="tab-pane2 active" id="tab2-qp">
+              <div class="file-viewer" id="qp-viewer"></div>
+            </div>
+            <div class="tab-pane2" id="tab2-ak">
+              <div class="file-viewer" id="ak-viewer"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PDF only (no questions extracted) -->
+        <div id="pdf-only-view" style="display:none;">
+          <div class="tab-list" style="margin-bottom:1rem;">
+            <button class="tab-btn active" data-tab3="qp">📄 Question Paper</button>
+            <button class="tab-btn" data-tab3="ak">🔑 Answer Key</button>
+          </div>
+          <div class="tab-pane3 active" id="tab3-qp">
+            <div class="file-viewer" id="qp-viewer2"></div>
+          </div>
+          <div class="tab-pane3" id="tab3-ak">
+            <div class="file-viewer" id="ak-viewer2"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="not-found" style="display:none;">
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>Paper not found</h3>
+      <p>This paper may have been deleted or the link is invalid.</p>
+      <br>
+      <a href="browse.html" class="btn btn-primary">Browse All Papers</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="browse.html">Browse Papers</a></p>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+<script>
+/**
+ * PYQ Portal — Shared Application Logic (v2 with OCR + Exam Engine)
+ */
+
+const STORAGE_KEY = 'pyq_papers_meta';
+const DB_NAME = 'pyq_portal_db';
+const DB_VERSION = 2;
+const STORE_NAME = 'paper_files';
+
+// ── IndexedDB ──────────────────────────────────────────────────
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+async function saveFileBlobs(id, qpFile, akFile) {
+  const db = await openDB();
+  const entry = {
+    id,
+    qpBlob: qpFile || null,
+    qpName: qpFile ? qpFile.name : null,
+    qpType: qpFile ? qpFile.type : null,
+    akBlob: akFile || null,
+    akName: akFile ? akFile.name : null,
+    akType: akFile ? akFile.type : null,
+  };
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(entry).onsuccess = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function loadFileBlobs(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function deleteFileBlobs(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).delete(id).onsuccess = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── METADATA ──────────────────────────────────────────────────
+
+function getPapers() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function savePaperMeta(meta) {
+  const papers = getPapers();
+  const existing = papers.findIndex(p => p.id === meta.id);
+  if (existing >= 0) papers[existing] = meta; else papers.push(meta);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(papers));
+}
+
+function removePaperMeta(id) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(getPapers().filter(p => p.id !== id)));
+}
+
+async function savePaper(meta, qpFile, akFile) {
+  await saveFileBlobs(meta.id, qpFile, akFile);
+  savePaperMeta(meta);
+}
+
+// ── PDF → IMAGES (PDF.js) ─────────────────────────────────────
+
+async function pdfToImages(file, onProgress) {
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const images = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 2.5 }); // High-res for OCR
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    images.push(canvas.toDataURL('image/png'));
+  }
+  return images;
+}
+
+// ── OCR (Tesseract.js) ────────────────────────────────────────
+
+async function ocrImageData(imageData) {
+  const worker = await Tesseract.createWorker('eng');
+  const { data: { text } } = await worker.recognize(imageData);
+  await worker.terminate();
+  return text;
+}
+
+async function ocrFile(file, onProgress) {
+  let pages = [];
+  if (file.type === 'application/pdf') {
+    pages = await pdfToImages(file, onProgress);
+  } else {
+    pages = [file]; // image file directly
+  }
+
+  let allText = '';
+  for (let i = 0; i < pages.length; i++) {
+    if (onProgress) onProgress(`Running OCR on page ${i + 1} of ${pages.length}…`);
+    const text = await ocrImageData(pages[i]);
+    allText += text + '\n\n';
+  }
+  return allText;
+}
+
+// ── QUESTION PAPER PARSER ─────────────────────────────────────
+
+function parseQuestions(ocrText) {
+  const questions = [];
+  const lines = ocrText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  let currentQ = null;
+
+  // Regex patterns
+  const qStart = /^(\d{1,3})\s*[.)]\s+(.+)/;
+  const optLine = /^\(?([A-Da-d])\s*[.)]\s+(.+)/;
+
+  for (const line of lines) {
+    const qm = line.match(qStart);
+    const om = line.match(optLine);
+
+    if (qm) {
+      if (currentQ && Object.keys(currentQ.options).length >= 2) {
+        questions.push(currentQ);
+      }
+      currentQ = {
+        number: parseInt(qm[1]),
+        text: qm[2].trim(),
+        options: {}
+      };
+    } else if (om && currentQ) {
+      const letter = om[1].toUpperCase();
+      if (['A','B','C','D'].includes(letter)) {
+        currentQ.options[letter] = om[2].trim();
+      }
+    } else if (currentQ) {
+      // Append to question text if no options yet
+      if (Object.keys(currentQ.options).length === 0 && line.length > 2 && !line.match(/^[A-D]\s*[.)]|^\d+\s*[.)]/)) {
+        currentQ.text += ' ' + line;
+      }
+    }
+  }
+
+  if (currentQ && Object.keys(currentQ.options).length >= 2) {
+    questions.push(currentQ);
+  }
+
+  return questions.filter(q =>
+    q.text.length > 5 &&
+    Object.keys(q.options).length >= 2
+  );
+}
+
+// ── ANSWER KEY PARSER ─────────────────────────────────────────
+
+function parseAnswerKey(ocrText) {
+  const answers = {};
+
+  // Match patterns: "1 A", "1. A", "1) A", "1  A"
+  // Works for both inline and tabular formats
+  const lines = ocrText.split('\n');
+  for (const line of lines) {
+    // Match multiple num→answer pairs per line (table format)
+    const pairs = [...line.matchAll(/\b(\d{1,3})\s{1,4}([A-Da-d])\b/g)];
+    for (const p of pairs) {
+      const num = parseInt(p[1]).toString();
+      const ans = p[2].toUpperCase();
+      if (!answers[num]) answers[num] = ans;
+    }
+  }
+
+  // Also match: "1. A" or "1) A"
+  const dotPattern = /\b(\d{1,3})\s*[.)]\s*([A-Da-d])\b/g;
+  let m;
+  while ((m = dotPattern.exec(ocrText)) !== null) {
+    const num = parseInt(m[1]).toString();
+    const ans = m[2].toUpperCase();
+    if (!answers[num]) answers[num] = ans;
+  }
+
+  return answers;
+}
+
+// ── CARD BUILDER ──────────────────────────────────────────────
+
+function buildPaperCard(paper) {
+  const date = paper.uploadedAt
+    ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+    : '';
+
+  const badges = [
+    `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
+    paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
+    paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
+    paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
+    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Questions</span>` : '',
+  ].filter(Boolean).join('');
+
+  return `
+  <div class="paper-card" onclick="window.location.href='viewer.html?id=${paper.id}'">
+    <div class="paper-card-header">
+      <div class="paper-card-title">${escapeHtml(paper.subject)} — ${escapeHtml(paper.examName)}</div>
+      <span class="badge badge-cyan">${escapeHtml(paper.year || '')}</span>
+    </div>
+    <div class="paper-card-body">
+      <div class="paper-card-meta">${badges}</div>
+      ${paper.description ? `<p class="paper-card-desc">${escapeHtml(paper.description)}</p>` : ''}
+    </div>
+    <div class="paper-card-footer">
+      <span class="paper-card-date">📅 ${date}</span>
+      <button class="btn btn-primary btn-sm"
+        onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
+    </div>
+  </div>`;
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+
+function showToast(message, type = 'info') {
+  const icon = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' }[type] || 'ℹ️';
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 350); }, 3500);
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatTime(s) {
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
+
+</script>
+<script>
+  let currentPaper = null;
+  let blobUrls = [];
+
+  function renderViewer(blob, mimeType, containerId) {
+    const c = document.getElementById(containerId);
+    if (!blob) { c.innerHTML = '<div class="no-file-msg">No file available</div>'; return; }
+    const url = URL.createObjectURL(blob);
+    blobUrls.push(url);
+    c.innerHTML = mimeType && mimeType.startsWith('image/')
+      ? `<img src="${url}" alt="Document" />`
+      : `<iframe src="${url}" title="Document"></iframe>`;
+  }
+
+  async function downloadFile(type) {
+    if (!currentPaper) return;
+    const entry = await loadFileBlobs(currentPaper.id);
+    if (!entry) { showToast('File not found', 'error'); return; }
+    const blob = type === 'qp' ? entry.qpBlob : entry.akBlob;
+    const fileName = type === 'qp' ? entry.qpName : entry.akName;
+    if (!blob) { showToast('No file available', 'error'); return; }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName || 'download'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+  }
+
+  async function deletePaper() {
+    if (!currentPaper || !confirm('Delete this paper? This cannot be undone.')) return;
+    await deleteFileBlobs(currentPaper.id);
+    removePaperMeta(currentPaper.id);
+    showToast('Paper deleted', 'success');
+    setTimeout(() => window.location.href = 'browse.html', 1200);
+  }
+
+  // Tab switching
+  function setupTabs(btnAttr, panePrefix) {
+    document.querySelectorAll(`[${btnAttr}]`).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute(btnAttr);
+        document.querySelectorAll(`[${btnAttr}]`).forEach(b => b.classList.remove('active'));
+        document.querySelectorAll(`.${panePrefix}`).forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const pane = document.getElementById(`${panePrefix.replace('tab-pane','tab')}-${tab}`);
+        if (pane) pane.classList.add('active');
+      });
+    });
+  }
+
+  window.addEventListener('unload', () => blobUrls.forEach(u => URL.revokeObjectURL(u)));
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const id = new URLSearchParams(window.location.search).get('id');
+    const paper = id ? getPapers().find(p => p.id === id) : null;
+    if (!paper) { document.getElementById('not-found').style.display = 'block'; return; }
+
+    currentPaper = paper;
+    document.title = `${paper.subject} — ${paper.examName} ${paper.year} | PYQ Portal`;
+    document.getElementById('viewer-content').style.display = 'block';
+
+    document.getElementById('v-title').textContent = `${paper.subject} — ${paper.examName}`;
+    document.getElementById('v-year').textContent = paper.year || '—';
+    document.getElementById('v-board').textContent = paper.board || '—';
+    document.getElementById('v-qcount').textContent = paper.questionCount ? `${paper.questionCount} MCQs` : '—';
+    document.getElementById('v-duration').textContent = paper.duration ? `${paper.duration} min` : '—';
+    document.getElementById('v-desc').textContent = paper.description || '';
+    document.getElementById('v-date').textContent = paper.uploadedAt
+      ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—';
+
+    const badges = document.getElementById('v-badges');
+    [
+      `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
+      `<span class="badge badge-cyan">${escapeHtml(paper.year)}</span>`,
+      paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
+      paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
+      paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
+    ].filter(Boolean).forEach(b => badges.insertAdjacentHTML('beforeend', b));
+
+    if (!paper.hasAnswerKey) document.getElementById('dl-ak').disabled = true;
+
+    // Exam CTA
+    if (paper.hasExam && paper.questions && paper.questions.length > 0) {
+      document.getElementById('exam-cta').style.display = 'block';
+      document.getElementById('start-exam-btn').href = `exam.html?id=${paper.id}`;
+      document.getElementById('exam-cta-desc').textContent =
+        `${paper.questions.length} questions · ${paper.duration || 180} min · ${Object.keys(paper.answerKey||{}).length > 0 ? 'Auto-graded' : 'No answer key'}`;
+
+      // Question preview
+      document.getElementById('questions-preview').style.display = 'block';
+      const previewList = document.getElementById('q-preview-list');
+      paper.questions.slice(0, 5).forEach(q => {
+        const opts = Object.entries(q.options).map(([l,t]) =>
+          `<span class="q-opt-chip">${l}: ${escapeHtml(t.substring(0,30))}${t.length>30?'…':''}</span>`
+        ).join('');
+        previewList.insertAdjacentHTML('beforeend', `
+          <div class="q-preview">
+            <strong>Q${q.number}.</strong> ${escapeHtml(q.text.substring(0, 120))}${q.text.length > 120 ? '…' : ''}
+            <div class="q-options-mini">${opts}</div>
+          </div>`);
+      });
+    } else {
+      document.getElementById('no-exam-card').style.display = 'block';
+      document.getElementById('pdf-only-view').style.display = 'block';
+    }
+
+    // Load PDF blobs
+    const entry = await loadFileBlobs(id);
+    if (entry) {
+      if (paper.hasExam) {
+        renderViewer(entry.qpBlob, entry.qpType, 'qp-viewer');
+        renderViewer(entry.akBlob, entry.akType, 'ak-viewer');
+      } else {
+        renderViewer(entry.qpBlob, entry.qpType, 'qp-viewer2');
+        renderViewer(entry.akBlob, entry.akType, 'ak-viewer2');
+      }
+    }
+
+    // Setup tabs
+    document.querySelectorAll('[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`tab-${tab}`).classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('[data-tab2]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab2;
+        document.querySelectorAll('[data-tab2]').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane2').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`tab2-${tab}`).classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('[data-tab3]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab3;
+        document.querySelectorAll('[data-tab3]').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane3').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`tab3-${tab}`).classList.add('active');
+      });
+    });
+  });
+</script>
+</body>
+</html>
