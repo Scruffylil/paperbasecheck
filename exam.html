@@ -1,10 +1,330 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Exam — PYQ Portal</title>
-  <style>
+  <style>/* =========================================================
+   PYQ PORTAL — Global Design System
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg-primary:    #070d1a;
+  --bg-secondary:  #0d1b2e;
+  --bg-card:       rgba(255,255,255,0.04);
+  --bg-card-hover: rgba(255,255,255,0.08);
+  --border:        rgba(255,255,255,0.08);
+  --border-glow:   rgba(59,130,246,0.4);
+  --accent:        #3b82f6;
+  --accent-dark:   #1d4ed8;
+  --cyan:          #06b6d4;
+  --purple:        #8b5cf6;
+  --green:         #10b981;
+  --red:           #f43f5e;
+  --text-primary:  #f0f6ff;
+  --text-secondary:#94a3b8;
+  --text-muted:    #475569;
+  --radius:        14px;
+  --radius-sm:     8px;
+  --radius-lg:     20px;
+  --shadow:        0 8px 32px rgba(0,0,0,0.5);
+  --shadow-blue:   0 0 40px rgba(59,130,246,0.15);
+  --transition:    0.25s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+/* ── NAVBAR ── */
+.navbar {
+  position: sticky; top: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background: rgba(7,13,26,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;
+}
+
+.nav-logo .logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+
+.nav-links {
+  display: flex; align-items: center; gap: 0.25rem;
+}
+
+.nav-links a {
+  padding: 6px 14px; border-radius: var(--radius-sm);
+  font-size: 0.9rem; font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.nav-cta {
+  background: var(--accent) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+.nav-cta:hover { background: var(--accent-dark) !important; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: var(--radius-sm);
+  font-size: 0.95rem; font-weight: 600; font-family: inherit;
+  border: none; cursor: pointer; transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+.btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+.btn-ghost { background: transparent; color: var(--text-secondary); }
+.btn-ghost:hover { color: var(--text-primary); background: var(--bg-card-hover); }
+.btn-danger { background: var(--red); color: white; }
+.btn-success { background: var(--green); color: white; }
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+.btn-lg { padding: 14px 32px; font-size: 1.05rem; }
+
+/* ── GLASS CARD ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+.card:hover { background: var(--bg-card-hover); border-color: rgba(255,255,255,0.12); }
+.card-glow:hover { box-shadow: var(--shadow-blue), var(--shadow); }
+
+/* ── FORM ELEMENTS ── */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.5px; text-transform: uppercase; }
+.form-input, .form-select, .form-textarea {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  transition: var(--transition);
+  width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.07);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.form-select option { background: #1e293b; }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+/* ── DROPZONE ── */
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent);
+  background: rgba(59,130,246,0.05);
+}
+.dropzone .dz-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+.dropzone .dz-label { font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+.dropzone .dz-sub { font-size: 0.82rem; color: var(--text-muted); }
+.dropzone.has-file { border-color: var(--green); background: rgba(16,185,129,0.05); }
+.dz-preview { display: flex; align-items: center; gap: 10px; background: rgba(16,185,129,0.1); padding: 10px; border-radius: var(--radius-sm); margin-top: 1rem; }
+.dz-preview-name { font-size: 0.85rem; font-weight: 600; color: var(--green); flex: 1; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── BADGE ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.3px;
+}
+.badge-blue { background: rgba(59,130,246,0.18); color: var(--accent); }
+.badge-cyan { background: rgba(6,182,212,0.18); color: var(--cyan); }
+.badge-purple { background: rgba(139,92,246,0.18); color: var(--purple); }
+.badge-green  { background: rgba(16,185,129,0.18); color: var(--green); }
+.badge-yellow { background: rgba(245,158,11,0.18); color: #f59e0b; }
+.badge-gray { background: rgba(255,255,255,0.08); color: var(--text-secondary); }
+
+/* ── TOAST ── */
+#toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  background: #1e293b; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.3s ease forwards;
+  max-width: 360px;
+  font-size: 0.9rem;
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOut { to { transform: translateX(130%); opacity: 0; } }
+.toast.hide { animation: slideOut 0.3s ease forwards; }
+
+/* ── SECTION UTILS ── */
+.section { padding: 4rem 0; }
+.container { max-width: 1160px; margin: 0 auto; padding: 0 1.5rem; }
+.section-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+.section-sub { color: var(--text-secondary); margin-bottom: 2.5rem; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+/* ── TAG ── */
+.tag {
+  display: inline-block; padding: 4px 10px;
+  border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600;
+  background: var(--bg-card-hover); color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+.empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.6; }
+.empty-state h3 { color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 1.15rem; }
+
+/* ── TABS ── */
+.tab-list { display: flex; border-bottom: 1px solid var(--border); gap: 0.25rem; margin-bottom: 1.5rem; }
+.tab-btn {
+  padding: 10px 20px; border: none; background: transparent;
+  color: var(--text-muted); font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; border-bottom: 2px solid transparent; transition: var(--transition);
+  position: relative; top: 1px;
+}
+.tab-btn.active { color: var(--accent); border-color: var(--accent); }
+.tab-btn:hover:not(.active) { color: var(--text-secondary); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── FILE VIEWER ── */
+.file-viewer { width: 100%; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: #111827; }
+.file-viewer iframe { width: 100%; height: 75vh; display: block; border: none; }
+.file-viewer img { width: 100%; height: auto; display: block; object-fit: contain; max-height: 80vh; }
+
+/* ── SEARCH BAR ── */
+.search-bar { position: relative; }
+.search-bar input { padding-left: 42px; }
+.search-bar .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 1rem; }
+
+/* ── PAPER CARD ── */
+.paper-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
+  display: flex; flex-direction: column;
+}
+.paper-card:hover { transform: translateY(-3px); background: var(--bg-card-hover); border-color: rgba(59,130,246,0.3); box-shadow: var(--shadow-blue); }
+.paper-card-header {
+  padding: 1.25rem 1.25rem 0.75rem;
+  background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(6,182,212,0.05));
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
+}
+.paper-card-title { font-weight: 700; font-size: 1rem; line-height: 1.4; }
+.paper-card-body { padding: 1rem 1.25rem; flex: 1; }
+.paper-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.75rem; }
+.paper-card-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.paper-card-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.paper-card-date { font-size: 0.78rem; color: var(--text-muted); }
+
+/* ── STAT CARD ── */
+.stat-card { text-align: center; padding: 1.75rem 1rem; }
+.stat-num { font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+.stat-label { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem; }
+
+/* ── HERO ── */
+.hero { padding: 6rem 0 4rem; text-align: center; position: relative; overflow: hidden; }
+.hero-glow {
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 16px; border-radius: 999px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-bottom: 1.5rem; }
+.hero-title { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.15; letter-spacing: -1.5px; margin-bottom: 1.25rem; }
+.hero-title .gradient { background: linear-gradient(135deg, var(--accent), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { font-size: 1.1rem; color: var(--text-secondary); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+footer a { color: var(--accent); }
+footer a:hover { text-decoration: underline; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-auto { grid-template-columns: 1fr; }
+  .hero { padding: 4rem 0 3rem; }
+  .nav-links a:not(.nav-cta) { display: none; }
+}
+
+/* ── PAGE HERO ── */
+.page-hero {
+  padding: 3rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(59,130,246,0.04) 0%, transparent 100%);
+}
+.page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
+.page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
 /* =========================================================
    PYQ PORTAL — Global Design System
    ========================================================= */
@@ -327,8 +647,6 @@ footer a:hover { text-decoration: underline; }
 .page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
 .page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
 
-</style>
-  <style>
     :root { --exam-sidebar: 280px; }
 
     .exam-wrap {
@@ -662,10 +980,29 @@ footer a:hover { text-decoration: underline; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .palette-grid { grid-template-columns: repeat(7, 1fr); }
     }
-  </style>
+  
+    .marks-scored-card{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(6,182,212,.06));border:1px solid rgba(59,130,246,.25);border-radius:var(--radius);padding:1.5rem;text-align:center;margin:1rem 0;}
+    .marks-scored-label{font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+    .marks-scored-value{font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+    .marks-breakdown{margin-top:.75rem;font-size:.82rem;color:var(--text-muted);display:flex;justify-content:center;gap:1.25rem;flex-wrap:wrap;}
+    .marks-breakdown span{display:inline-flex;align-items:center;gap:4px;}
+</style>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    const FIREBASE_CONFIG = {
+      apiKey:"YOUR_API_KEY", authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+      projectId:"YOUR_PROJECT_ID", storageBucket:"YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId:"YOUR_SENDER_ID", appId:"YOUR_APP_ID"
+    };
+    const fbApp=initializeApp(FIREBASE_CONFIG);
+    const auth=getAuth(fbApp), db=getFirestore(fbApp);
+    window._fb={auth,db,doc,getDoc};
+    onAuthStateChanged(auth,u=>{ if(!u) signInAnonymously(auth).catch(console.error); else window._fbUser=u; });
+  </script>
 </head>
 <body>
-
 <nav class="navbar">
   <a href="index.html" class="nav-logo">
     <div class="logo-icon">📚</div>
@@ -724,6 +1061,10 @@ footer a:hover { text-decoration: underline; }
           <div class="palette-title">📊 Progress</div>
           <div id="sidebar-stats" style="font-size:0.88rem; color:var(--text-secondary);"></div>
         </div>
+        <div class="palette-card" id="marking-scheme-card" style="display:none;">
+          <div class="palette-title">🎯 Marking Scheme</div>
+          <div id="marking-scheme-display" style="font-size:.85rem;line-height:1.9;"></div>
+        </div>
 
         <button class="btn btn-primary" style="width:100%; margin-top:0.5rem;" onclick="confirmSubmit()">
           ✅ Submit Exam
@@ -768,8 +1109,13 @@ footer a:hover { text-decoration: underline; }
       </div>
       <div class="stat-box">
         <div class="stat-num" id="r-total">0</div>
-        <div class="stat-lbl">📋 Total</div>
+        <div class="stat-lbl">📋 Total Qs</div>
       </div>
+    </div>
+    <div class="marks-scored-card" id="marks-scored-card">
+      <div class="marks-scored-label">🎯 Marks Scored</div>
+      <div class="marks-scored-value" id="r-marks">—</div>
+      <div class="marks-breakdown" id="marks-breakdown"></div>
     </div>
 
     <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
@@ -797,120 +1143,34 @@ footer a:hover { text-decoration: underline; }
     </div>
   </div>
 </div>
-
 <div id="toast-container"></div>
 <script>
 /**
- * PYQ Portal — Shared Application Logic (v2 with OCR + Exam Engine)
+ * PYQ Portal — Core Shared Logic v3
+ * OCR, parsers, card builder, toast, utils.
+ * Firebase calls are handled inline in each page.
  */
 
-const STORAGE_KEY = 'pyq_papers_meta';
-const DB_NAME = 'pyq_portal_db';
-const DB_VERSION = 2;
-const STORE_NAME = 'paper_files';
-
-// ── IndexedDB ──────────────────────────────────────────────────
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-async function saveFileBlobs(id, qpFile, akFile) {
-  const db = await openDB();
-  const entry = {
-    id,
-    qpBlob: qpFile || null,
-    qpName: qpFile ? qpFile.name : null,
-    qpType: qpFile ? qpFile.type : null,
-    akBlob: akFile || null,
-    akName: akFile ? akFile.name : null,
-    akType: akFile ? akFile.type : null,
-  };
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(entry).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function loadFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(id);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function deleteFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete(id).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-// ── METADATA ──────────────────────────────────────────────────
-
-function getPapers() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function savePaperMeta(meta) {
-  const papers = getPapers();
-  const existing = papers.findIndex(p => p.id === meta.id);
-  if (existing >= 0) papers[existing] = meta; else papers.push(meta);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(papers));
-}
-
-function removePaperMeta(id) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(getPapers().filter(p => p.id !== id)));
-}
-
-async function savePaper(meta, qpFile, akFile) {
-  await saveFileBlobs(meta.id, qpFile, akFile);
-  savePaperMeta(meta);
-}
-
-// ── PDF → IMAGES (PDF.js) ─────────────────────────────────────
-
+// ── PDF → IMAGES ──────────────────────────────
 async function pdfToImages(file, onProgress) {
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const images = [];
-
   for (let i = 1; i <= pdf.numPages; i++) {
     if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2.5 }); // High-res for OCR
+    const viewport = page.getViewport({ scale: 2.5 });
     const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+    canvas.width = viewport.width; canvas.height = viewport.height;
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     images.push(canvas.toDataURL('image/png'));
   }
   return images;
 }
 
-// ── OCR (Tesseract.js) ────────────────────────────────────────
-
+// ── OCR ───────────────────────────────────────
 async function ocrImageData(imageData) {
   const worker = await Tesseract.createWorker('eng');
   const { data: { text } } = await worker.recognize(imageData);
@@ -918,116 +1178,64 @@ async function ocrImageData(imageData) {
   return text;
 }
 
-async function ocrFile(file, onProgress) {
-  let pages = [];
-  if (file.type === 'application/pdf') {
-    pages = await pdfToImages(file, onProgress);
-  } else {
-    pages = [file]; // image file directly
-  }
-
-  let allText = '';
-  for (let i = 0; i < pages.length; i++) {
-    if (onProgress) onProgress(`Running OCR on page ${i + 1} of ${pages.length}…`);
-    const text = await ocrImageData(pages[i]);
-    allText += text + '\n\n';
-  }
-  return allText;
-}
-
-// ── QUESTION PAPER PARSER ─────────────────────────────────────
-
+// ── QUESTION PARSER ───────────────────────────
 function parseQuestions(ocrText) {
   const questions = [];
   const lines = ocrText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
   let currentQ = null;
-
-  // Regex patterns
   const qStart = /^(\d{1,3})\s*[.)]\s+(.+)/;
   const optLine = /^\(?([A-Da-d])\s*[.)]\s+(.+)/;
-
   for (const line of lines) {
-    const qm = line.match(qStart);
-    const om = line.match(optLine);
-
+    const qm = line.match(qStart); const om = line.match(optLine);
     if (qm) {
-      if (currentQ && Object.keys(currentQ.options).length >= 2) {
-        questions.push(currentQ);
-      }
-      currentQ = {
-        number: parseInt(qm[1]),
-        text: qm[2].trim(),
-        options: {}
-      };
+      if (currentQ && Object.keys(currentQ.options).length >= 2) questions.push(currentQ);
+      currentQ = { number: parseInt(qm[1]), text: qm[2].trim(), options: {} };
     } else if (om && currentQ) {
       const letter = om[1].toUpperCase();
-      if (['A','B','C','D'].includes(letter)) {
-        currentQ.options[letter] = om[2].trim();
-      }
-    } else if (currentQ) {
-      // Append to question text if no options yet
-      if (Object.keys(currentQ.options).length === 0 && line.length > 2 && !line.match(/^[A-D]\s*[.)]|^\d+\s*[.)]/)) {
-        currentQ.text += ' ' + line;
-      }
+      if (['A','B','C','D'].includes(letter)) currentQ.options[letter] = om[2].trim();
+    } else if (currentQ && Object.keys(currentQ.options).length === 0 && line.length > 2
+        && !line.match(/^[A-D]\s*[.)]|^\d+\s*[.)]/) ) {
+      currentQ.text += ' ' + line;
     }
   }
-
-  if (currentQ && Object.keys(currentQ.options).length >= 2) {
-    questions.push(currentQ);
-  }
-
-  return questions.filter(q =>
-    q.text.length > 5 &&
-    Object.keys(q.options).length >= 2
-  );
+  if (currentQ && Object.keys(currentQ.options).length >= 2) questions.push(currentQ);
+  return questions.filter(q => q.text.length > 5 && Object.keys(q.options).length >= 2);
 }
 
-// ── ANSWER KEY PARSER ─────────────────────────────────────────
-
+// ── ANSWER KEY PARSER ─────────────────────────
 function parseAnswerKey(ocrText) {
   const answers = {};
-
-  // Match patterns: "1 A", "1. A", "1) A", "1  A"
-  // Works for both inline and tabular formats
-  const lines = ocrText.split('\n');
-  for (const line of lines) {
-    // Match multiple num→answer pairs per line (table format)
-    const pairs = [...line.matchAll(/\b(\d{1,3})\s{1,4}([A-Da-d])\b/g)];
-    for (const p of pairs) {
-      const num = parseInt(p[1]).toString();
-      const ans = p[2].toUpperCase();
-      if (!answers[num]) answers[num] = ans;
+  const skipLine = /^(SI|No\.|Key|Answer|Serial|Sl\.)/i;
+  const cleaned = ocrText.replace(/[|\\]/g, ' ');
+  for (const line of cleaned.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || skipLine.test(trimmed)) continue;
+    for (const p of [...trimmed.matchAll(/\b(\d{1,3})\s+([ABCDabcd])\b/g)]) {
+      const num = String(parseInt(p[1]));
+      if (!answers[num]) answers[num] = p[2].toUpperCase();
+    }
+    for (const p of [...trimmed.matchAll(/\b(\d{1,3})([ABCDabcd])\b/g)]) {
+      const num = String(parseInt(p[1]));
+      if (!answers[num]) answers[num] = p[2].toUpperCase();
+    }
+    for (const p of [...trimmed.matchAll(/\b(\d{1,3})[.)]\s*([ABCDabcd])\b/g)]) {
+      const num = String(parseInt(p[1]));
+      if (!answers[num]) answers[num] = p[2].toUpperCase();
     }
   }
-
-  // Also match: "1. A" or "1) A"
-  const dotPattern = /\b(\d{1,3})\s*[.)]\s*([A-Da-d])\b/g;
-  let m;
-  while ((m = dotPattern.exec(ocrText)) !== null) {
-    const num = parseInt(m[1]).toString();
-    const ans = m[2].toUpperCase();
-    if (!answers[num]) answers[num] = ans;
-  }
-
   return answers;
 }
 
-// ── CARD BUILDER ──────────────────────────────────────────────
-
+// ── CARD BUILDER ──────────────────────────────
 function buildPaperCard(paper) {
-  const date = paper.uploadedAt
-    ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
-    : '';
-
+  const date = paper.uploadedAt ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
   const badges = [
     `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
     paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
     paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
     paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
-    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Questions</span>` : '',
+    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Q</span>` : '',
   ].filter(Boolean).join('');
-
   return `
   <div class="paper-card" onclick="window.location.href='viewer.html?id=${paper.id}'">
     <div class="paper-card-header">
@@ -1040,14 +1248,12 @@ function buildPaperCard(paper) {
     </div>
     <div class="paper-card-footer">
       <span class="paper-card-date">📅 ${date}</span>
-      <button class="btn btn-primary btn-sm"
-        onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
     </div>
   </div>`;
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
-
+// ── TOAST ─────────────────────────────────────
 function showToast(message, type = 'info') {
   const icon = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' }[type] || 'ℹ️';
   const container = document.getElementById('toast-container');
@@ -1059,55 +1265,68 @@ function showToast(message, type = 'info') {
   setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 350); }, 3500);
 }
 
-// ── UTILITIES ─────────────────────────────────────────────────
-
+// ── UTILS ─────────────────────────────────────
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function formatTime(s) {
   return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 
-</script>
-<script>
+
   // ── State ──
-  let paper = null;
-  let questions = [];
-  let userAnswers = {}; // { qIndex: "A" }
-  let currentIndex = 0;
-  let timerInterval = null;
-  let secondsLeft = 0;
-  let examSubmitted = false;
+  let paper = null, questions = [], userAnswers = {}, currentIndex = 0;
+  let timerInterval = null, secondsLeft = 0, examSubmitted = false;
+
+  function waitFB(cb) { if(window._fb) cb(); else setTimeout(()=>waitFB(cb),80); }
+
+  async function fbGetPaper(id) {
+    const {db,doc,getDoc}=window._fb;
+    const snap=await getDoc(doc(db,'papers',id));
+    return snap.exists()?snap.data():null;
+  }
 
   // ── Init ──
   document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    paper = id ? getPapers().find(p => p.id === id) : null;
+    waitFB(async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      paper = id ? await fbGetPaper(id) : null;
 
-    if (!paper || !paper.questions || paper.questions.length === 0) {
-      document.getElementById('exam-nav-info').textContent = 'Exam not found';
-      document.getElementById('exam-screen').innerHTML = `
-        <div class="container" style="padding:4rem 1rem; text-align:center;">
-          <div style="font-size:3rem; margin-bottom:1rem;">😕</div>
-          <h2>No exam available</h2>
-          <p style="color:var(--text-secondary); margin-bottom:1.5rem;">This paper hasn't been processed with OCR yet, or no questions were extracted.</p>
-          <a href="index.html" class="btn btn-primary">← Go Home</a>
-        </div>`;
-      return;
-    }
+      if (!paper || !paper.questions || paper.questions.length === 0) {
+        document.getElementById('exam-nav-info').textContent = 'Exam not found';
+        document.getElementById('exam-screen').innerHTML = `
+          <div class="container" style="padding:4rem 1rem;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:1rem;">😕</div>
+            <h2>No exam available</h2>
+            <p style="color:var(--text-secondary);margin-bottom:1.5rem;">This paper has no extracted questions.</p>
+            <a href="index.html" class="btn btn-primary">← Go Home</a>
+          </div>`;
+        return;
+      }
 
-    questions = paper.questions;
-    secondsLeft = (paper.duration || 180) * 60;
-    document.getElementById('exam-nav-info').textContent = `${paper.subject} — ${paper.examName} ${paper.year}`;
-    document.getElementById('back-to-paper').href = `viewer.html?id=${paper.id}`;
-    document.title = `${paper.subject} Exam — PYQ Portal`;
+      questions = paper.questions;
+      secondsLeft = (paper.duration || 180) * 60;
+      document.getElementById('exam-nav-info').textContent = paper.subject + ' — ' + paper.examName + ' ' + paper.year;
+      document.getElementById('back-to-paper').href = 'viewer.html?id=' + paper.id;
+      document.title = paper.subject + ' Exam — PYQ Portal';
+      buildPalette();
+      renderQuestion(0);
+      startTimer();
 
-    buildPalette();
-    renderQuestion(0);
-    startTimer();
+      // Show marking scheme in sidebar
+      if (paper.markingScheme) {
+        const ms = paper.markingScheme;
+        document.getElementById('marking-scheme-card').style.display = 'block';
+        document.getElementById('marking-scheme-display').innerHTML =
+          '<div style="color:var(--green);">+' + ms.correct + ' &nbsp;correct</div>' +
+          '<div style="color:var(--red);">−' + ms.wrong + ' &nbsp;wrong</div>' +
+          '<div style="color:var(--text-muted);">0 &nbsp;skipped</div>' +
+          '<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);' +
+          'color:var(--text-secondary);font-size:.8rem;">Max: ' + ms.total + ' marks</div>';
+      }
+    });
   });
 
   // ── Timer ──
@@ -1118,7 +1337,7 @@ function formatTime(s) {
       updateTimerDisplay();
       if (secondsLeft <= 0) {
         clearInterval(timerInterval);
-        showToast('⏰ Time is up! Auto-submitting…', 'warning');
+        showToast('Time is up! Auto-submitting…', 'warning');
         setTimeout(submitExam, 1500);
       }
     }, 1000);
@@ -1132,27 +1351,22 @@ function formatTime(s) {
 
   // ── Palette ──
   function buildPalette() {
-    const grid = document.getElementById('palette-grid');
-    grid.innerHTML = questions.map((q, i) =>
+    document.getElementById('palette-grid').innerHTML = questions.map((q,i) =>
       `<button class="palette-btn" id="pal-${i}" onclick="jumpTo(${i})">${q.number}</button>`
     ).join('');
   }
 
   function updatePalette() {
-    questions.forEach((q, i) => {
-      const btn = document.getElementById(`pal-${i}`);
+    questions.forEach((_,i) => {
+      const btn = document.getElementById('pal-'+i);
       if (!btn) return;
-      btn.className = 'palette-btn' +
-        (i === currentIndex ? ' current' : '') +
-        (userAnswers[i] !== undefined ? ' answered' : '');
+      btn.className = 'palette-btn' + (i===currentIndex?' current':'') + (userAnswers[i]!==undefined?' answered':'');
     });
-    // sidebar stats
     const answered = Object.keys(userAnswers).length;
-    const skipped = questions.length - answered;
-    document.getElementById('sidebar-stats').innerHTML = `
-      <div>Answered: <strong style="color:var(--accent);">${answered}</strong></div>
-      <div>Remaining: <strong style="color:#f59e0b;">${skipped}</strong></div>
-      <div>Total: <strong>${questions.length}</strong></div>`;
+    document.getElementById('sidebar-stats').innerHTML =
+      `<div>Answered: <strong style="color:var(--accent);">${answered}</strong></div>` +
+      `<div>Remaining: <strong style="color:#f59e0b;">${questions.length-answered}</strong></div>` +
+      `<div>Total: <strong>${questions.length}</strong></div>`;
   }
 
   // ── Render Question ──
@@ -1160,34 +1374,25 @@ function formatTime(s) {
     currentIndex = index;
     const q = questions[index];
     if (!q) return;
-
-    document.getElementById('q-number').textContent = `Question ${q.number}`;
-    document.getElementById('q-progress').textContent = `${index + 1} / ${questions.length}`;
+    document.getElementById('q-number').textContent = 'Question ' + q.number;
+    document.getElementById('q-progress').textContent = (index+1) + ' / ' + questions.length;
     document.getElementById('q-text').textContent = q.text;
-
-    const grid = document.getElementById('options-grid');
-    grid.innerHTML = Object.entries(q.options).map(([letter, text]) => `
-      <button class="option-btn ${userAnswers[index] === letter ? 'selected' : ''}"
-        id="opt-${letter}" onclick="selectAnswer('${letter}')">
-        <span class="option-label">${letter}</span>
-        <span>${escapeHtml(text)}</span>
+    document.getElementById('options-grid').innerHTML = Object.entries(q.options).map(([letter, text]) =>
+      `<button class="option-btn ${userAnswers[index]===letter?'selected':''}" id="opt-${letter}" onclick="selectAnswer('${letter}')">
+        <span class="option-label">${letter}</span><span>${escapeHtml(text)}</span>
       </button>`
     ).join('');
-
     document.getElementById('btn-prev').disabled = index === 0;
-    document.getElementById('btn-next').textContent = index === questions.length - 1 ? 'Last Question' : 'Next →';
-
+    document.getElementById('btn-next').textContent = index === questions.length-1 ? 'Last Question' : 'Next →';
     updatePalette();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({top:0,behavior:'smooth'});
   }
 
   function selectAnswer(letter) {
     if (examSubmitted) return;
     userAnswers[currentIndex] = letter;
-
-    // Update button states
-    document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
-    document.getElementById('opt-' + letter).classList.add('selected');
+    document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+    document.getElementById('opt-'+letter).classList.add('selected');
     updatePalette();
   }
 
@@ -1196,134 +1401,135 @@ function formatTime(s) {
     if (next >= 0 && next < questions.length) renderQuestion(next);
   }
 
-  function jumpTo(index) {
-    renderQuestion(index);
-  }
+  function jumpTo(index) { renderQuestion(index); }
 
   // ── Submit ──
   function confirmSubmit() {
     const unanswered = questions.length - Object.keys(userAnswers).length;
-    document.getElementById('modal-msg').textContent =
-      unanswered > 0
-        ? `You have ${unanswered} unanswered question${unanswered !== 1 ? 's' : ''}. Submit anyway?`
-        : `All ${questions.length} questions answered. Ready to submit?`;
+    document.getElementById('modal-msg').textContent = unanswered > 0
+      ? `You have ${unanswered} unanswered question${unanswered!==1?'s':''}. Submit anyway?`
+      : `All ${questions.length} questions answered. Ready to submit?`;
     document.getElementById('submit-modal').classList.add('open');
   }
 
-  function closeModal() {
-    document.getElementById('submit-modal').classList.remove('open');
-  }
+  function closeModal() { document.getElementById('submit-modal').classList.remove('open'); }
 
   function submitExam() {
     closeModal();
     examSubmitted = true;
     clearInterval(timerInterval);
+    const ak      = paper.answerKey || {};
+    const hasKey  = Object.keys(ak).length > 0;
+    const ms      = paper.markingScheme || { correct:4, wrong:1, skipped:0, total: questions.length*4 };
+    const mC      = parseFloat(ms.correct) || 4;
+    const mW      = parseFloat(ms.wrong)   || 0;
+    const mS      = parseFloat(ms.skipped) || 0;
+    const mTotal  = parseFloat(ms.total)   || (questions.length * mC);
 
-    // Evaluate
-    const ak = paper.answerKey || {};
-    let correct = 0, wrong = 0, skipped = 0;
-    const hasKey = Object.keys(ak).length > 0;
+    let correct=0, wrong=0, skipped=0, marksScored=0;
 
-    questions.forEach((q, i) => {
-      const userAns = userAnswers[i];
-      const correctAns = ak[q.number.toString()];
-      if (!userAns) {
+    questions.forEach((q,i) => {
+      const ua = userAnswers[i], ca = ak[String(q.number)];
+      if (!ua) {
         skipped++;
-      } else if (hasKey && correctAns) {
-        if (userAns === correctAns) correct++; else wrong++;
+        marksScored += mS;
+      } else if (hasKey) {
+        if (!ca) {
+          skipped++;
+        } else if (ua === ca) {
+          correct++;
+          marksScored += mC;
+        } else {
+          wrong++;
+          marksScored -= mW;
+        }
+      } else {
+        correct++;
+        marksScored += mC;
       }
     });
 
-    if (!hasKey) {
-      // No answer key — just show what was answered
-      correct = Object.keys(userAnswers).length;
-      skipped = questions.length - correct;
-    }
+    if (!hasKey) { correct=Object.keys(userAnswers).length; skipped=questions.length-correct; marksScored=correct*mC; }
 
-    // Show results
-    document.getElementById('exam-screen').style.display = 'none';
-    document.getElementById('results-screen').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('exam-screen').style.display='none';
+    document.getElementById('results-screen').style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
 
     const total = questions.length;
-    const pct = hasKey ? Math.round((correct / total) * 100) : null;
+    const pct   = hasKey ? Math.round((marksScored / mTotal) * 100) : null;
+    const pctDisplay = pct !== null ? Math.max(0, pct) : null;
 
-    document.getElementById('r-correct').textContent = correct;
-    document.getElementById('r-wrong').textContent = wrong;
-    document.getElementById('r-skipped').textContent = skipped;
-    document.getElementById('r-total').textContent = total;
+    document.getElementById('r-correct').textContent  = correct;
+    document.getElementById('r-wrong').textContent    = wrong;
+    document.getElementById('r-skipped').textContent  = skipped;
+    document.getElementById('r-total').textContent    = total;
 
-    if (pct !== null) {
-      document.getElementById('score-pct').textContent = pct + '%';
-      document.getElementById('score-fraction').textContent = `${correct} out of ${total} correct`;
-      document.getElementById('score-grade').textContent =
-        pct >= 90 ? '🏆 Outstanding!' :
-        pct >= 75 ? '🌟 Excellent!' :
-        pct >= 60 ? '👍 Good job!' :
-        pct >= 40 ? '📚 Keep practicing!' :
-        '💪 Don\'t give up!';
+    // Show marks scored
+    const marksEl = document.getElementById('r-marks');
+    if (marksEl) {
+      marksEl.textContent = Math.max(0, marksScored.toFixed(1)).replace('.0','') + ' / ' + mTotal;
+    }
 
-      // Animate ring
+    if (pctDisplay !== null) {
+      document.getElementById('score-pct').textContent      = pctDisplay + '%';
+      document.getElementById('score-fraction').textContent =
+        Math.max(0,marksScored).toFixed(1).replace('.0','') + ' out of ' + mTotal + ' marks';
+      document.getElementById('score-grade').textContent    =
+        pctDisplay>=90?'🏆 Outstanding!':pctDisplay>=75?'🌟 Excellent!':pctDisplay>=60?'👍 Good job!':pctDisplay>=40?'📚 Keep practicing!':"💪 Don't give up!";
       setTimeout(() => {
-        const circumference = 452;
-        const offset = circumference - (pct / 100) * circumference;
         const ring = document.getElementById('score-ring-circle');
-        ring.style.strokeDashoffset = offset;
-        ring.style.stroke = pct >= 60 ? 'var(--green)' : pct >= 40 ? '#f59e0b' : 'var(--red)';
+        ring.style.strokeDashoffset = 452 - (Math.max(0,pctDisplay)/100)*452;
+        ring.style.stroke = pctDisplay>=60?'var(--green)':pctDisplay>=40?'#f59e0b':'var(--red)';
       }, 100);
+
+      // Populate marks breakdown
+      const bd = document.getElementById('marks-breakdown');
+      if (bd) {
+        bd.innerHTML =
+          `<span>✅ +${mC} per correct</span>` +
+          (mW > 0 ? `<span>❌ −${mW} per wrong</span>` : '<span>❌ No negative marking</span>') +
+          (mS !== 0 ? `<span>⏭️ ${mS} per skip</span>` : '') +
+          `<span>📋 Max: ${mTotal} marks</span>`;
+      }
     } else {
-      document.getElementById('score-pct').textContent = correct;
-      document.getElementById('score-fraction').textContent = `Questions answered out of ${total}`;
-      document.getElementById('score-grade').textContent = 'No answer key — results show your responses.';
-      document.getElementById('score-ring-circle').style.strokeDashoffset =
-        452 - (correct / total) * 452;
+      document.getElementById('score-pct').textContent      = correct;
+      document.getElementById('score-fraction').textContent = 'Questions answered out of ' + total;
+      document.getElementById('score-grade').textContent    = 'No answer key — showing your responses.';
+      document.getElementById('score-ring-circle').style.strokeDashoffset = 452-(correct/total)*452;
     }
   }
 
   function showReview() {
     const section = document.getElementById('review-section');
-    if (section.style.display !== 'none') { section.style.display = 'none'; return; }
-    section.style.display = 'block';
-
-    const ak = paper.answerKey || {};
-    const hasKey = Object.keys(ak).length > 0;
-
-    const list = document.getElementById('review-list');
-    list.innerHTML = questions.map((q, i) => {
-      const userAns = userAnswers[i];
-      const correctAns = ak[q.number.toString()];
-      const isCorrect = hasKey && correctAns && userAns === correctAns;
-      const isWrong = hasKey && correctAns && userAns && userAns !== correctAns;
-      const isSkipped = !userAns;
-
-      const statusIcon = isSkipped ? '⏭️' : isCorrect ? '✅' : isWrong ? '❌' : '📝';
-      const statusColor = isSkipped ? '#f59e0b' : isCorrect ? 'var(--green)' : isWrong ? 'var(--red)' : 'var(--accent)';
-
-      const optionsHtml = Object.entries(q.options).map(([letter, text]) => {
-        let cls = '';
-        if (hasKey && letter === correctAns) cls = 'correct';
-        else if (letter === userAns && isWrong) cls = 'wrong';
-        else if (letter === userAns) cls = 'selected';
-        return `<div class="option-btn ${cls}" style="padding:0.5rem 0.75rem; font-size:0.88rem; pointer-events:none;">
-          <span class="option-label">${letter}</span>
-          <span>${escapeHtml(text)}</span>
-        </div>`;
+    if (section.style.display!=='none') { section.style.display='none'; return; }
+    section.style.display='block';
+    const ak = paper.answerKey||{}, hasKey=Object.keys(ak).length>0;
+    document.getElementById('review-list').innerHTML = questions.map((q,i) => {
+      const ua=userAnswers[i], ca=ak[String(q.number)];
+      const isCorrect=hasKey&&ca&&ua===ca, isWrong=hasKey&&ca&&ua&&ua!==ca, isSkipped=!ua;
+      const icon=isSkipped?'⏭️':isCorrect?'✅':isWrong?'❌':'📝';
+      const color=isSkipped?'#f59e0b':isCorrect?'var(--green)':isWrong?'var(--red)':'var(--accent)';
+      const opts=Object.entries(q.options).map(([l,t])=>{
+        let cls='';
+        if(hasKey&&l===ca) cls='correct';
+        else if(l===ua&&isWrong) cls='wrong';
+        else if(l===ua) cls='selected';
+        return `<div class="option-btn ${cls}" style="padding:.5rem .75rem;font-size:.88rem;pointer-events:none;"><span class="option-label">${l}</span><span>${escapeHtml(t)}</span></div>`;
       }).join('');
-
-      return `
-        <div class="review-q">
-          <div class="review-q-header">
-            <span style="font-weight:800; color:${statusColor};">${statusIcon} Q${q.number}</span>
-            <div class="review-answer">
-              ${userAns ? `<span class="ans-chip your">Your answer: ${userAns}</span>` : '<span class="ans-chip" style="background:rgba(245,158,11,0.1);color:#f59e0b;">Skipped</span>'}
-              ${hasKey && correctAns ? `<span class="ans-chip correct-ans">Correct: ${correctAns}</span>` : ''}
-            </div>
+      return `<div class="review-q">
+        <div class="review-q-header">
+          <span style="font-weight:800;color:${color};">${icon} Q${q.number}</span>
+          <div class="review-answer">
+            ${ua?`<span class="ans-chip your">Your answer: ${ua}</span>`:'<span class="ans-chip" style="background:rgba(245,158,11,.1);color:#f59e0b;">Skipped</span>'}
+            ${hasKey&&ca?`<span class="ans-chip correct-ans">Correct: ${ca}</span>`:''}
           </div>
-          <div class="review-q-text">${escapeHtml(q.text)}</div>
-          <div class="options-grid">${optionsHtml}</div>
-        </div>`;
+        </div>
+        <div class="review-q-text">${escapeHtml(q.text)}</div>
+        <div class="options-grid">${opts}</div>
+      </div>`;
     }).join('');
   }
+
 </script>
 </body>
 </html>
