@@ -376,51 +376,80 @@ footer a:hover { text-decoration: underline; }
 // ── PDF → IMAGES ──────────────────────────────
 async function pdfToImages(file, onProgress) {
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-  let arrayBuffer;
-  if (file instanceof File || file instanceof Blob) {
-    arrayBuffer = await file.arrayBuffer();
-  } else {
-    arrayBuffer = file; // already a buffer (e.g. image passed directly)
-  }
+  const arrayBuffer = (file instanceof File || file instanceof Blob)
+    ? await file.arrayBuffer() : file;
 
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pdf    = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const images = [];
 
-  for (let i = 1; i <= pdf.numPages; i++) {
-    if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
-    const page = await pdf.getPage(i);
-
-    // Scale 3.5 = ~280 DPI — critical for math symbols and small text
-    const viewport = page.getViewport({ scale: 3.5 });
+  function renderToCanvas(page, scale) {
+    const viewport = page.getViewport({ scale });
     const canvas   = document.createElement('canvas');
     canvas.width   = viewport.width;
     canvas.height  = viewport.height;
     const ctx      = canvas.getContext('2d');
-
-    // White background (PDFs may have transparent bg which OCR reads as black)
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle  = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+      // Greyscale — improves Tesseract accuracy on printed text
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imgData.data;
+      for (let j = 0; j < d.length; j += 4) {
+        const g = 0.299*d[j] + 0.587*d[j+1] + 0.114*d[j+2];
+        d[j] = d[j+1] = d[j+2] = g;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return canvas;
+    });
+  }
 
-    await page.render({ canvasContext: ctx, viewport }).promise;
+  function cropCanvas(src, x, y, w, h) {
+    const dst = document.createElement('canvas');
+    dst.width = w; dst.height = h;
+    dst.getContext('2d').drawImage(src, x, y, w, h, 0, 0, w, h);
+    return dst.toDataURL('image/png');
+  }
 
-    // Convert to greyscale — dramatically improves Tesseract accuracy
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    for (let j = 0; j < d.length; j += 4) {
-      const grey = 0.299 * d[j] + 0.587 * d[j+1] + 0.114 * d[j+2];
-      d[j] = d[j+1] = d[j+2] = grey;
+  // Detect if page is two-column by checking text width vs height ratio
+  // Most JEE/exam papers in A4 landscape or two-column portrait are wide
+  function isTwoColumn(canvas) {
+    // Heuristic: if width > 1.2× height it's likely landscape/two-column
+    // OR if width > 2000px (high-res A4 portrait with two columns)
+    return canvas.width > canvas.height * 1.15 || canvas.width > 2200;
+  }
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    if (onProgress) onProgress('Rendering page ' + i + ' of ' + pdf.numPages + '…');
+    const page   = await pdf.getPage(i);
+    const canvas = await renderToCanvas(page, 3.5);
+
+    if (isTwoColumn(canvas)) {
+      // Split into left column and right column — OCR each separately
+      // This prevents Tesseract from interleaving both columns
+      const mid = Math.floor(canvas.width / 2);
+      images.push(cropCanvas(canvas, 0,    0, mid,                 canvas.height)); // left
+      images.push(cropCanvas(canvas, mid,  0, canvas.width - mid,  canvas.height)); // right
+    } else {
+      // Single column — OCR the full page
+      images.push(canvas.toDataURL('image/png'));
     }
-    ctx.putImageData(imgData, 0, 0);
-
-    images.push(canvas.toDataURL('image/png'));
   }
   return images;
 }
 
 // ── OCR ───────────────────────────────────────
-async function ocrImageData(imageData) {
+// NOTE: upload.html provides getOcrWorker/terminateOcrWorker for efficiency.
+// This fallback is used if called outside upload context.
+async function ocrImageData(imageData, onProgress) {
+  if (typeof getOcrWorker === 'function') {
+    const worker = await getOcrWorker(onProgress);
+    const { data: { text } } = await worker.recognize(imageData);
+    return text;
+  }
+  // Fallback: one-shot worker
   const worker = await Tesseract.createWorker('eng');
   const { data: { text } } = await worker.recognize(imageData);
   await worker.terminate();
