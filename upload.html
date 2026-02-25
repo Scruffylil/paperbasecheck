@@ -444,23 +444,50 @@ footer a:hover { text-decoration: underline; }
 /**
  * PYQ Portal — Core Shared Logic v3
  * OCR, parsers, card builder, toast, utils.
- * Data stored in localStorage.
+ * Firebase calls are handled inline in each page.
  */
 
 // ── PDF → IMAGES ──────────────────────────────
 async function pdfToImages(file, onProgress) {
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  const arrayBuffer = await file.arrayBuffer();
+
+  let arrayBuffer;
+  if (file instanceof File || file instanceof Blob) {
+    arrayBuffer = await file.arrayBuffer();
+  } else {
+    arrayBuffer = file; // already a buffer (e.g. image passed directly)
+  }
+
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const images = [];
+
   for (let i = 1; i <= pdf.numPages; i++) {
     if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2.5 });
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width; canvas.height = viewport.height;
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+    // Scale 3.5 = ~280 DPI — critical for math symbols and small text
+    const viewport = page.getViewport({ scale: 3.5 });
+    const canvas   = document.createElement('canvas');
+    canvas.width   = viewport.width;
+    canvas.height  = viewport.height;
+    const ctx      = canvas.getContext('2d');
+
+    // White background (PDFs may have transparent bg which OCR reads as black)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    // Convert to greyscale — dramatically improves Tesseract accuracy
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imgData.data;
+    for (let j = 0; j < d.length; j += 4) {
+      const grey = 0.299 * d[j] + 0.587 * d[j+1] + 0.114 * d[j+2];
+      d[j] = d[j+1] = d[j+2] = grey;
+    }
+    ctx.putImageData(imgData, 0, 0);
+
     images.push(canvas.toDataURL('image/png'));
   }
   return images;
@@ -476,92 +503,117 @@ async function ocrImageData(imageData) {
 
 // ── QUESTION PARSER ───────────────────────────
 function parseQuestions(ocrText) {
-  const questions = [];
-  const lines = ocrText.split('\n');
-  let currentQ = null;
+  const questions   = [];
+  const lines       = ocrText.split('\n');
+  let   currentQ    = null;
+  let   currentSection = '';
+
   const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
 
-  // Patterns — handles both "Q1." prefix and bare "1." numbered styles
-  const qStartQ     = /^Q(\d{1,3})[.)]\s+(.+)/i;
-  const qStartN     = /^(\d{1,3})[.)]\s+(.+)/;
-  const optNumParen = /^\(([1-4])\)\s+(.+)/;           // "(1) text"
-  const optLetParen = /^\(([A-Da-d])\)\s+(.+)/;        // "(A) text"
-  const optLetBare  = /^([A-Da-d])[.)]\s+(.+)/;        // "A) text" or "A. text"
-  // Two options on one line: "(1) 628    (2) 812"
-  const twoOpts     = /\(([1-4])\)\s+(.+?)\s{3,}\(([1-4])\)\s+(.+)/;
+  // Section header detection
+  const sectionPat = /\b(PHYSICS|CHEMISTRY|MATHEMATICS|MATHS|BIOLOGY|BOTANY|ZOOLOGY)\b/i;
+
+  // Question start patterns
+  const qStartQ = /^Q\.?\s*(\d{1,3})[\s.):\-]\s*(.*)/i;   // Q1. Q.1 Q1:
+  const qStartN = /^(\d{1,3})[.)]\s+(.+)/;                  // 1.  1)
+
+  function extractOpts(line) {
+    // Find ALL (A)/(B)/(C)/(D)/(1)/(2)/(3)/(4) markers and split text between them
+    const pat = /\(([A-Da-d1-4])\)\s*/g;
+    const matches = [...line.matchAll(pat)];
+    if (!matches.length) return {};
+    const result = {};
+    matches.forEach((m, i) => {
+      let label = m[1].toUpperCase();
+      if (NUM_TO_LETTER[label]) label = NUM_TO_LETTER[label];
+      if (!['A','B','C','D'].includes(label)) return;
+      const textStart = m.index + m[0].length;
+      const textEnd   = i + 1 < matches.length ? matches[i+1].index : line.length;
+      const text      = line.slice(textStart, textEnd).trim();
+      if (text && !result[label]) result[label] = text;
+    });
+    return result;
+  }
+
+  function isOptLine(line) {
+    return /^\s*\(?[A-Da-d1-4][).]\s/.test(line);
+  }
+
+  function isHeader(line) {
+    const l = line.trim();
+    if (!l || l.length < 2) return true;
+    if (/^(SECTION|PART|CHAPTER|INSTRUCTION|NOTE:|PAGE\s*\d|Time Allowed|Maximum Marks|\*{2,})/i.test(l)) return true;
+    if (/^\d+\s*$/.test(l)) return true;
+    return false;
+  }
 
   function saveQ() {
-    if (currentQ && Object.keys(currentQ.options).length >= 2 && currentQ.text.length > 5) {
+    if (currentQ && Object.keys(currentQ.options).length >= 2 && currentQ.text.trim().length > 3) {
       questions.push(currentQ);
     }
   }
 
-  for (const rawLine of lines) {
-    const line = rawLine.trim();
+  for (const raw of lines) {
+    const line = raw.trim();
     if (!line) continue;
 
-    // Two options on one line
-    const m2 = line.match(twoOpts);
-    if (m2 && currentQ) {
-      const k1 = NUM_TO_LETTER[m2[1]], k2 = NUM_TO_LETTER[m2[3]];
-      if (k1 && !(k1 in currentQ.options)) currentQ.options[k1] = m2[2].trim();
-      if (k2 && !(k2 in currentQ.options)) currentQ.options[k2] = m2[4].trim();
+    // Detect section heading
+    const sm = sectionPat.exec(line);
+    if (sm && line.length < 80) {
+      const s = sm[1].toUpperCase();
+      currentSection = s.startsWith('MATH') ? 'Mathematics'
+                     : s.startsWith('PHYS') ? 'Physics'
+                     : s.startsWith('CHEM') ? 'Chemistry'
+                     : s.startsWith('BIO') || s.startsWith('BOT') || s.startsWith('ZOO') ? 'Biology'
+                     : sm[1];
+    }
+
+    if (isHeader(line)) continue;
+
+    // Try extracting options from this line (handles all layouts)
+    const opts = extractOpts(line);
+    if (Object.keys(opts).length > 0 && currentQ) {
+      Object.entries(opts).forEach(([k,v]) => { if (!currentQ.options[k]) currentQ.options[k] = v; });
       continue;
     }
 
-    // Q-prefix question: "Q1. text"
-    const mQ = line.match(qStartQ);
+    // Bare letter option: "A) text" or "A. text"
+    const mOB = /^([A-Da-d])[.)]\s+(.+)/.exec(line);
+    if (mOB && currentQ) {
+      const letter = mOB[1].toUpperCase();
+      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
+        currentQ.options[letter] = mOB[2].trim();
+      }
+      continue;
+    }
+
+    // Q-prefix question: Q1. / Q.1 / Q1:
+    const mQ = qStartQ.exec(line);
     if (mQ) {
       saveQ();
-      currentQ = { number: parseInt(mQ[1]), text: mQ[2].trim(), options: {} };
+      currentQ = { number: parseInt(mQ[1]), text: mQ[2].trim(), options: {}, section: currentSection };
       continue;
     }
 
-    // Numbered question: "1. text" (require meaningful length to avoid matching answer lines)
-    const mN = line.match(qStartN);
-    if (mN && parseInt(mN[1]) <= 200) {
+    // Numbered question: "1. text"
+    const mN = qStartN.exec(line);
+    if (mN && parseInt(mN[1]) <= 300) {
       const rest = mN[2].trim();
-      const looksLikeOpt = /^\([1-4]\)|^[A-D][.)]\s/.test(rest);
-      if (rest.length > 12 && !looksLikeOpt) {
+      if (rest.length > 8 && !isOptLine(rest)) {
         saveQ();
-        currentQ = { number: parseInt(mN[1]), text: rest, options: {} };
+        currentQ = { number: parseInt(mN[1]), text: rest, options: {}, section: currentSection };
         continue;
       }
     }
 
-    if (currentQ) {
-      // Option: "(1) text"
-      const mON = line.match(optNumParen);
-      if (mON) {
-        const letter = NUM_TO_LETTER[mON[1]];
-        if (letter && !(letter in currentQ.options)) currentQ.options[letter] = mON[2].trim();
-        continue;
-      }
-      // Option: "(A) text"
-      const mOL = line.match(optLetParen);
-      if (mOL) {
-        const letter = mOL[1].toUpperCase();
-        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
-          currentQ.options[letter] = mOL[2].trim();
-        continue;
-      }
-      // Option: "A) text" or "A. text"
-      const mOB = line.match(optLetBare);
-      if (mOB) {
-        const letter = mOB[1].toUpperCase();
-        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
-          currentQ.options[letter] = mOB[2].trim();
-        continue;
-      }
-      // Continuation of question text (before options arrive)
-      if (Object.keys(currentQ.options).length === 0 && !/^[(\d]/.test(line)) {
-        currentQ.text += ' ' + line;
-      }
+    // Continuation of question text (before any options arrive)
+    if (currentQ && Object.keys(currentQ.options).length === 0 && !isOptLine(line)) {
+      currentQ.text += ' ' + line;
     }
   }
 
   saveQ();
-  return questions.filter(q => q.text.length > 5 && Object.keys(q.options).length >= 2);
+  return questions.filter(q => q.text.trim().length > 3 && Object.keys(q.options).length >= 2);
 }
 
 // ── ANSWER KEY PARSER ─────────────────────────
@@ -651,8 +703,7 @@ function formatTime(s) {
   return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 
-
-  function lsGetAllPapers() {
+function lsGetAllPapers() {
     try { return JSON.parse(localStorage.getItem('pyq_papers') || '[]'); } catch(e) { return []; }
   }
   function lsGetPaper(id) { return lsGetAllPapers().find(p => p.id === id) || null; }
