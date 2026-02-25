@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>View Paper — PYQ Portal</title>
-  <style>
-/* =========================================================
+  <style>/* =========================================================
    PYQ PORTAL — Global Design System
    ========================================================= */
 
@@ -327,309 +326,153 @@ footer a:hover { text-decoration: underline; }
 .page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
 .page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
 
+  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:.88rem;margin-bottom:1.5rem;}
+  .back-link:hover{color:var(--accent);}
+  .paper-title{font-size:1.7rem;font-weight:900;letter-spacing:-.5px;margin-bottom:.25rem;}
+  .viewer-meta{display:flex;flex-wrap:wrap;gap:10px;margin:1rem 0 1.5rem;align-items:center;}
+  .detail-grid{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;}
+  .info-row h4{font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;}
+  .info-row p{font-size:.95rem;font-weight:600;}
+  .exam-cta-card{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(6,182,212,.06));border:1px solid rgba(59,130,246,.25);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;text-align:center;}
+  .exam-cta-card .big-icon{font-size:2.5rem;margin-bottom:.5rem;}
+  .q-preview{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.85rem;color:var(--text-secondary);margin-bottom:.5rem;line-height:1.5;}
+  .q-preview strong{color:var(--text-primary);}
+  .q-options-mini{margin-top:.3rem;display:flex;gap:.5rem;flex-wrap:wrap;}
+  .q-opt-chip{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:.78rem;}
+  .file-viewer{background:var(--bg-secondary);border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);}
+  .file-viewer iframe{width:100%;height:600px;border:none;display:block;}
+  .file-viewer img{width:100%;height:auto;display:block;}
+  .no-file-msg{text-align:center;padding:3rem;color:var(--text-muted);}
+  .tab-pane2,.tab-pane3{display:none;} .tab-pane2.active,.tab-pane3.active{display:block;}
+  @media(max-width:768px){.detail-grid{grid-template-columns:1fr;}}
 </style>
-  <style>
-    .back-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.5rem;
-    }
-    .back-link:hover { color: var(--accent); }
-
-    .paper-title { font-size: 1.7rem; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
-    .viewer-meta { display: flex; flex-wrap: wrap; gap: 10px; margin: 1rem 0 1.5rem; align-items: center; }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 1.5rem;
-    }
-
-    .info-row h4 {
-      font-size: 0.75rem; font-weight: 700;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 0.2rem;
-    }
-    .info-row p { font-size: 0.95rem; font-weight: 600; }
-
-    .exam-cta-card {
-      background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(6,182,212,0.06));
-      border: 1px solid rgba(59,130,246,0.25);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .exam-cta-card .big-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-    .exam-cta-card h3 { margin-bottom: 0.25rem; }
-    .exam-cta-card p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem; }
-
-    .q-preview {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 0.8rem 1rem;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-      line-height: 1.5;
-    }
-
-    .q-preview strong { color: var(--text-primary); }
-    .q-options-mini { margin-top: 0.3rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .q-opt-chip { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; font-size: 0.78rem; }
-
-    .file-viewer { background: var(--bg-secondary); border-radius: var(--radius-sm); overflow: hidden; }
-    .file-viewer iframe { width: 100%; height: 600px; border: none; }
-    .file-viewer img { width: 100%; height: auto; display: block; }
-    .no-file-msg { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.95rem; }
-
-    @media(max-width:768px) { .detail-grid { grid-template-columns: 1fr; } }
-  </style>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+    const FIREBASE_CONFIG = {
+      apiKey:"YOUR_API_KEY", authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+      projectId:"YOUR_PROJECT_ID", storageBucket:"YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId:"YOUR_SENDER_ID", appId:"YOUR_APP_ID"
+    };
+    const fbApp=initializeApp(FIREBASE_CONFIG);
+    const auth=getAuth(fbApp), db=getFirestore(fbApp), store=getStorage(fbApp);
+    window._fb={auth,db,store,doc,setDoc,getDoc,getDocs,deleteDoc,collection,query,orderBy,ref,uploadBytes,getDownloadURL,deleteObject};
+    onAuthStateChanged(auth,u=>{ if(!u) signInAnonymously(auth).catch(console.error); else window._fbUser=u; });
+  </script>
 </head>
 <body>
-
 <nav class="navbar">
-  <a href="index.html" class="nav-logo">
-    <div class="logo-icon">📚</div>
-    PYQ Portal
-  </a>
-  <div class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="browse.html">Browse</a>
-    <a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a>
-  </div>
+  <a href="index.html" class="nav-logo"><div class="logo-icon">📚</div>PYQ Portal</a>
+  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a></div>
 </nav>
-
 <section class="section">
+  <div id="loading-view" class="container" style="text-align:center;padding:4rem 1rem;color:var(--text-muted);">
+    <div style="font-size:2rem;">⏳</div><p style="margin-top:.5rem;">Loading paper from Firebase…</p>
+  </div>
   <div class="container" id="viewer-content" style="display:none;">
-
     <a href="browse.html" class="back-link">← Back to Browse</a>
-
     <div class="detail-grid">
-
-      <!-- LEFT: Sidebar -->
-      <div style="position:sticky; top:80px;">
-
-        <!-- EXAM CTA (shown if questions extracted) -->
+      <div style="position:sticky;top:80px;">
         <div class="exam-cta-card" id="exam-cta" style="display:none;">
           <div class="big-icon">🎯</div>
           <h3>Take Online Exam</h3>
-          <p id="exam-cta-desc">Answer questions interactively and get auto-evaluated.</p>
-          <a class="btn btn-primary" style="width:100%; justify-content:center;" id="start-exam-btn" href="#">
-            🚀 Start Exam
-          </a>
+          <p id="exam-cta-desc" style="color:var(--text-secondary);font-size:.85rem;margin-bottom:1rem;"></p>
+          <a class="btn btn-primary" style="width:100%;justify-content:center;" id="start-exam-btn" href="#">🚀 Start Exam</a>
         </div>
-
-        <!-- No exam state -->
-        <div class="card" id="no-exam-card" style="margin-bottom:1rem; text-align:center; padding:1.25rem; display:none;">
-          <div style="font-size:1.5rem; margin-bottom:0.5rem;">🤖</div>
-          <p style="font-size:0.85rem; color:var(--text-muted);">No exam generated. Re-upload with OCR to create an interactive exam.</p>
+        <div class="card" id="no-exam-card" style="margin-bottom:1rem;text-align:center;padding:1.25rem;display:none;">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">🤖</div>
+          <p style="font-size:.85rem;color:var(--text-muted);">No exam generated — re-upload with OCR to create one.</p>
         </div>
-
-        <!-- PAPER INFO -->
         <div class="card" style="margin-bottom:1rem;">
           <div class="paper-title" id="v-title"></div>
           <div class="viewer-meta" id="v-badges"></div>
           <div class="divider"></div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
             <div class="info-row"><h4>Year</h4><p id="v-year">—</p></div>
             <div class="info-row"><h4>Board</h4><p id="v-board">—</p></div>
             <div class="info-row"><h4>Questions</h4><p id="v-qcount">—</p></div>
             <div class="info-row"><h4>Duration</h4><p id="v-duration">—</p></div>
+            <div class="info-row"><h4>✅ Correct</h4><p id="v-marks-c">—</p></div>
+            <div class="info-row"><h4>❌ Wrong</h4><p id="v-marks-w">—</p></div>
           </div>
-          <p style="color:var(--text-secondary); font-size:0.9rem;" id="v-desc"></p>
+          <p style="color:var(--text-secondary);font-size:.9rem;" id="v-desc"></p>
           <div class="divider"></div>
-          <p style="font-size:0.78rem; color:var(--text-muted);">Uploaded on <span id="v-date"></span></p>
+          <p style="font-size:.78rem;color:var(--text-muted);">Uploaded on <span id="v-date"></span></p>
         </div>
-
-        <!-- DOWNLOADS -->
         <div class="card" style="margin-bottom:1rem;">
-          <h4 style="font-size:0.85rem; margin-bottom:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Downloads</h4>
-          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+          <h4 style="font-size:.85rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Downloads</h4>
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
             <button class="btn btn-primary btn-sm" onclick="downloadFile('qp')">⬇️ Question Paper</button>
             <button class="btn btn-outline btn-sm" id="dl-ak" onclick="downloadFile('ak')">⬇️ Answer Key</button>
           </div>
         </div>
-
         <button class="btn btn-danger btn-sm" onclick="deletePaper()" style="width:100%;">🗑️ Delete Paper</button>
       </div>
-
-      <!-- RIGHT: Content -->
       <div>
-
-        <!-- Question Preview (if OCR extracted) -->
-        <div id="questions-preview" style="margin-bottom:1.5rem; display:none;">
-          <div class="tab-list" style="margin-bottom:1rem;">
+        <div id="questions-preview" style="margin-bottom:1.5rem;display:none;">
+          <div class="tab-list">
             <button class="tab-btn active" data-tab="exam-tab">🎯 Questions Preview</button>
             <button class="tab-btn" data-tab="pdf-tab">📄 PDF Viewer</button>
           </div>
           <div class="tab-pane active" id="tab-exam-tab">
             <div id="q-preview-list"></div>
-            <p style="font-size:0.82rem; color:var(--text-muted); text-align:center; margin-top:0.5rem;">Showing first 5 questions. Take the exam to answer all.</p>
+            <p style="font-size:.82rem;color:var(--text-muted);text-align:center;margin-top:.5rem;">Showing first 5 questions.</p>
           </div>
           <div class="tab-pane" id="tab-pdf-tab">
             <div class="tab-list" style="margin-bottom:1rem;">
-              <button class="tab-btn active" data-tab2="qp">📄 Question Paper</button>
-              <button class="tab-btn" data-tab2="ak">🔑 Answer Key</button>
+              <button class="tab-btn2 active" data-tab2="qp">📄 Question Paper</button>
+              <button class="tab-btn2" data-tab2="ak">🔑 Answer Key</button>
             </div>
-            <div class="tab-pane2 active" id="tab2-qp">
-              <div class="file-viewer" id="qp-viewer"></div>
-            </div>
-            <div class="tab-pane2" id="tab2-ak">
-              <div class="file-viewer" id="ak-viewer"></div>
-            </div>
+            <div class="tab-pane2 active" id="tab2-qp"><div class="file-viewer" id="qp-viewer"></div></div>
+            <div class="tab-pane2" id="tab2-ak"><div class="file-viewer" id="ak-viewer"></div></div>
           </div>
         </div>
-
-        <!-- PDF only (no questions extracted) -->
         <div id="pdf-only-view" style="display:none;">
-          <div class="tab-list" style="margin-bottom:1rem;">
-            <button class="tab-btn active" data-tab3="qp">📄 Question Paper</button>
-            <button class="tab-btn" data-tab3="ak">🔑 Answer Key</button>
+          <div class="tab-list">
+            <button class="tab-btn3 active" data-tab3="qp">📄 Question Paper</button>
+            <button class="tab-btn3" data-tab3="ak">🔑 Answer Key</button>
           </div>
-          <div class="tab-pane3 active" id="tab3-qp">
-            <div class="file-viewer" id="qp-viewer2"></div>
-          </div>
-          <div class="tab-pane3" id="tab3-ak">
-            <div class="file-viewer" id="ak-viewer2"></div>
-          </div>
+          <div class="tab-pane3 active" id="tab3-qp"><div class="file-viewer" id="qp-viewer2"></div></div>
+          <div class="tab-pane3" id="tab3-ak"><div class="file-viewer" id="ak-viewer2"></div></div>
         </div>
-
       </div>
     </div>
   </div>
-
   <div class="container" id="not-found" style="display:none;">
-    <div class="empty-state">
-      <div class="empty-icon">🔍</div>
-      <h3>Paper not found</h3>
-      <p>This paper may have been deleted or the link is invalid.</p>
-      <br>
-      <a href="browse.html" class="btn btn-primary">Browse All Papers</a>
-    </div>
+    <div class="empty-state"><div class="empty-icon">🔍</div><h3>Paper not found</h3><p>This paper may have been deleted.</p><br><a href="browse.html" class="btn btn-primary">Browse All Papers</a></div>
   </div>
 </section>
-
-<footer>
-  <div class="container">
-    <p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="browse.html">Browse Papers</a></p>
-  </div>
-</footer>
-
+<footer><div class="container"><p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="browse.html">Browse</a></p></div></footer>
 <div id="toast-container"></div>
 <script>
 /**
- * PYQ Portal — Shared Application Logic (v2 with OCR + Exam Engine)
+ * PYQ Portal — Core Shared Logic v3
+ * OCR, parsers, card builder, toast, utils.
+ * Firebase calls are handled inline in each page.
  */
 
-const STORAGE_KEY = 'pyq_papers_meta';
-const DB_NAME = 'pyq_portal_db';
-const DB_VERSION = 2;
-const STORE_NAME = 'paper_files';
-
-// ── IndexedDB ──────────────────────────────────────────────────
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-async function saveFileBlobs(id, qpFile, akFile) {
-  const db = await openDB();
-  const entry = {
-    id,
-    qpBlob: qpFile || null,
-    qpName: qpFile ? qpFile.name : null,
-    qpType: qpFile ? qpFile.type : null,
-    akBlob: akFile || null,
-    akName: akFile ? akFile.name : null,
-    akType: akFile ? akFile.type : null,
-  };
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(entry).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function loadFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(id);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function deleteFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete(id).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-// ── METADATA ──────────────────────────────────────────────────
-
-function getPapers() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function savePaperMeta(meta) {
-  const papers = getPapers();
-  const existing = papers.findIndex(p => p.id === meta.id);
-  if (existing >= 0) papers[existing] = meta; else papers.push(meta);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(papers));
-}
-
-function removePaperMeta(id) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(getPapers().filter(p => p.id !== id)));
-}
-
-async function savePaper(meta, qpFile, akFile) {
-  await saveFileBlobs(meta.id, qpFile, akFile);
-  savePaperMeta(meta);
-}
-
-// ── PDF → IMAGES (PDF.js) ─────────────────────────────────────
-
+// ── PDF → IMAGES ──────────────────────────────
 async function pdfToImages(file, onProgress) {
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const images = [];
-
   for (let i = 1; i <= pdf.numPages; i++) {
     if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2.5 }); // High-res for OCR
+    const viewport = page.getViewport({ scale: 2.5 });
     const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+    canvas.width = viewport.width; canvas.height = viewport.height;
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     images.push(canvas.toDataURL('image/png'));
   }
   return images;
 }
 
-// ── OCR (Tesseract.js) ────────────────────────────────────────
-
+// ── OCR ───────────────────────────────────────
 async function ocrImageData(imageData) {
   const worker = await Tesseract.createWorker('eng');
   const { data: { text } } = await worker.recognize(imageData);
@@ -637,116 +480,145 @@ async function ocrImageData(imageData) {
   return text;
 }
 
-async function ocrFile(file, onProgress) {
-  let pages = [];
-  if (file.type === 'application/pdf') {
-    pages = await pdfToImages(file, onProgress);
-  } else {
-    pages = [file]; // image file directly
-  }
-
-  let allText = '';
-  for (let i = 0; i < pages.length; i++) {
-    if (onProgress) onProgress(`Running OCR on page ${i + 1} of ${pages.length}…`);
-    const text = await ocrImageData(pages[i]);
-    allText += text + '\n\n';
-  }
-  return allText;
-}
-
-// ── QUESTION PAPER PARSER ─────────────────────────────────────
-
+// ── QUESTION PARSER ───────────────────────────
 function parseQuestions(ocrText) {
   const questions = [];
-  const lines = ocrText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
+  const lines = ocrText.split('\n');
   let currentQ = null;
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
 
-  // Regex patterns
-  const qStart = /^(\d{1,3})\s*[.)]\s+(.+)/;
-  const optLine = /^\(?([A-Da-d])\s*[.)]\s+(.+)/;
+  // Patterns — handles both "Q1." prefix and bare "1." numbered styles
+  const qStartQ     = /^Q(\d{1,3})[.)]\s+(.+)/i;
+  const qStartN     = /^(\d{1,3})[.)]\s+(.+)/;
+  const optNumParen = /^\(([1-4])\)\s+(.+)/;           // "(1) text"
+  const optLetParen = /^\(([A-Da-d])\)\s+(.+)/;        // "(A) text"
+  const optLetBare  = /^([A-Da-d])[.)]\s+(.+)/;        // "A) text" or "A. text"
+  // Two options on one line: "(1) 628    (2) 812"
+  const twoOpts     = /\(([1-4])\)\s+(.+?)\s{3,}\(([1-4])\)\s+(.+)/;
 
-  for (const line of lines) {
-    const qm = line.match(qStart);
-    const om = line.match(optLine);
+  function saveQ() {
+    if (currentQ && Object.keys(currentQ.options).length >= 2 && currentQ.text.length > 5) {
+      questions.push(currentQ);
+    }
+  }
 
-    if (qm) {
-      if (currentQ && Object.keys(currentQ.options).length >= 2) {
-        questions.push(currentQ);
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // Two options on one line
+    const m2 = line.match(twoOpts);
+    if (m2 && currentQ) {
+      const k1 = NUM_TO_LETTER[m2[1]], k2 = NUM_TO_LETTER[m2[3]];
+      if (k1 && !(k1 in currentQ.options)) currentQ.options[k1] = m2[2].trim();
+      if (k2 && !(k2 in currentQ.options)) currentQ.options[k2] = m2[4].trim();
+      continue;
+    }
+
+    // Q-prefix question: "Q1. text"
+    const mQ = line.match(qStartQ);
+    if (mQ) {
+      saveQ();
+      currentQ = { number: parseInt(mQ[1]), text: mQ[2].trim(), options: {} };
+      continue;
+    }
+
+    // Numbered question: "1. text" (require meaningful length to avoid matching answer lines)
+    const mN = line.match(qStartN);
+    if (mN && parseInt(mN[1]) <= 200) {
+      const rest = mN[2].trim();
+      const looksLikeOpt = /^\([1-4]\)|^[A-D][.)]\s/.test(rest);
+      if (rest.length > 12 && !looksLikeOpt) {
+        saveQ();
+        currentQ = { number: parseInt(mN[1]), text: rest, options: {} };
+        continue;
       }
-      currentQ = {
-        number: parseInt(qm[1]),
-        text: qm[2].trim(),
-        options: {}
-      };
-    } else if (om && currentQ) {
-      const letter = om[1].toUpperCase();
-      if (['A','B','C','D'].includes(letter)) {
-        currentQ.options[letter] = om[2].trim();
+    }
+
+    if (currentQ) {
+      // Option: "(1) text"
+      const mON = line.match(optNumParen);
+      if (mON) {
+        const letter = NUM_TO_LETTER[mON[1]];
+        if (letter && !(letter in currentQ.options)) currentQ.options[letter] = mON[2].trim();
+        continue;
       }
-    } else if (currentQ) {
-      // Append to question text if no options yet
-      if (Object.keys(currentQ.options).length === 0 && line.length > 2 && !line.match(/^[A-D]\s*[.)]|^\d+\s*[.)]/)) {
+      // Option: "(A) text"
+      const mOL = line.match(optLetParen);
+      if (mOL) {
+        const letter = mOL[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOL[2].trim();
+        continue;
+      }
+      // Option: "A) text" or "A. text"
+      const mOB = line.match(optLetBare);
+      if (mOB) {
+        const letter = mOB[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOB[2].trim();
+        continue;
+      }
+      // Continuation of question text (before options arrive)
+      if (Object.keys(currentQ.options).length === 0 && !/^[(\d]/.test(line)) {
         currentQ.text += ' ' + line;
       }
     }
   }
 
-  if (currentQ && Object.keys(currentQ.options).length >= 2) {
-    questions.push(currentQ);
-  }
-
-  return questions.filter(q =>
-    q.text.length > 5 &&
-    Object.keys(q.options).length >= 2
-  );
+  saveQ();
+  return questions.filter(q => q.text.length > 5 && Object.keys(q.options).length >= 2);
 }
 
-// ── ANSWER KEY PARSER ─────────────────────────────────────────
-
+// ── ANSWER KEY PARSER ─────────────────────────
 function parseAnswerKey(ocrText) {
   const answers = {};
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
+  const skipLine = /^(SI|No\.|Key|Answer|Serial|Sl\.)/i;
+  const cleaned  = ocrText.replace(/[|\\]/g, ' ');
 
-  // Match patterns: "1 A", "1. A", "1) A", "1  A"
-  // Works for both inline and tabular formats
-  const lines = ocrText.split('\n');
-  for (const line of lines) {
-    // Match multiple num→answer pairs per line (table format)
-    const pairs = [...line.matchAll(/\b(\d{1,3})\s{1,4}([A-Da-d])\b/g)];
-    for (const p of pairs) {
-      const num = parseInt(p[1]).toString();
-      const ans = p[2].toUpperCase();
-      if (!answers[num]) answers[num] = ans;
-    }
+  // Format 1: "1. (A)" or "1. (a)" — letter in parens
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([A-Da-d])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = m[2].toUpperCase();
   }
 
-  // Also match: "1. A" or "1) A"
-  const dotPattern = /\b(\d{1,3})\s*[.)]\s*([A-Da-d])\b/g;
-  let m;
-  while ((m = dotPattern.exec(ocrText)) !== null) {
-    const num = parseInt(m[1]).toString();
-    const ans = m[2].toUpperCase();
-    if (!answers[num]) answers[num] = ans;
+  // Format 2: "1. (4)" — number 1-4 in parens meaning option choice
+  // Ignore values > 4 (those are integer answers like (34), (216))
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([1-4])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = NUM_TO_LETTER[m[2]];
+  }
+
+  // Format 3: "1 A", "31 B" — bare letter after number (table format)
+  for (const line of cleaned.split('\n')) {
+    const t = line.trim();
+    if (!t || skipLine.test(t)) continue;
+    // Any whitespace between number and letter
+    for (const m of t.matchAll(/\b(\d{1,3})\s+([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
+    // Stuck together: "1A"
+    for (const m of t.matchAll(/\b(\d{1,3})([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
   }
 
   return answers;
 }
 
-// ── CARD BUILDER ──────────────────────────────────────────────
-
+// ── CARD BUILDER ──────────────────────────────
 function buildPaperCard(paper) {
-  const date = paper.uploadedAt
-    ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
-    : '';
-
+  const date = paper.uploadedAt ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
   const badges = [
     `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
     paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
     paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
     paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
-    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Questions</span>` : '',
+    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Q</span>` : '',
   ].filter(Boolean).join('');
-
   return `
   <div class="paper-card" onclick="window.location.href='viewer.html?id=${paper.id}'">
     <div class="paper-card-header">
@@ -759,14 +631,12 @@ function buildPaperCard(paper) {
     </div>
     <div class="paper-card-footer">
       <span class="paper-card-date">📅 ${date}</span>
-      <button class="btn btn-primary btn-sm"
-        onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
     </div>
   </div>`;
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
-
+// ── TOAST ─────────────────────────────────────
 function showToast(message, type = 'info') {
   const icon = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' }[type] || 'ℹ️';
   const container = document.getElementById('toast-container');
@@ -778,166 +648,175 @@ function showToast(message, type = 'info') {
   setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 350); }, 3500);
 }
 
-// ── UTILITIES ─────────────────────────────────────────────────
-
+// ── UTILS ─────────────────────────────────────
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function formatTime(s) {
   return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 
-</script>
-<script>
-  let currentPaper = null;
-  let blobUrls = [];
 
-  function renderViewer(blob, mimeType, containerId) {
+  function waitFB(cb) { if(window._fb) cb(); else setTimeout(()=>waitFB(cb),80); }
+  async function fbGetPaper(id) {
+    const {db,doc,getDoc}=window._fb;
+    const snap=await getDoc(doc(db,'papers',id));
+    return snap.exists()?snap.data():null;
+  }
+  async function fbDeletePaper(paper) {
+    const {db,doc,deleteDoc,store,ref,deleteObject}=window._fb;
+    if(paper.qpPath){try{await deleteObject(ref(store,paper.qpPath));}catch(e){}}
+    if(paper.akPath){try{await deleteObject(ref(store,paper.akPath));}catch(e){}}
+    await deleteDoc(doc(db,'papers',paper.id));
+  }
+
+
+  let currentPaper = null;
+
+  function renderViewerUrl(url, mimeType, containerId) {
     const c = document.getElementById(containerId);
-    if (!blob) { c.innerHTML = '<div class="no-file-msg">No file available</div>'; return; }
-    const url = URL.createObjectURL(blob);
-    blobUrls.push(url);
+    if (!c) return;
+    if (!url) { c.innerHTML = '<div class="no-file-msg">No file available</div>'; return; }
     c.innerHTML = mimeType && mimeType.startsWith('image/')
-      ? `<img src="${url}" alt="Document" />`
+      ? `<img src="${url}" alt="Document" style="width:100%;height:auto;"/>`
       : `<iframe src="${url}" title="Document"></iframe>`;
   }
 
   async function downloadFile(type) {
     if (!currentPaper) return;
-    const entry = await loadFileBlobs(currentPaper.id);
-    if (!entry) { showToast('File not found', 'error'); return; }
-    const blob = type === 'qp' ? entry.qpBlob : entry.akBlob;
-    const fileName = type === 'qp' ? entry.qpName : entry.akName;
-    if (!blob) { showToast('No file available', 'error'); return; }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = fileName || 'download'; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    const url  = type === 'qp' ? currentPaper.qpUrl  : currentPaper.akUrl;
+    const name = type === 'qp' ? currentPaper.qpName : currentPaper.akName;
+    if (!url) { showToast('No file available', 'error'); return; }
+    try {
+      showToast('Preparing download…', 'info');
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl; a.download = name || 'download'; a.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+    } catch(e) {
+      window.open(url, '_blank');
+    }
   }
 
   async function deletePaper() {
-    if (!currentPaper || !confirm('Delete this paper? This cannot be undone.')) return;
-    await deleteFileBlobs(currentPaper.id);
-    removePaperMeta(currentPaper.id);
-    showToast('Paper deleted', 'success');
-    setTimeout(() => window.location.href = 'browse.html', 1200);
+    if (!currentPaper || !confirm('Delete this paper from Firebase? This cannot be undone.')) return;
+    try {
+      await waitFBReady();
+      await fbDeletePaper(currentPaper);
+      showToast('Paper deleted', 'success');
+      setTimeout(() => window.location.href = 'browse.html', 1200);
+    } catch(err) {
+      showToast('Delete failed: ' + err.message, 'error');
+    }
   }
 
-  // Tab switching
-  function setupTabs(btnAttr, panePrefix) {
-    document.querySelectorAll(`[${btnAttr}]`).forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tab = btn.getAttribute(btnAttr);
-        document.querySelectorAll(`[${btnAttr}]`).forEach(b => b.classList.remove('active'));
-        document.querySelectorAll(`.${panePrefix}`).forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        const pane = document.getElementById(`${panePrefix.replace('tab-pane','tab')}-${tab}`);
-        if (pane) pane.classList.add('active');
-      });
-    });
+  function waitFBReady() {
+    return new Promise(resolve => { waitFB(resolve); });
   }
 
-  window.addEventListener('unload', () => blobUrls.forEach(u => URL.revokeObjectURL(u)));
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    const id = new URLSearchParams(window.location.search).get('id');
-    const paper = id ? getPapers().find(p => p.id === id) : null;
-    if (!paper) { document.getElementById('not-found').style.display = 'block'; return; }
-
-    currentPaper = paper;
-    document.title = `${paper.subject} — ${paper.examName} ${paper.year} | PYQ Portal`;
-    document.getElementById('viewer-content').style.display = 'block';
-
-    document.getElementById('v-title').textContent = `${paper.subject} — ${paper.examName}`;
-    document.getElementById('v-year').textContent = paper.year || '—';
-    document.getElementById('v-board').textContent = paper.board || '—';
-    document.getElementById('v-qcount').textContent = paper.questionCount ? `${paper.questionCount} MCQs` : '—';
-    document.getElementById('v-duration').textContent = paper.duration ? `${paper.duration} min` : '—';
-    document.getElementById('v-desc').textContent = paper.description || '';
-    document.getElementById('v-date').textContent = paper.uploadedAt
-      ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—';
-
-    const badges = document.getElementById('v-badges');
-    [
-      `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
-      `<span class="badge badge-cyan">${escapeHtml(paper.year)}</span>`,
-      paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
-      paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
-      paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
-    ].filter(Boolean).forEach(b => badges.insertAdjacentHTML('beforeend', b));
-
-    if (!paper.hasAnswerKey) document.getElementById('dl-ak').disabled = true;
-
-    // Exam CTA
-    if (paper.hasExam && paper.questions && paper.questions.length > 0) {
-      document.getElementById('exam-cta').style.display = 'block';
-      document.getElementById('start-exam-btn').href = `exam.html?id=${paper.id}`;
-      document.getElementById('exam-cta-desc').textContent =
-        `${paper.questions.length} questions · ${paper.duration || 180} min · ${Object.keys(paper.answerKey||{}).length > 0 ? 'Auto-graded' : 'No answer key'}`;
-
-      // Question preview
-      document.getElementById('questions-preview').style.display = 'block';
-      const previewList = document.getElementById('q-preview-list');
-      paper.questions.slice(0, 5).forEach(q => {
-        const opts = Object.entries(q.options).map(([l,t]) =>
-          `<span class="q-opt-chip">${l}: ${escapeHtml(t.substring(0,30))}${t.length>30?'…':''}</span>`
-        ).join('');
-        previewList.insertAdjacentHTML('beforeend', `
-          <div class="q-preview">
-            <strong>Q${q.number}.</strong> ${escapeHtml(q.text.substring(0, 120))}${q.text.length > 120 ? '…' : ''}
-            <div class="q-options-mini">${opts}</div>
-          </div>`);
-      });
-    } else {
-      document.getElementById('no-exam-card').style.display = 'block';
-      document.getElementById('pdf-only-view').style.display = 'block';
-    }
-
-    // Load PDF blobs
-    const entry = await loadFileBlobs(id);
-    if (entry) {
-      if (paper.hasExam) {
-        renderViewer(entry.qpBlob, entry.qpType, 'qp-viewer');
-        renderViewer(entry.akBlob, entry.akType, 'ak-viewer');
-      } else {
-        renderViewer(entry.qpBlob, entry.qpType, 'qp-viewer2');
-        renderViewer(entry.akBlob, entry.akType, 'ak-viewer2');
-      }
-    }
-
-    // Setup tabs
-    document.querySelectorAll('[data-tab]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tab = btn.dataset.tab;
-        document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`tab-${tab}`).classList.add('active');
-      });
-    });
-
-    document.querySelectorAll('[data-tab2]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tab = btn.dataset.tab2;
-        document.querySelectorAll('[data-tab2]').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-pane2').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`tab2-${tab}`).classList.add('active');
-      });
-    });
-
-    document.querySelectorAll('[data-tab3]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tab = btn.dataset.tab3;
-        document.querySelectorAll('[data-tab3]').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-pane3').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`tab3-${tab}`).classList.add('active');
-      });
+  // Tab setups
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
     });
   });
+
+  document.addEventListener('click', e => {
+    if (e.target.dataset.tab2) {
+      document.querySelectorAll('[data-tab2]').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane2').forEach(p=>p.classList.remove('active'));
+      e.target.classList.add('active');
+      document.getElementById('tab2-'+e.target.dataset.tab2).classList.add('active');
+    }
+    if (e.target.dataset.tab3) {
+      document.querySelectorAll('[data-tab3]').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane3').forEach(p=>p.classList.remove('active'));
+      e.target.classList.add('active');
+      document.getElementById('tab3-'+e.target.dataset.tab3).classList.add('active');
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const id = new URLSearchParams(window.location.search).get('id');
+    if (!id) { document.getElementById('not-found').style.display='block'; return; }
+
+    waitFB(async () => {
+      try {
+        const paper = await fbGetPaper(id);
+        document.getElementById('loading-view').style.display = 'none';
+        if (!paper) { document.getElementById('not-found').style.display='block'; return; }
+
+        currentPaper = paper;
+        document.title = paper.subject + ' — ' + paper.examName + ' ' + paper.year + ' | PYQ Portal';
+        document.getElementById('viewer-content').style.display = 'block';
+
+        document.getElementById('v-title').textContent   = paper.subject + ' — ' + paper.examName;
+        document.getElementById('v-year').textContent    = paper.year || '—';
+        document.getElementById('v-board').textContent   = paper.board || '—';
+        document.getElementById('v-qcount').textContent  = paper.questionCount ? paper.questionCount + ' MCQs' : '—';
+        document.getElementById('v-duration').textContent= paper.duration ? paper.duration + ' min' : '—';
+        if (paper.markingScheme) {
+          document.getElementById('v-marks-c').textContent = '+' + paper.markingScheme.correct + ' marks';
+          document.getElementById('v-marks-w').textContent = paper.markingScheme.wrong > 0
+            ? '−' + paper.markingScheme.wrong + ' marks' : 'No penalty';
+        }
+        document.getElementById('v-desc').textContent    = paper.description || '';
+        document.getElementById('v-date').textContent    = paper.uploadedAt
+          ? new Date(paper.uploadedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+
+        const badges = document.getElementById('v-badges');
+        [
+          `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
+          `<span class="badge badge-cyan">${escapeHtml(paper.year||'')}</span>`,
+          paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
+          paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
+          paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
+        ].filter(Boolean).forEach(b => badges.insertAdjacentHTML('beforeend', b));
+
+        if (!paper.hasAnswerKey) document.getElementById('dl-ak').disabled = true;
+
+        if (paper.hasExam && paper.questions && paper.questions.length > 0) {
+          document.getElementById('exam-cta').style.display = 'block';
+          document.getElementById('start-exam-btn').href = 'exam.html?id=' + paper.id;
+          const ms = paper.markingScheme;
+          const msText = ms ? ' · +' + ms.correct + '/' + (ms.wrong>0?'−'+ms.wrong:'no') + ' neg' : '';
+          document.getElementById('exam-cta-desc').textContent =
+            paper.questions.length + ' questions · ' + (paper.duration||180) + ' min · ' +
+            (Object.keys(paper.answerKey||{}).length > 0 ? 'Auto-graded' : 'No answer key') + msText;
+          document.getElementById('questions-preview').style.display = 'block';
+          const previewList = document.getElementById('q-preview-list');
+          paper.questions.slice(0,5).forEach(q => {
+            const opts = Object.entries(q.options).map(([l,t]) =>
+              `<span class="q-opt-chip">${l}: ${escapeHtml(t.substring(0,30))}${t.length>30?'…':''}</span>`).join('');
+            previewList.insertAdjacentHTML('beforeend', `
+              <div class="q-preview">
+                <strong>Q${q.number}.</strong> ${escapeHtml(q.text.substring(0,120))}${q.text.length>120?'…':''}
+                <div class="q-options-mini">${opts}</div>
+              </div>`);
+          });
+          renderViewerUrl(paper.qpUrl, paper.qpType, 'qp-viewer');
+          if (paper.akUrl) renderViewerUrl(paper.akUrl, paper.akType, 'ak-viewer');
+        } else {
+          document.getElementById('no-exam-card').style.display = 'block';
+          document.getElementById('pdf-only-view').style.display = 'block';
+          renderViewerUrl(paper.qpUrl, paper.qpType, 'qp-viewer2');
+          if (paper.akUrl) renderViewerUrl(paper.akUrl, paper.akType, 'ak-viewer2');
+        }
+
+      } catch(err) {
+        document.getElementById('loading-view').style.display = 'none';
+        document.getElementById('not-found').style.display = 'block';
+        console.error('Firebase error:', err);
+      }
+    });
+  });
+
 </script>
 </body>
 </html>

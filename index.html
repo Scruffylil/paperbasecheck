@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PYQ Portal — Previous Year Question Papers</title>
-  <meta name="description" content="Browse and upload previous year question papers with answer keys. Ace your exams with PYQ Portal." />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <style>
 /* =========================================================
    PYQ PORTAL — Global Design System
@@ -328,16 +326,46 @@ footer a:hover { text-decoration: underline; }
 .page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
 .page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
 
-</style>
+
+  </style>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+    // 🔥 REPLACE THESE WITH YOUR FIREBASE PROJECT VALUES
+    // Get them from: https://console.firebase.google.com → Project Settings → Web App
+    const FIREBASE_CONFIG = {
+      apiKey:            "YOUR_API_KEY",
+      authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId:         "YOUR_PROJECT_ID",
+      storageBucket:     "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId:             "YOUR_APP_ID"
+    };
+
+    const fbApp  = initializeApp(FIREBASE_CONFIG);
+    const auth   = getAuth(fbApp);
+    const db     = getFirestore(fbApp);
+    const store  = getStorage(fbApp);
+
+    // Expose to global scope for use by non-module scripts
+    window._fb = { auth, db, store,
+      doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, orderBy,
+      ref, uploadBytes, getDownloadURL, deleteObject };
+
+    // Sign in anonymously so reads/writes are authenticated
+    onAuthStateChanged(auth, user => {
+      if (!user) signInAnonymously(auth).catch(console.error);
+      else window._fbUser = user;
+    });
+  </script>
+
 </head>
 <body>
-
-<!-- NAVBAR -->
 <nav class="navbar">
-  <a href="index.html" class="nav-logo">
-    <div class="logo-icon">📚</div>
-    PYQ Portal
-  </a>
+  <a href="index.html" class="nav-logo"><div class="logo-icon">📚</div>PYQ Portal</a>
   <div class="nav-links">
     <a href="index.html" class="active">Home</a>
     <a href="browse.html">Browse</a>
@@ -345,19 +373,12 @@ footer a:hover { text-decoration: underline; }
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-glow"></div>
   <div class="container">
     <div class="hero-badge">🎓 Student-Powered Question Bank</div>
-    <h1 class="hero-title">
-      Master Your Exams with<br>
-      <span class="gradient">Previous Year Papers</span>
-    </h1>
-    <p class="hero-sub">
-      Upload, access, and study PYQ papers with complete answer keys — all in one place.
-      Built by students, for students.
-    </p>
+    <h1 class="hero-title">Master Your Exams with<br><span class="gradient">Previous Year Papers</span></h1>
+    <p class="hero-sub">Upload PDFs — OCR extracts every MCQ automatically and generates an online exam with instant auto-grading.</p>
     <div class="hero-actions">
       <a href="browse.html" class="btn btn-primary btn-lg">📖 Browse Papers</a>
       <a href="upload.html" class="btn btn-outline btn-lg">⬆️ Upload a Paper</a>
@@ -365,221 +386,115 @@ footer a:hover { text-decoration: underline; }
   </div>
 </section>
 
-<!-- STATS -->
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="grid-4" id="stats-grid">
-      <div class="card stat-card card-glow">
-        <div class="stat-num" id="stat-papers">0</div>
-        <div class="stat-label">Papers Uploaded</div>
-      </div>
-      <div class="card stat-card card-glow">
-        <div class="stat-num" id="stat-subjects">0</div>
-        <div class="stat-label">Subjects Covered</div>
-      </div>
-      <div class="card stat-card card-glow">
-        <div class="stat-num" id="stat-keys">0</div>
-        <div class="stat-label">Answer Keys Available</div>
-      </div>
-      <div class="card stat-card card-glow">
-        <div class="stat-num">100%</div>
-        <div class="stat-label">Free Forever</div>
-      </div>
+    <div class="grid-4">
+      <div class="card stat-card card-glow"><div class="stat-num" id="stat-papers">—</div><div class="stat-label">Papers Online</div></div>
+      <div class="card stat-card card-glow"><div class="stat-num" id="stat-subjects">—</div><div class="stat-label">Subjects</div></div>
+      <div class="card stat-card card-glow"><div class="stat-num" id="stat-exams">—</div><div class="stat-label">Online Exams</div></div>
+      <div class="card stat-card card-glow"><div class="stat-num">100%</div><div class="stat-label">Free Forever</div></div>
     </div>
   </div>
 </section>
 
-<!-- RECENT PAPERS -->
 <section class="section">
   <div class="container">
     <h2 class="section-title">🕐 Recently Uploaded</h2>
-    <p class="section-sub">Latest contributions from the community</p>
-    <div class="grid-auto" id="recent-papers">
-      <!-- Populated by JS -->
+    <p class="section-sub">Latest papers from the community — available to everyone</p>
+    <div id="loading-state" style="text-align:center;padding:2rem;color:var(--text-muted);">
+      <div style="font-size:2rem;">⏳</div><p style="margin-top:.5rem;">Loading from cloud…</p>
     </div>
+    <div class="grid-auto" id="recent-papers"></div>
     <div id="recent-empty" class="empty-state" style="display:none;">
-      <div class="empty-icon">📋</div>
-      <h3>No papers yet</h3>
-      <p>Be the first to upload a PYQ paper!</p>
-      <br>
+      <div class="empty-icon">📋</div><h3>No papers yet</h3>
+      <p>Be the first to upload a PYQ paper!</p><br>
       <a href="upload.html" class="btn btn-primary">Upload Now</a>
     </div>
+    <div id="firebase-error" class="empty-state" style="display:none;">
+      <div class="empty-icon">🔥</div><h3>Firebase not configured yet</h3>
+      <p>Open any HTML file, find <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;">FIREBASE_CONFIG</code> near the top, and paste your project values.</p>
+    </div>
   </div>
 </section>
 
-<!-- FEATURES -->
-<section class="section" style="background: var(--bg-secondary);">
+<section class="section" style="background:var(--bg-secondary);">
   <div class="container">
-    <h2 class="section-title" style="text-align:center;">Why PYQ Portal?</h2>
-    <p class="section-sub" style="text-align:center;">Everything students need to prepare smarter</p>
+    <h2 class="section-title" style="text-align:center;">How It Works</h2>
+    <p class="section-sub" style="text-align:center;">From PDF to live online exam in minutes</p>
     <div class="grid-3">
-      <div class="card card-glow" style="text-align:center; padding:2rem;">
-        <div style="font-size:2.5rem; margin-bottom:1rem;">📄</div>
-        <h3 style="margin-bottom:0.5rem;">Instant Online Access</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">View question papers and answer keys directly in your browser — no downloads required.</p>
+      <div class="card card-glow" style="text-align:center;padding:2rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">📄</div>
+        <h3 style="margin-bottom:.5rem;">1. Upload PDF</h3>
+        <p style="color:var(--text-secondary);font-size:.9rem;">Drop your question paper + answer key. Supports scanned PDFs and images.</p>
       </div>
-      <div class="card card-glow" style="text-align:center; padding:2rem;">
-        <div style="font-size:2.5rem; margin-bottom:1rem;">🔍</div>
-        <h3 style="margin-bottom:0.5rem;">Smart Search & Filter</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">Find papers by subject, year, board, or exam name instantly.</p>
+      <div class="card card-glow" style="text-align:center;padding:2rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">🤖</div>
+        <h3 style="margin-bottom:.5rem;">2. OCR Extracts</h3>
+        <p style="color:var(--text-secondary);font-size:.9rem;">Tesseract OCR reads every question, option A–D, and answer key automatically.</p>
       </div>
-      <div class="card card-glow" style="text-align:center; padding:2rem;">
-        <div style="font-size:2.5rem; margin-bottom:1rem;">🔑</div>
-        <h3 style="margin-bottom:0.5rem;">Complete Answer Keys</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">Every paper can include a full answer key — learn from your mistakes immediately.</p>
-      </div>
-      <div class="card card-glow" style="text-align:center; padding:2rem;">
-        <div style="font-size:2.5rem; margin-bottom:1rem;">🎓</div>
-        <h3 style="margin-bottom:0.5rem;">Community Driven</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">Any student can upload, growing the database collaboratively.</p>
-      </div>
-      <div class="card card-glow" style="text-align:center; padding:2rem;">
-        <div style="font-size:2.5rem; margin-bottom:1rem;">⬇️</div>
-        <h3 style="margin-bottom:0.5rem;">Easy Download</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">Download any paper or answer key for offline study with one click.</p>
-      </div>
-      <div class="card card-glow" style="text-align:center; padding:2rem;">
-        <div style="font-size:2.5rem; margin-bottom:1rem;">🆓</div>
-        <h3 style="margin-bottom:0.5rem;">Completely Free</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">No paywalls, no subscriptions. Open for every student.</p>
+      <div class="card card-glow" style="text-align:center;padding:2rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">🎯</div>
+        <h3 style="margin-bottom:.5rem;">3. Take & Get Graded</h3>
+        <p style="color:var(--text-secondary);font-size:.9rem;">Students anywhere take the exam with a live timer and get instant scores.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="section">
-  <div class="container" style="text-align:center;">
-    <div class="card" style="max-width:600px; margin:0 auto; padding:3rem; background:linear-gradient(135deg, rgba(59,130,246,0.1), rgba(6,182,212,0.05)); border-color:rgba(59,130,246,0.2);">
-      <div style="font-size:2.5rem; margin-bottom:1rem;">🚀</div>
-      <h2 style="font-size:1.6rem; margin-bottom:0.75rem;">Have a PYQ Paper?</h2>
-      <p style="color:var(--text-secondary); margin-bottom:1.5rem;">Help fellow students by uploading question papers and answer keys you've collected.</p>
-      <a href="upload.html" class="btn btn-primary btn-lg">Start Uploading →</a>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="container">
-    <p>© 2026 PYQ Portal · Built by students, for students · <a href="browse.html">Browse Papers</a> · <a href="upload.html">Upload</a></p>
-  </div>
-</footer>
-
-<div id="toast-container"></div>
+<footer><div class="container"><p>© 2026 PYQ Portal · <a href="browse.html">Browse</a> · <a href="upload.html">Upload</a></p></div></footer>
 
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    waitFB(async () => {
+      try {
+        const papers = await fbGetAllPapers();
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('stat-papers').textContent   = papers.length;
+        document.getElementById('stat-subjects').textContent = new Set(papers.map(p => p.subject)).size;
+        document.getElementById('stat-exams').textContent    = papers.filter(p => p.hasExam).length;
+        const container = document.getElementById('recent-papers');
+        const recent = papers.slice(0, 6);
+        if (recent.length === 0) {
+          document.getElementById('recent-empty').style.display = 'block';
+        } else {
+          recent.forEach(p => container.insertAdjacentHTML('beforeend', buildPaperCard(p)));
+        }
+      } catch(err) {
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('firebase-error').style.display = 'block';
+        console.error('Firebase error:', err);
+      }
+    });
+  });
+</script>
+<div id="toast-container"></div>
+<script>
 /**
- * PYQ Portal — Shared Application Logic (v2 with OCR + Exam Engine)
+ * PYQ Portal — Core Shared Logic v3
+ * OCR, parsers, card builder, toast, utils.
+ * Firebase calls are handled inline in each page.
  */
 
-const STORAGE_KEY = 'pyq_papers_meta';
-const DB_NAME = 'pyq_portal_db';
-const DB_VERSION = 2;
-const STORE_NAME = 'paper_files';
-
-// ── IndexedDB ──────────────────────────────────────────────────
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-async function saveFileBlobs(id, qpFile, akFile) {
-  const db = await openDB();
-  const entry = {
-    id,
-    qpBlob: qpFile || null,
-    qpName: qpFile ? qpFile.name : null,
-    qpType: qpFile ? qpFile.type : null,
-    akBlob: akFile || null,
-    akName: akFile ? akFile.name : null,
-    akType: akFile ? akFile.type : null,
-  };
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(entry).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function loadFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(id);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function deleteFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete(id).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-// ── METADATA ──────────────────────────────────────────────────
-
-function getPapers() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function savePaperMeta(meta) {
-  const papers = getPapers();
-  const existing = papers.findIndex(p => p.id === meta.id);
-  if (existing >= 0) papers[existing] = meta; else papers.push(meta);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(papers));
-}
-
-function removePaperMeta(id) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(getPapers().filter(p => p.id !== id)));
-}
-
-async function savePaper(meta, qpFile, akFile) {
-  await saveFileBlobs(meta.id, qpFile, akFile);
-  savePaperMeta(meta);
-}
-
-// ── PDF → IMAGES (PDF.js) ─────────────────────────────────────
-
+// ── PDF → IMAGES ──────────────────────────────
 async function pdfToImages(file, onProgress) {
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const images = [];
-
   for (let i = 1; i <= pdf.numPages; i++) {
     if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2.5 }); // High-res for OCR
+    const viewport = page.getViewport({ scale: 2.5 });
     const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+    canvas.width = viewport.width; canvas.height = viewport.height;
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     images.push(canvas.toDataURL('image/png'));
   }
   return images;
 }
 
-// ── OCR (Tesseract.js) ────────────────────────────────────────
-
+// ── OCR ───────────────────────────────────────
 async function ocrImageData(imageData) {
   const worker = await Tesseract.createWorker('eng');
   const { data: { text } } = await worker.recognize(imageData);
@@ -587,116 +502,145 @@ async function ocrImageData(imageData) {
   return text;
 }
 
-async function ocrFile(file, onProgress) {
-  let pages = [];
-  if (file.type === 'application/pdf') {
-    pages = await pdfToImages(file, onProgress);
-  } else {
-    pages = [file]; // image file directly
-  }
-
-  let allText = '';
-  for (let i = 0; i < pages.length; i++) {
-    if (onProgress) onProgress(`Running OCR on page ${i + 1} of ${pages.length}…`);
-    const text = await ocrImageData(pages[i]);
-    allText += text + '\n\n';
-  }
-  return allText;
-}
-
-// ── QUESTION PAPER PARSER ─────────────────────────────────────
-
+// ── QUESTION PARSER ───────────────────────────
 function parseQuestions(ocrText) {
   const questions = [];
-  const lines = ocrText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
+  const lines = ocrText.split('\n');
   let currentQ = null;
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
 
-  // Regex patterns
-  const qStart = /^(\d{1,3})\s*[.)]\s+(.+)/;
-  const optLine = /^\(?([A-Da-d])\s*[.)]\s+(.+)/;
+  // Patterns — handles both "Q1." prefix and bare "1." numbered styles
+  const qStartQ     = /^Q(\d{1,3})[.)]\s+(.+)/i;
+  const qStartN     = /^(\d{1,3})[.)]\s+(.+)/;
+  const optNumParen = /^\(([1-4])\)\s+(.+)/;           // "(1) text"
+  const optLetParen = /^\(([A-Da-d])\)\s+(.+)/;        // "(A) text"
+  const optLetBare  = /^([A-Da-d])[.)]\s+(.+)/;        // "A) text" or "A. text"
+  // Two options on one line: "(1) 628    (2) 812"
+  const twoOpts     = /\(([1-4])\)\s+(.+?)\s{3,}\(([1-4])\)\s+(.+)/;
 
-  for (const line of lines) {
-    const qm = line.match(qStart);
-    const om = line.match(optLine);
+  function saveQ() {
+    if (currentQ && Object.keys(currentQ.options).length >= 2 && currentQ.text.length > 5) {
+      questions.push(currentQ);
+    }
+  }
 
-    if (qm) {
-      if (currentQ && Object.keys(currentQ.options).length >= 2) {
-        questions.push(currentQ);
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // Two options on one line
+    const m2 = line.match(twoOpts);
+    if (m2 && currentQ) {
+      const k1 = NUM_TO_LETTER[m2[1]], k2 = NUM_TO_LETTER[m2[3]];
+      if (k1 && !(k1 in currentQ.options)) currentQ.options[k1] = m2[2].trim();
+      if (k2 && !(k2 in currentQ.options)) currentQ.options[k2] = m2[4].trim();
+      continue;
+    }
+
+    // Q-prefix question: "Q1. text"
+    const mQ = line.match(qStartQ);
+    if (mQ) {
+      saveQ();
+      currentQ = { number: parseInt(mQ[1]), text: mQ[2].trim(), options: {} };
+      continue;
+    }
+
+    // Numbered question: "1. text" (require meaningful length to avoid matching answer lines)
+    const mN = line.match(qStartN);
+    if (mN && parseInt(mN[1]) <= 200) {
+      const rest = mN[2].trim();
+      const looksLikeOpt = /^\([1-4]\)|^[A-D][.)]\s/.test(rest);
+      if (rest.length > 12 && !looksLikeOpt) {
+        saveQ();
+        currentQ = { number: parseInt(mN[1]), text: rest, options: {} };
+        continue;
       }
-      currentQ = {
-        number: parseInt(qm[1]),
-        text: qm[2].trim(),
-        options: {}
-      };
-    } else if (om && currentQ) {
-      const letter = om[1].toUpperCase();
-      if (['A','B','C','D'].includes(letter)) {
-        currentQ.options[letter] = om[2].trim();
+    }
+
+    if (currentQ) {
+      // Option: "(1) text"
+      const mON = line.match(optNumParen);
+      if (mON) {
+        const letter = NUM_TO_LETTER[mON[1]];
+        if (letter && !(letter in currentQ.options)) currentQ.options[letter] = mON[2].trim();
+        continue;
       }
-    } else if (currentQ) {
-      // Append to question text if no options yet
-      if (Object.keys(currentQ.options).length === 0 && line.length > 2 && !line.match(/^[A-D]\s*[.)]|^\d+\s*[.)]/)) {
+      // Option: "(A) text"
+      const mOL = line.match(optLetParen);
+      if (mOL) {
+        const letter = mOL[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOL[2].trim();
+        continue;
+      }
+      // Option: "A) text" or "A. text"
+      const mOB = line.match(optLetBare);
+      if (mOB) {
+        const letter = mOB[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOB[2].trim();
+        continue;
+      }
+      // Continuation of question text (before options arrive)
+      if (Object.keys(currentQ.options).length === 0 && !/^[(\d]/.test(line)) {
         currentQ.text += ' ' + line;
       }
     }
   }
 
-  if (currentQ && Object.keys(currentQ.options).length >= 2) {
-    questions.push(currentQ);
-  }
-
-  return questions.filter(q =>
-    q.text.length > 5 &&
-    Object.keys(q.options).length >= 2
-  );
+  saveQ();
+  return questions.filter(q => q.text.length > 5 && Object.keys(q.options).length >= 2);
 }
 
-// ── ANSWER KEY PARSER ─────────────────────────────────────────
-
+// ── ANSWER KEY PARSER ─────────────────────────
 function parseAnswerKey(ocrText) {
   const answers = {};
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
+  const skipLine = /^(SI|No\.|Key|Answer|Serial|Sl\.)/i;
+  const cleaned  = ocrText.replace(/[|\\]/g, ' ');
 
-  // Match patterns: "1 A", "1. A", "1) A", "1  A"
-  // Works for both inline and tabular formats
-  const lines = ocrText.split('\n');
-  for (const line of lines) {
-    // Match multiple num→answer pairs per line (table format)
-    const pairs = [...line.matchAll(/\b(\d{1,3})\s{1,4}([A-Da-d])\b/g)];
-    for (const p of pairs) {
-      const num = parseInt(p[1]).toString();
-      const ans = p[2].toUpperCase();
-      if (!answers[num]) answers[num] = ans;
-    }
+  // Format 1: "1. (A)" or "1. (a)" — letter in parens
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([A-Da-d])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = m[2].toUpperCase();
   }
 
-  // Also match: "1. A" or "1) A"
-  const dotPattern = /\b(\d{1,3})\s*[.)]\s*([A-Da-d])\b/g;
-  let m;
-  while ((m = dotPattern.exec(ocrText)) !== null) {
-    const num = parseInt(m[1]).toString();
-    const ans = m[2].toUpperCase();
-    if (!answers[num]) answers[num] = ans;
+  // Format 2: "1. (4)" — number 1-4 in parens meaning option choice
+  // Ignore values > 4 (those are integer answers like (34), (216))
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([1-4])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = NUM_TO_LETTER[m[2]];
+  }
+
+  // Format 3: "1 A", "31 B" — bare letter after number (table format)
+  for (const line of cleaned.split('\n')) {
+    const t = line.trim();
+    if (!t || skipLine.test(t)) continue;
+    // Any whitespace between number and letter
+    for (const m of t.matchAll(/\b(\d{1,3})\s+([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
+    // Stuck together: "1A"
+    for (const m of t.matchAll(/\b(\d{1,3})([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
   }
 
   return answers;
 }
 
-// ── CARD BUILDER ──────────────────────────────────────────────
-
+// ── CARD BUILDER ──────────────────────────────
 function buildPaperCard(paper) {
-  const date = paper.uploadedAt
-    ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
-    : '';
-
+  const date = paper.uploadedAt ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
   const badges = [
     `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
     paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
     paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
     paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
-    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Questions</span>` : '',
+    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Q</span>` : '',
   ].filter(Boolean).join('');
-
   return `
   <div class="paper-card" onclick="window.location.href='viewer.html?id=${paper.id}'">
     <div class="paper-card-header">
@@ -709,14 +653,12 @@ function buildPaperCard(paper) {
     </div>
     <div class="paper-card-footer">
       <span class="paper-card-date">📅 ${date}</span>
-      <button class="btn btn-primary btn-sm"
-        onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
     </div>
   </div>`;
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
-
+// ── TOAST ─────────────────────────────────────
 function showToast(message, type = 'info') {
   const icon = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' }[type] || 'ℹ️';
   const container = document.getElementById('toast-container');
@@ -728,41 +670,58 @@ function showToast(message, type = 'info') {
   setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 350); }, 3500);
 }
 
-// ── UTILITIES ─────────────────────────────────────────────────
-
+// ── UTILS ─────────────────────────────────────
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function formatTime(s) {
   return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 
-</script>
-<script>
-  // Load stats & recent papers
-  document.addEventListener('DOMContentLoaded', () => {
-    const papers = getPapers();
-    const subjects = [...new Set(papers.map(p => p.subject))];
-    const withKey = papers.filter(p => p.answerKeyData);
 
-    document.getElementById('stat-papers').textContent   = papers.length;
-    document.getElementById('stat-subjects').textContent = subjects.length;
-    document.getElementById('stat-keys').textContent     = withKey.length;
+  // ── Wait for Firebase SDK to be ready ────────────────────────
+  function waitFB(cb) {
+    if (window._fb) cb();
+    else setTimeout(() => waitFB(cb), 80);
+  }
 
-    const recentContainer = document.getElementById('recent-papers');
-    const emptyState      = document.getElementById('recent-empty');
-    const recent = [...papers].reverse().slice(0, 6);
+  // ── Firestore helpers ─────────────────────────────────────────
+  async function fbGetAllPapers() {
+    const { db, collection, query, orderBy, getDocs } = window._fb;
+    const snap = await getDocs(query(collection(db, 'papers'), orderBy('uploadedAt', 'desc')));
+    return snap.docs.map(d => d.data());
+  }
 
-    if (recent.length === 0) {
-      emptyState.style.display = 'block';
-    } else {
-      recent.forEach(p => {
-        recentContainer.insertAdjacentHTML('beforeend', buildPaperCard(p));
-      });
-    }
-  });
+  async function fbGetPaper(id) {
+    const { db, doc, getDoc } = window._fb;
+    const snap = await getDoc(doc(db, 'papers', id));
+    return snap.exists() ? snap.data() : null;
+  }
+
+  async function fbSavePaper(meta) {
+    const { db, doc, setDoc } = window._fb;
+    await setDoc(doc(db, 'papers', meta.id), meta);
+  }
+
+  async function fbDeletePaper(paper) {
+    const { db, doc, deleteDoc, store, ref, deleteObject } = window._fb;
+    if (paper.qpPath) { try { await deleteObject(ref(store, paper.qpPath)); } catch(e){} }
+    if (paper.akPath) { try { await deleteObject(ref(store, paper.akPath)); } catch(e){} }
+    await deleteDoc(doc(db, 'papers', paper.id));
+  }
+
+  // ── Storage: upload a file, return { url, path, name, mimeType } ──
+  async function fbUploadFile(paperId, file, type) {
+    const { store, ref, uploadBytes, getDownloadURL } = window._fb;
+    const ext  = file.name.split('.').pop();
+    const path = 'papers/' + paperId + '/' + type + '.' + ext;
+    const sRef = ref(store, path);
+    await uploadBytes(sRef, file);
+    const url = await getDownloadURL(sRef);
+    return { url, path, name: file.name, mimeType: file.type };
+  }
+
 </script>
 </body>
 </html>

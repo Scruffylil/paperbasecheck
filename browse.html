@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Browse Papers — PYQ Portal</title>
-    <meta name="description" content="Search and browse previous year question papers by subject, year, and board." />
-    <style>
-/* =========================================================
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Browse Papers — PYQ Portal</title>
+  <style>/* =========================================================
    PYQ PORTAL — Global Design System
    ========================================================= */
 
@@ -329,236 +326,88 @@ footer a:hover { text-decoration: underline; }
 .page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
 .page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
 
+  .filter-bar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;padding:1rem 1.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.75rem;}
+  .filter-bar .search-bar{flex:1;min-width:220px;}
+  .results-meta{font-size:.85rem;color:var(--text-muted);margin-bottom:1rem;}
+  .sort-btn{font-size:.82rem;padding:5px 12px;}
+  .sort-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
 </style>
-    <style>
-        .filter-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            align-items: center;
-            padding: 1rem 1.25rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 1.75rem;
-        }
-
-        .filter-bar .search-bar {
-            flex: 1;
-            min-width: 220px;
-        }
-
-        .filter-bar select {
-            min-width: 150px;
-        }
-
-        .results-meta {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-        }
-
-        .sort-btn {
-            font-size: 0.82rem;
-            padding: 5px 12px;
-        }
-
-        .sort-btn.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-    </style>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+    const FIREBASE_CONFIG = {
+      apiKey:"YOUR_API_KEY", authDomain:"YOUR_PROJECT_ID.firebaseapp.com",
+      projectId:"YOUR_PROJECT_ID", storageBucket:"YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId:"YOUR_SENDER_ID", appId:"YOUR_APP_ID"
+    };
+    const fbApp=initializeApp(FIREBASE_CONFIG);
+    const auth=getAuth(fbApp), db=getFirestore(fbApp), store=getStorage(fbApp);
+    window._fb={auth,db,store,doc,setDoc,getDoc,getDocs,deleteDoc,collection,query,orderBy,ref,uploadBytes,getDownloadURL,deleteObject};
+    onAuthStateChanged(auth,u=>{ if(!u) signInAnonymously(auth).catch(console.error); else window._fbUser=u; });
+  </script>
 </head>
-
 <body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <a href="index.html" class="nav-logo">
-            <div class="logo-icon">📚</div>
-            PYQ Portal
-        </a>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="browse.html" class="active">Browse</a>
-            <a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a>
-        </div>
-    </nav>
-
-    <!-- PAGE HERO -->
-    <div class="page-hero">
-        <div class="container">
-            <h1>🔍 Browse Papers</h1>
-            <p>Search through all uploaded question papers and answer keys</p>
-        </div>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><div class="logo-icon">📚</div>PYQ Portal</a>
+  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html" class="active">Browse</a><a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a></div>
+</nav>
+<div class="page-hero"><div class="container"><h1>🔍 Browse Papers</h1><p>All papers stored in Firebase — accessible from anywhere in the world</p></div></div>
+<section class="section">
+  <div class="container">
+    <div class="filter-bar">
+      <div class="search-bar"><span class="search-icon">🔍</span><input class="form-input" id="search-input" type="text" placeholder="Search by subject, exam, board…"/></div>
+      <select class="form-select" id="filter-subject" style="width:auto;"><option value="">All Subjects</option></select>
+      <select class="form-select" id="filter-year" style="width:auto;"><option value="">All Years</option></select>
+      <select class="form-select" id="filter-board" style="width:auto;"><option value="">All Boards</option></select>
+      <button class="btn btn-outline btn-sm" id="clear-filters">Clear</button>
     </div>
-
-    <!-- BROWSE SECTION -->
-    <section class="section">
-        <div class="container">
-            <!-- FILTER BAR -->
-            <div class="filter-bar">
-                <div class="search-bar">
-                    <span class="search-icon">🔍</span>
-                    <input class="form-input" id="search-input" type="text"
-                        placeholder="Search by subject, exam, board…" />
-                </div>
-                <select class="form-select" id="filter-subject" style="width:auto;">
-                    <option value="">All Subjects</option>
-                </select>
-                <select class="form-select" id="filter-year" style="width:auto;">
-                    <option value="">All Years</option>
-                </select>
-                <select class="form-select" id="filter-board" style="width:auto;">
-                    <option value="">All Boards</option>
-                </select>
-                <button class="btn btn-outline btn-sm" id="clear-filters">Clear</button>
-            </div>
-
-            <!-- SORT + RESULTS META -->
-            <div
-                style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-                <div class="results-meta" id="results-meta"></div>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn btn-outline sort-btn active" data-sort="newest">Newest</button>
-                    <button class="btn btn-outline sort-btn" data-sort="oldest">Oldest</button>
-                    <button class="btn btn-outline sort-btn" data-sort="subject">Subject</button>
-                </div>
-            </div>
-
-            <!-- CARDS GRID -->
-            <div class="grid-auto" id="papers-grid"></div>
-
-            <!-- EMPTY STATE -->
-            <div id="empty-state" class="empty-state" style="display:none;">
-                <div class="empty-icon">📭</div>
-                <h3>No papers found</h3>
-                <p id="empty-message">Try adjusting your filters or search term</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-        <div class="container">
-            <p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="upload.html">Upload a Paper</a></p>
-        </div>
-    </footer>
-
-    <div id="toast-container"></div>
-    <script>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+      <div class="results-meta" id="results-meta"></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline sort-btn active" data-sort="newest">Newest</button>
+        <button class="btn btn-outline sort-btn" data-sort="oldest">Oldest</button>
+        <button class="btn btn-outline sort-btn" data-sort="subject">Subject</button>
+      </div>
+    </div>
+    <div id="loading-state" style="text-align:center;padding:3rem;color:var(--text-muted);">
+      <div style="font-size:2rem;">⏳</div><p style="margin-top:.5rem;">Loading from Firebase…</p>
+    </div>
+    <div class="grid-auto" id="papers-grid"></div>
+    <div id="empty-state" class="empty-state" style="display:none;"><div class="empty-icon">📭</div><h3>No papers found</h3><p id="empty-message">Try adjusting your filters</p></div>
+    <div id="firebase-error" class="empty-state" style="display:none;"><div class="empty-icon">🔥</div><h3>Firebase not configured</h3><p>Add your Firebase config values to the HTML files.</p></div>
+  </div>
+</section>
+<footer><div class="container"><p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="upload.html">Upload</a></p></div></footer>
+<div id="toast-container"></div>
+<script>
 /**
- * PYQ Portal — Shared Application Logic (v2 with OCR + Exam Engine)
+ * PYQ Portal — Core Shared Logic v3
+ * OCR, parsers, card builder, toast, utils.
+ * Firebase calls are handled inline in each page.
  */
 
-const STORAGE_KEY = 'pyq_papers_meta';
-const DB_NAME = 'pyq_portal_db';
-const DB_VERSION = 2;
-const STORE_NAME = 'paper_files';
-
-// ── IndexedDB ──────────────────────────────────────────────────
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-      }
-    };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-async function saveFileBlobs(id, qpFile, akFile) {
-  const db = await openDB();
-  const entry = {
-    id,
-    qpBlob: qpFile || null,
-    qpName: qpFile ? qpFile.name : null,
-    qpType: qpFile ? qpFile.type : null,
-    akBlob: akFile || null,
-    akName: akFile ? akFile.name : null,
-    akType: akFile ? akFile.type : null,
-  };
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(entry).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function loadFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(id);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function deleteFileBlobs(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete(id).onsuccess = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-// ── METADATA ──────────────────────────────────────────────────
-
-function getPapers() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
-
-function savePaperMeta(meta) {
-  const papers = getPapers();
-  const existing = papers.findIndex(p => p.id === meta.id);
-  if (existing >= 0) papers[existing] = meta; else papers.push(meta);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(papers));
-}
-
-function removePaperMeta(id) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(getPapers().filter(p => p.id !== id)));
-}
-
-async function savePaper(meta, qpFile, akFile) {
-  await saveFileBlobs(meta.id, qpFile, akFile);
-  savePaperMeta(meta);
-}
-
-// ── PDF → IMAGES (PDF.js) ─────────────────────────────────────
-
+// ── PDF → IMAGES ──────────────────────────────
 async function pdfToImages(file, onProgress) {
   const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const arrayBuffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const images = [];
-
   for (let i = 1; i <= pdf.numPages; i++) {
     if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2.5 }); // High-res for OCR
+    const viewport = page.getViewport({ scale: 2.5 });
     const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
+    canvas.width = viewport.width; canvas.height = viewport.height;
     await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
     images.push(canvas.toDataURL('image/png'));
   }
   return images;
 }
 
-// ── OCR (Tesseract.js) ────────────────────────────────────────
-
+// ── OCR ───────────────────────────────────────
 async function ocrImageData(imageData) {
   const worker = await Tesseract.createWorker('eng');
   const { data: { text } } = await worker.recognize(imageData);
@@ -566,116 +415,145 @@ async function ocrImageData(imageData) {
   return text;
 }
 
-async function ocrFile(file, onProgress) {
-  let pages = [];
-  if (file.type === 'application/pdf') {
-    pages = await pdfToImages(file, onProgress);
-  } else {
-    pages = [file]; // image file directly
-  }
-
-  let allText = '';
-  for (let i = 0; i < pages.length; i++) {
-    if (onProgress) onProgress(`Running OCR on page ${i + 1} of ${pages.length}…`);
-    const text = await ocrImageData(pages[i]);
-    allText += text + '\n\n';
-  }
-  return allText;
-}
-
-// ── QUESTION PAPER PARSER ─────────────────────────────────────
-
+// ── QUESTION PARSER ───────────────────────────
 function parseQuestions(ocrText) {
   const questions = [];
-  const lines = ocrText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
+  const lines = ocrText.split('\n');
   let currentQ = null;
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
 
-  // Regex patterns
-  const qStart = /^(\d{1,3})\s*[.)]\s+(.+)/;
-  const optLine = /^\(?([A-Da-d])\s*[.)]\s+(.+)/;
+  // Patterns — handles both "Q1." prefix and bare "1." numbered styles
+  const qStartQ     = /^Q(\d{1,3})[.)]\s+(.+)/i;
+  const qStartN     = /^(\d{1,3})[.)]\s+(.+)/;
+  const optNumParen = /^\(([1-4])\)\s+(.+)/;           // "(1) text"
+  const optLetParen = /^\(([A-Da-d])\)\s+(.+)/;        // "(A) text"
+  const optLetBare  = /^([A-Da-d])[.)]\s+(.+)/;        // "A) text" or "A. text"
+  // Two options on one line: "(1) 628    (2) 812"
+  const twoOpts     = /\(([1-4])\)\s+(.+?)\s{3,}\(([1-4])\)\s+(.+)/;
 
-  for (const line of lines) {
-    const qm = line.match(qStart);
-    const om = line.match(optLine);
+  function saveQ() {
+    if (currentQ && Object.keys(currentQ.options).length >= 2 && currentQ.text.length > 5) {
+      questions.push(currentQ);
+    }
+  }
 
-    if (qm) {
-      if (currentQ && Object.keys(currentQ.options).length >= 2) {
-        questions.push(currentQ);
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // Two options on one line
+    const m2 = line.match(twoOpts);
+    if (m2 && currentQ) {
+      const k1 = NUM_TO_LETTER[m2[1]], k2 = NUM_TO_LETTER[m2[3]];
+      if (k1 && !(k1 in currentQ.options)) currentQ.options[k1] = m2[2].trim();
+      if (k2 && !(k2 in currentQ.options)) currentQ.options[k2] = m2[4].trim();
+      continue;
+    }
+
+    // Q-prefix question: "Q1. text"
+    const mQ = line.match(qStartQ);
+    if (mQ) {
+      saveQ();
+      currentQ = { number: parseInt(mQ[1]), text: mQ[2].trim(), options: {} };
+      continue;
+    }
+
+    // Numbered question: "1. text" (require meaningful length to avoid matching answer lines)
+    const mN = line.match(qStartN);
+    if (mN && parseInt(mN[1]) <= 200) {
+      const rest = mN[2].trim();
+      const looksLikeOpt = /^\([1-4]\)|^[A-D][.)]\s/.test(rest);
+      if (rest.length > 12 && !looksLikeOpt) {
+        saveQ();
+        currentQ = { number: parseInt(mN[1]), text: rest, options: {} };
+        continue;
       }
-      currentQ = {
-        number: parseInt(qm[1]),
-        text: qm[2].trim(),
-        options: {}
-      };
-    } else if (om && currentQ) {
-      const letter = om[1].toUpperCase();
-      if (['A','B','C','D'].includes(letter)) {
-        currentQ.options[letter] = om[2].trim();
+    }
+
+    if (currentQ) {
+      // Option: "(1) text"
+      const mON = line.match(optNumParen);
+      if (mON) {
+        const letter = NUM_TO_LETTER[mON[1]];
+        if (letter && !(letter in currentQ.options)) currentQ.options[letter] = mON[2].trim();
+        continue;
       }
-    } else if (currentQ) {
-      // Append to question text if no options yet
-      if (Object.keys(currentQ.options).length === 0 && line.length > 2 && !line.match(/^[A-D]\s*[.)]|^\d+\s*[.)]/)) {
+      // Option: "(A) text"
+      const mOL = line.match(optLetParen);
+      if (mOL) {
+        const letter = mOL[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOL[2].trim();
+        continue;
+      }
+      // Option: "A) text" or "A. text"
+      const mOB = line.match(optLetBare);
+      if (mOB) {
+        const letter = mOB[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOB[2].trim();
+        continue;
+      }
+      // Continuation of question text (before options arrive)
+      if (Object.keys(currentQ.options).length === 0 && !/^[(\d]/.test(line)) {
         currentQ.text += ' ' + line;
       }
     }
   }
 
-  if (currentQ && Object.keys(currentQ.options).length >= 2) {
-    questions.push(currentQ);
-  }
-
-  return questions.filter(q =>
-    q.text.length > 5 &&
-    Object.keys(q.options).length >= 2
-  );
+  saveQ();
+  return questions.filter(q => q.text.length > 5 && Object.keys(q.options).length >= 2);
 }
 
-// ── ANSWER KEY PARSER ─────────────────────────────────────────
-
+// ── ANSWER KEY PARSER ─────────────────────────
 function parseAnswerKey(ocrText) {
   const answers = {};
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
+  const skipLine = /^(SI|No\.|Key|Answer|Serial|Sl\.)/i;
+  const cleaned  = ocrText.replace(/[|\\]/g, ' ');
 
-  // Match patterns: "1 A", "1. A", "1) A", "1  A"
-  // Works for both inline and tabular formats
-  const lines = ocrText.split('\n');
-  for (const line of lines) {
-    // Match multiple num→answer pairs per line (table format)
-    const pairs = [...line.matchAll(/\b(\d{1,3})\s{1,4}([A-Da-d])\b/g)];
-    for (const p of pairs) {
-      const num = parseInt(p[1]).toString();
-      const ans = p[2].toUpperCase();
-      if (!answers[num]) answers[num] = ans;
-    }
+  // Format 1: "1. (A)" or "1. (a)" — letter in parens
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([A-Da-d])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = m[2].toUpperCase();
   }
 
-  // Also match: "1. A" or "1) A"
-  const dotPattern = /\b(\d{1,3})\s*[.)]\s*([A-Da-d])\b/g;
-  let m;
-  while ((m = dotPattern.exec(ocrText)) !== null) {
-    const num = parseInt(m[1]).toString();
-    const ans = m[2].toUpperCase();
-    if (!answers[num]) answers[num] = ans;
+  // Format 2: "1. (4)" — number 1-4 in parens meaning option choice
+  // Ignore values > 4 (those are integer answers like (34), (216))
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([1-4])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = NUM_TO_LETTER[m[2]];
+  }
+
+  // Format 3: "1 A", "31 B" — bare letter after number (table format)
+  for (const line of cleaned.split('\n')) {
+    const t = line.trim();
+    if (!t || skipLine.test(t)) continue;
+    // Any whitespace between number and letter
+    for (const m of t.matchAll(/\b(\d{1,3})\s+([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
+    // Stuck together: "1A"
+    for (const m of t.matchAll(/\b(\d{1,3})([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
   }
 
   return answers;
 }
 
-// ── CARD BUILDER ──────────────────────────────────────────────
-
+// ── CARD BUILDER ──────────────────────────────
 function buildPaperCard(paper) {
-  const date = paper.uploadedAt
-    ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
-    : '';
-
+  const date = paper.uploadedAt ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
   const badges = [
     `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
     paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
     paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
     paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
-    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Questions</span>` : '',
+    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Q</span>` : '',
   ].filter(Boolean).join('');
-
   return `
   <div class="paper-card" onclick="window.location.href='viewer.html?id=${paper.id}'">
     <div class="paper-card-header">
@@ -688,14 +566,12 @@ function buildPaperCard(paper) {
     </div>
     <div class="paper-card-footer">
       <span class="paper-card-date">📅 ${date}</span>
-      <button class="btn btn-primary btn-sm"
-        onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
     </div>
   </div>`;
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
-
+// ── TOAST ─────────────────────────────────────
 function showToast(message, type = 'info') {
   const icon = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' }[type] || 'ℹ️';
   const container = document.getElementById('toast-container');
@@ -707,109 +583,117 @@ function showToast(message, type = 'info') {
   setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 350); }, 3500);
 }
 
-// ── UTILITIES ─────────────────────────────────────────────────
-
+// ── UTILS ─────────────────────────────────────
 function escapeHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function formatTime(s) {
   return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 
+
+  function waitFB(cb) { if(window._fb) cb(); else setTimeout(()=>waitFB(cb),80); }
+  async function fbGetAllPapers() {
+    const {db,collection,query,orderBy,getDocs}=window._fb;
+    const snap=await getDocs(query(collection(db,'papers'),orderBy('uploadedAt','desc')));
+    return snap.docs.map(d=>d.data());
+  }
+  async function fbGetPaper(id) {
+    const {db,doc,getDoc}=window._fb;
+    const snap=await getDoc(doc(db,'papers',id));
+    return snap.exists()?snap.data():null;
+  }
+  async function fbSavePaper(meta) {
+    const {db,doc,setDoc}=window._fb;
+    await setDoc(doc(db,'papers',meta.id),meta);
+  }
+  async function fbDeletePaper(paper) {
+    const {db,doc,deleteDoc,store,ref,deleteObject}=window._fb;
+    if(paper.qpPath){try{await deleteObject(ref(store,paper.qpPath));}catch(e){}}
+    if(paper.akPath){try{await deleteObject(ref(store,paper.akPath));}catch(e){}}
+    await deleteDoc(doc(db,'papers',paper.id));
+  }
+  async function fbUploadFile(paperId,file,type) {
+    const {store,ref,uploadBytes,getDownloadURL}=window._fb;
+    const ext=file.name.split('.').pop();
+    const path='papers/'+paperId+'/'+type+'.'+ext;
+    const sRef=ref(store,path);
+    await uploadBytes(sRef,file);
+    const url=await getDownloadURL(sRef);
+    return {url,path,name:file.name,mimeType:file.type};
+  }
+
+
+  let currentSort = 'newest', allPapers = [];
+
+  function populateFilters(papers) {
+    const sub  = document.getElementById('filter-subject');
+    const yr   = document.getElementById('filter-year');
+    const brd  = document.getElementById('filter-board');
+    [...new Set(papers.map(p=>p.subject).filter(Boolean))].sort().forEach(s=>sub.insertAdjacentHTML('beforeend',`<option value="${s}">${s}</option>`));
+    [...new Set(papers.map(p=>p.year).filter(Boolean))].sort((a,b)=>b-a).forEach(y=>yr.insertAdjacentHTML('beforeend',`<option value="${y}">${y}</option>`));
+    [...new Set(papers.map(p=>p.board).filter(Boolean))].sort().forEach(b=>brd.insertAdjacentHTML('beforeend',`<option value="${b}">${b}</option>`));
+  }
+
+  function renderPapers() {
+    const q   = document.getElementById('search-input').value.toLowerCase();
+    const sub = document.getElementById('filter-subject').value;
+    const yr  = document.getElementById('filter-year').value;
+    const brd = document.getElementById('filter-board').value;
+    let filtered = allPapers.filter(p => {
+      const t = (p.subject+' '+p.examName+' '+(p.board||'')+' '+(p.description||'')).toLowerCase();
+      return (!q||t.includes(q)) && (!sub||p.subject===sub) && (!yr||p.year===yr) && (!brd||p.board===brd);
+    });
+    if (currentSort==='newest')  filtered.sort((a,b)=>new Date(b.uploadedAt)-new Date(a.uploadedAt));
+    if (currentSort==='oldest')  filtered.sort((a,b)=>new Date(a.uploadedAt)-new Date(b.uploadedAt));
+    if (currentSort==='subject') filtered.sort((a,b)=>a.subject.localeCompare(b.subject));
+    const grid  = document.getElementById('papers-grid');
+    const empty = document.getElementById('empty-state');
+    const meta  = document.getElementById('results-meta');
+    grid.innerHTML = '';
+    if (filtered.length === 0) {
+      empty.style.display = 'block';
+      meta.textContent = '0 papers';
+      document.getElementById('empty-message').textContent = allPapers.length===0 ? 'No papers uploaded yet — be the first!' : 'Try adjusting your filters';
+    } else {
+      empty.style.display = 'none';
+      meta.textContent = filtered.length + ' paper' + (filtered.length!==1?'s':'') + ' found';
+      filtered.forEach(p => grid.insertAdjacentHTML('beforeend', buildPaperCard(p)));
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    waitFB(async () => {
+      try {
+        allPapers = await fbGetAllPapers();
+        document.getElementById('loading-state').style.display = 'none';
+        populateFilters(allPapers);
+        renderPapers();
+      } catch(err) {
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('firebase-error').style.display = 'block';
+        console.error('Firebase error:', err);
+      }
+    });
+
+    document.getElementById('search-input').addEventListener('input', renderPapers);
+    document.getElementById('filter-subject').addEventListener('change', renderPapers);
+    document.getElementById('filter-year').addEventListener('change', renderPapers);
+    document.getElementById('filter-board').addEventListener('change', renderPapers);
+    document.getElementById('clear-filters').addEventListener('click', () => {
+      document.getElementById('search-input').value = '';
+      ['filter-subject','filter-year','filter-board'].forEach(id => document.getElementById(id).value = '');
+      renderPapers();
+    });
+    document.querySelectorAll('.sort-btn').forEach(btn => btn.addEventListener('click', () => {
+      document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSort = btn.dataset.sort;
+      renderPapers();
+    }));
+  });
+
 </script>
-    <script>
-        let currentSort = 'newest';
-        let allPapers = [];
-
-        function populateFilters(papers) {
-            const subjects = [...new Set(papers.map(p => p.subject).filter(Boolean))].sort();
-            const years = [...new Set(papers.map(p => p.year).filter(Boolean))].sort((a, b) => b - a);
-            const boards = [...new Set(papers.map(p => p.board).filter(Boolean))].sort();
-
-            const subSel = document.getElementById('filter-subject');
-            const yearSel = document.getElementById('filter-year');
-            const boardSel = document.getElementById('filter-board');
-
-            subjects.forEach(s => subSel.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
-            years.forEach(y => yearSel.insertAdjacentHTML('beforeend', `<option value="${y}">${y}</option>`));
-            boards.forEach(b => boardSel.insertAdjacentHTML('beforeend', `<option value="${b}">${b}</option>`));
-        }
-
-        function sortPapers(papers) {
-            return [...papers].sort((a, b) => {
-                if (currentSort === 'newest') return new Date(b.uploadedAt) - new Date(a.uploadedAt);
-                if (currentSort === 'oldest') return new Date(a.uploadedAt) - new Date(b.uploadedAt);
-                if (currentSort === 'subject') return a.subject.localeCompare(b.subject);
-                return 0;
-            });
-        }
-
-        function renderPapers() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const subject = document.getElementById('filter-subject').value;
-            const year = document.getElementById('filter-year').value;
-            const board = document.getElementById('filter-board').value;
-
-            let filtered = allPapers.filter(p => {
-                const searchText = `${p.subject} ${p.examName} ${p.board} ${p.description}`.toLowerCase();
-                return (!query || searchText.includes(query))
-                    && (!subject || p.subject === subject)
-                    && (!year || p.year === year)
-                    && (!board || p.board === board);
-            });
-
-            filtered = sortPapers(filtered);
-
-            const grid = document.getElementById('papers-grid');
-            const empty = document.getElementById('empty-state');
-            const meta = document.getElementById('results-meta');
-
-            grid.innerHTML = '';
-
-            if (filtered.length === 0) {
-                empty.style.display = 'block';
-                meta.textContent = '0 papers';
-                const emptyMsg = allPapers.length === 0
-                    ? 'No papers uploaded yet — be the first!'
-                    : 'Try adjusting your filters or search term';
-                document.getElementById('empty-message').textContent = emptyMsg;
-            } else {
-                empty.style.display = 'none';
-                meta.textContent = `${filtered.length} paper${filtered.length !== 1 ? 's' : ''} found`;
-                filtered.forEach(p => grid.insertAdjacentHTML('beforeend', buildPaperCard(p)));
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            allPapers = getPapers();
-            populateFilters(allPapers);
-            renderPapers();
-
-            document.getElementById('search-input').addEventListener('input', renderPapers);
-            document.getElementById('filter-subject').addEventListener('change', renderPapers);
-            document.getElementById('filter-year').addEventListener('change', renderPapers);
-            document.getElementById('filter-board').addEventListener('change', renderPapers);
-
-            document.getElementById('clear-filters').addEventListener('click', () => {
-                document.getElementById('search-input').value = '';
-                document.getElementById('filter-subject').value = '';
-                document.getElementById('filter-year').value = '';
-                document.getElementById('filter-board').value = '';
-                renderPapers();
-            });
-
-            document.querySelectorAll('.sort-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    currentSort = btn.dataset.sort;
-                    renderPapers();
-                });
-            });
-        });
-    </script>
 </body>
-
 </html>
