@@ -328,149 +328,110 @@ footer a:hover { text-decoration: underline; }
 
   .ocr-progress-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:var(--radius);padding:1.5rem;margin-top:1.5rem;display:none;}
   .ocr-progress-box.active{display:block;}
-  .ocr-step{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;font-size:.9rem;color:var(--text-secondary);border-bottom:1px solid var(--border);}
+  .ocr-step{display:flex;align-items:center;gap:.75rem;padding:.55rem 0;font-size:.88rem;color:var(--text-secondary);border-bottom:1px solid var(--border);}
   .ocr-step:last-child{border-bottom:none;}
-  .ocr-step .step-icon{font-size:1.1rem;width:24px;text-align:center;flex-shrink:0;}
-  .ocr-step.done{color:var(--green);} .ocr-step.active{color:var(--accent);} .ocr-step.skip{color:var(--text-muted);}
+  .ocr-step .step-icon{font-size:1rem;width:22px;text-align:center;flex-shrink:0;}
+  .ocr-step.done{color:var(--green);}.ocr-step.active{color:var(--accent);}.ocr-step.skip{color:var(--text-muted);}
   .spin{animation:spin 1s linear infinite;display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .ocr-result-preview{margin-top:1rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:var(--radius-sm);padding:1rem;font-size:.85rem;}
-  .q-count-big{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
   .progress-bar-wrap{width:100%;height:6px;background:rgba(255,255,255,.06);border-radius:3px;margin:.75rem 0;overflow:hidden;}
   .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:3px;transition:width .4s ease;width:0%;}
-  .upload-cloud-step{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:var(--radius-sm);padding:.75rem 1rem;margin-top:.75rem;font-size:.85rem;color:var(--text-secondary);}
-
-  .marking-scheme-box{background:linear-gradient(135deg,rgba(16,185,129,.06),rgba(6,182,212,.04));border:1px solid rgba(16,185,129,.2);border-radius:var(--radius);padding:1.25rem;margin-top:1rem;}
-  .ms-header{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
-  .ms-title{font-weight:700;font-size:.95rem;color:var(--green);}
-  .ms-subtitle{font-size:.82rem;color:var(--text-muted);}
-  .marks-input-wrap{display:flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:rgba(255,255,255,.05);}
-  .marks-sign{padding:0 12px;font-size:1.1rem;font-weight:800;min-width:36px;text-align:center;border-right:1px solid var(--border);}
-  .marks-sign.plus{color:var(--green);background:rgba(16,185,129,.1);}
-  .marks-sign.minus{color:var(--red);background:rgba(244,63,94,.1);}
-  .marks-sign.neutral{color:var(--text-muted);background:rgba(255,255,255,.03);}
-  .marks-input{border:none!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;flex:1;}
-  .marks-hint{font-size:.75rem;color:var(--text-muted);margin-top:4px;}
-  .ms-preview{margin-top:1rem;padding:.75rem 1rem;background:rgba(0,0,0,.2);border-radius:var(--radius-sm);font-size:.88rem;color:var(--text-secondary);}
-  .ms-preview span:first-child{color:var(--text-muted);}
-  #ms-preview-text{font-weight:600;color:var(--text-primary);}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
-  @media(max-width:600px){.grid-3{grid-template-columns:1fr;}}
+  .ocr-result-preview{margin-top:1rem;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:var(--radius-sm);padding:1rem;}
+  .q-count-big{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .marking-scheme-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--radius);padding:1.25rem;margin-top:1rem;}
+  .ms-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.25rem;}
+  .ms-title{font-weight:700;font-size:.95rem;}
+  .ms-subtitle{font-size:.8rem;color:var(--text-muted);}
+  .marks-input-wrap{position:relative;display:flex;align-items:center;}
+  .marks-sign{position:absolute;left:10px;font-weight:900;font-size:1rem;z-index:1;}
+  .marks-sign.plus{color:var(--green);}.marks-sign.minus{color:var(--red);}.marks-sign.neutral{color:var(--text-muted);}
+  .marks-input{padding-left:28px !important;}
+  .marks-hint{font-size:.75rem;color:var(--text-muted);margin-top:.3rem;}
+  .ms-preview{margin-top:.75rem;padding:.6rem 1rem;background:rgba(255,255,255,.04);border-radius:var(--radius-sm);font-size:.85rem;color:var(--text-secondary);}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBezh9TEnrJClfofeeMd-bXeoGiSBPyaYo",
-      authDomain: "paperbase-94ed6.firebaseapp.com",
-      projectId: "paperbase-94ed6",
-      storageBucket: "paperbase-94ed6.firebasestorage.app",
-      messagingSenderId: "168232626521",
-      appId: "1:168232626521:web:dc71365868bb068aa2c448"
-    };
-    const fbApp=initializeApp(FIREBASE_CONFIG);
-    const auth=getAuth(fbApp), db=getFirestore(fbApp), store=getStorage(fbApp);
-    window._fb={auth,db,store,doc,setDoc,getDoc,getDocs,deleteDoc,collection,query,orderBy,ref,uploadBytes,getDownloadURL,deleteObject};
-    onAuthStateChanged(auth,u=>{ if(!u) signInAnonymously(auth).catch(console.error); else window._fbUser=u; });
-  </script>
 </head>
 <body>
 <nav class="navbar">
   <a href="index.html" class="nav-logo"><div class="logo-icon">📚</div>PYQ Portal</a>
-  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="upload.html" class="nav-cta btn btn-sm active">+ Upload Paper</a></div>
+  <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="upload.html" class="active nav-cta btn btn-sm">+ Upload Paper</a></div>
 </nav>
-<div class="page-hero"><div class="container"><h1>⬆️ Upload a Question Paper</h1><p>Upload PDFs — OCR extracts questions, answer key is mapped, exam is published to Firebase for everyone.</p></div></div>
+<div class="page-hero"><div class="container"><h1>⬆️ Upload a Question Paper</h1><p>Upload your PDF — OCR extracts questions and answer key automatically.</p></div></div>
 <section class="section">
   <div class="container"><div style="max-width:760px;margin:0 auto;">
     <form id="upload-form" novalidate>
+
       <div class="card" style="margin-bottom:1.5rem;">
         <h3 style="margin-bottom:1.25rem;font-size:1.05rem;">📋 Paper Details</h3>
         <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
           <div class="form-group"><label class="form-label">Subject *</label><input class="form-input" id="subject" type="text" placeholder="e.g. Mathematics, Physics" required/></div>
-          <div class="form-group"><label class="form-label">Exam / Course Name *</label><input class="form-input" id="exam-name" type="text" placeholder="e.g. JEE Advanced, CBSE Class 12" required/></div>
+          <div class="form-group"><label class="form-label">Exam / Course *</label><input class="form-input" id="exam-name" type="text" placeholder="e.g. JEE Advanced, CBSE Class 12" required/></div>
         </div>
         <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
           <div class="form-group"><label class="form-label">Year *</label><select class="form-select" id="year" required><option value="">Select year</option></select></div>
-          <div class="form-group"><label class="form-label">Board / University</label><input class="form-input" id="board" type="text" placeholder="e.g. NTA, CBSE, Anna University"/></div>
+          <div class="form-group"><label class="form-label">Board / University</label><input class="form-input" id="board" type="text" placeholder="e.g. NTA, CBSE"/></div>
         </div>
         <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
-          <div class="form-group"><label class="form-label">Duration (minutes)</label><input class="form-input" id="duration" type="number" placeholder="180" min="10" max="360" value="180"/></div>
-          <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="description" type="text" placeholder="e.g. Set A, 100 marks"/></div>
+          <div class="form-group"><label class="form-label">Duration (minutes)</label><input class="form-input" id="duration" type="number" value="180" min="10" max="360"/></div>
+          <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="description" type="text" placeholder="e.g. Set A, Paper 1"/></div>
         </div>
         <!-- Marking Scheme -->
         <div class="marking-scheme-box">
-          <div class="ms-header">
-            <span class="ms-title">🎯 Marking Scheme</span>
-            <span class="ms-subtitle">Define how marks are awarded and deducted</span>
-          </div>
+          <div class="ms-header"><span class="ms-title">🎯 Marking Scheme</span><span class="ms-subtitle">Define marks per correct / wrong / skipped</span></div>
           <div class="grid-3" style="gap:1rem;margin-top:1rem;">
             <div class="form-group">
-              <label class="form-label">✅ Marks for Correct</label>
-              <div class="marks-input-wrap">
-                <span class="marks-sign plus">+</span>
-                <input class="form-input marks-input" id="marks-correct" type="number" value="4" min="1" max="100" step="0.5"/>
-              </div>
+              <label class="form-label">✅ Correct</label>
+              <div class="marks-input-wrap"><span class="marks-sign plus">+</span><input class="form-input marks-input" id="marks-correct" type="number" value="4" min="0.5" max="100" step="0.5"/></div>
             </div>
             <div class="form-group">
-              <label class="form-label">❌ Marks for Wrong</label>
-              <div class="marks-input-wrap">
-                <span class="marks-sign minus">−</span>
-                <input class="form-input marks-input" id="marks-wrong" type="number" value="1" min="0" max="100" step="0.25"/>
-              </div>
-              <div class="marks-hint">Enter 0 for no negative marking</div>
+              <label class="form-label">❌ Wrong</label>
+              <div class="marks-input-wrap"><span class="marks-sign minus">−</span><input class="form-input marks-input" id="marks-wrong" type="number" value="1" min="0" max="100" step="0.25"/></div>
+              <div class="marks-hint">0 = no negative marking</div>
             </div>
             <div class="form-group">
-              <label class="form-label">⏭️ Marks for Skipped</label>
-              <div class="marks-input-wrap">
-                <span class="marks-sign neutral">0</span>
-                <input class="form-input marks-input" id="marks-skipped" type="number" value="0" min="-10" max="0" step="0.25"/>
-              </div>
-              <div class="marks-hint">Usually 0</div>
+              <label class="form-label">⏭️ Skipped</label>
+              <div class="marks-input-wrap"><span class="marks-sign neutral">0</span><input class="form-input marks-input" id="marks-skipped" type="number" value="0" min="-10" max="0" step="0.25"/></div>
             </div>
           </div>
           <div class="ms-preview" id="ms-preview">
-            <span>📊 Preview: </span><span id="ms-preview-text"></span>
+            <span>📊 </span><span id="ms-preview-text">+4 correct &nbsp;|&nbsp; −1 wrong &nbsp;|&nbsp; 0 skipped</span>
           </div>
         </div>
-        <div class="form-group" style="margin-top:1rem;">
-          <label class="form-label">Total Marks</label>
-          <input class="form-input" id="total-marks" type="number" placeholder="Auto-calculated or enter manually" min="1"/>
-          <div class="marks-hint" id="total-marks-hint"></div>
-        </div>
       </div>
+
       <div class="card" style="margin-bottom:1.5rem;">
         <h3 style="margin-bottom:.4rem;font-size:1.05rem;">📄 Question Paper *</h3>
-        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">PDF or image. OCR will extract all MCQ questions automatically. Max 30 MB.</p>
+        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">PDF or image. OCR will extract all MCQ questions. Max 30 MB.</p>
         <div class="dropzone" id="qp-drop" onclick="document.getElementById('qp-file').click()">
           <span class="dz-icon">📄</span><div class="dz-label">Drop question paper here</div><div class="dz-sub">or click to browse · PDF, JPG, PNG</div>
           <input type="file" id="qp-file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none"/>
           <div class="dz-preview" id="qp-preview" style="display:none;"><span>✅</span><span class="dz-preview-name" id="qp-name"></span><button type="button" class="btn btn-ghost btn-sm" onclick="clearFile(event,'qp')">✕</button></div>
         </div>
       </div>
+
       <div class="card" style="margin-bottom:1.5rem;">
         <h3 style="margin-bottom:.4rem;font-size:1.05rem;">🔑 Answer Key <span style="color:var(--text-muted);font-weight:400;">(optional)</span></h3>
-        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">OCR reads the answer table — enables auto-grading after students submit.</p>
+        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">OCR reads the answer table — enables auto-grading.</p>
         <div class="dropzone" id="ak-drop" onclick="document.getElementById('ak-file').click()">
           <span class="dz-icon">🔑</span><div class="dz-label">Drop answer key here</div><div class="dz-sub">or click to browse · PDF, JPG, PNG</div>
           <input type="file" id="ak-file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none"/>
           <div class="dz-preview" id="ak-preview" style="display:none;"><span>✅</span><span class="dz-preview-name" id="ak-name"></span><button type="button" class="btn btn-ghost btn-sm" onclick="clearFile(event,'ak')">✕</button></div>
         </div>
       </div>
+
       <div class="ocr-progress-box" id="ocr-box">
         <h3 style="font-size:1rem;margin-bottom:1rem;">🤖 Processing…</h3>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="ocr-bar"></div></div>
         <div id="ocr-steps"></div>
-        <div style="font-size:.8rem;color:var(--text-muted);margin-top:.25rem;" id="ocr-msg"></div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:.25rem;" id="ocr-msg"></div>
         <div class="ocr-result-preview" id="ocr-result" style="display:none;"></div>
       </div>
+
       <div style="display:flex;justify-content:flex-end;gap:1rem;margin-top:1.5rem;">
         <a href="browse.html" class="btn btn-outline">Cancel</a>
         <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
-          <span id="submit-text">🚀 Process &amp; Publish</span>
+          <span id="submit-text">🚀 Process &amp; Save</span>
           <span id="submit-loader" style="display:none;" class="spin">⏳</span>
         </button>
       </div>
@@ -483,7 +444,7 @@ footer a:hover { text-decoration: underline; }
 /**
  * PYQ Portal — Core Shared Logic v3
  * OCR, parsers, card builder, toast, utils.
- * Firebase calls are handled inline in each page.
+ * Data stored in localStorage.
  */
 
 // ── PDF → IMAGES ──────────────────────────────
@@ -506,31 +467,10 @@ async function pdfToImages(file, onProgress) {
 }
 
 // ── OCR ───────────────────────────────────────
-// ── Tesseract.js v5/v6 — single worker, reused across all pages ──────
-// Worker is created once, all pages run through it, then terminated.
-// Per official docs: "create a worker once, run worker.recognize for
-// each image, and then run worker.terminate() once at the end"
-let _ocrWorker = null;
-
-async function getOcrWorker(onProgress) {
-  if (_ocrWorker) return _ocrWorker;
-  _ocrWorker = await Tesseract.createWorker('eng', 1, {
-    logger: m => {
-      if (onProgress && m.status === 'recognizing text') {
-        onProgress(`OCR: ${Math.round(m.progress * 100)}%`);
-      }
-    }
-  });
-  return _ocrWorker;
-}
-
-async function terminateOcrWorker() {
-  if (_ocrWorker) { await _ocrWorker.terminate(); _ocrWorker = null; }
-}
-
-async function ocrImageData(imageData, onProgress) {
-  const worker = await getOcrWorker(onProgress);
+async function ocrImageData(imageData) {
+  const worker = await Tesseract.createWorker('eng');
   const { data: { text } } = await worker.recognize(imageData);
+  await worker.terminate();
   return text;
 }
 
@@ -625,21 +565,7 @@ function parseQuestions(ocrText) {
 }
 
 // ── ANSWER KEY PARSER ─────────────────────────
-async function extractPdfText(file) {
-  const pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let fullText = '';
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    fullText += content.items.map(item => item.str).join('\n') + '\n';
-  }
-  return fullText;
-}
-
-  function parseAnswerKey(ocrText) {
+function parseAnswerKey(ocrText) {
   const answers = {};
   const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
   const skipLine = /^(SI|No\.|Key|Answer|Serial|Sl\.)/i;
@@ -726,247 +652,217 @@ function formatTime(s) {
 }
 
 
-  function waitFB(cb) { if(window._fb) cb(); else setTimeout(()=>waitFB(cb),80); }
-  async function fbGetAllPapers() {
-    const {db,collection,query,orderBy,getDocs}=window._fb;
-    const snap=await getDocs(query(collection(db,'papers'),orderBy('uploadedAt','desc')));
-    return snap.docs.map(d=>d.data());
+  function lsGetAllPapers() {
+    try { return JSON.parse(localStorage.getItem('pyq_papers') || '[]'); } catch(e) { return []; }
   }
-  async function fbGetPaper(id) {
-    const {db,doc,getDoc}=window._fb;
-    const snap=await getDoc(doc(db,'papers',id));
-    return snap.exists()?snap.data():null;
+  function lsGetPaper(id) { return lsGetAllPapers().find(p => p.id === id) || null; }
+  function lsSavePaper(meta) {
+    const papers = lsGetAllPapers().filter(p => p.id !== meta.id);
+    papers.unshift(meta);
+    localStorage.setItem('pyq_papers', JSON.stringify(papers));
   }
-  async function fbSavePaper(meta) {
-    const {db,doc,setDoc}=window._fb;
-    await setDoc(doc(db,'papers',meta.id),meta);
-  }
-  async function fbDeletePaper(paper) {
-    const {db,doc,deleteDoc,store,ref,deleteObject}=window._fb;
-    if(paper.qpPath){try{await deleteObject(ref(store,paper.qpPath));}catch(e){}}
-    if(paper.akPath){try{await deleteObject(ref(store,paper.akPath));}catch(e){}}
-    await deleteDoc(doc(db,'papers',paper.id));
-  }
-  async function fbUploadFile(paperId,file,type) {
-    const {store,ref,uploadBytes,getDownloadURL}=window._fb;
-    const ext=file.name.split('.').pop();
-    const path='papers/'+paperId+'/'+type+'.'+ext;
-    const sRef=ref(store,path);
-    await uploadBytes(sRef,file);
-    const url=await getDownloadURL(sRef);
-    return {url,path,name:file.name,mimeType:file.type};
+  function lsDeletePaper(id) {
+    localStorage.setItem('pyq_papers', JSON.stringify(lsGetAllPapers().filter(p => p.id !== id)));
   }
 
 
-  let qpFile=null, akFile=null;
+  let qpFile = null, akFile = null;
+  let _ocrWorker = null;
 
-  function setupDZ(dropId,inputId,type) {
-    const drop=document.getElementById(dropId), input=document.getElementById(inputId);
-    input.addEventListener('change',()=>handleFile(input.files[0],type));
-    drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag-over');});
-    drop.addEventListener('dragleave',()=>drop.classList.remove('drag-over'));
-    drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag-over');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0],type);});
+  async function getOcrWorker(onProgress) {
+    if (_ocrWorker) return _ocrWorker;
+    _ocrWorker = await Tesseract.createWorker('eng', 1, {
+      logger: m => {
+        if (onProgress && m.status === 'recognizing text')
+          onProgress('OCR: ' + Math.round(m.progress * 100) + '%');
+      }
+    });
+    return _ocrWorker;
   }
-  function handleFile(file,type) {
-    if(!file) return;
-    if(file.size>30*1024*1024){showToast('File too large (max 30 MB)','error');return;}
-    if(!['application/pdf','image/jpeg','image/png','image/webp'].includes(file.type)){showToast('Unsupported file type','error');return;}
-    if(type==='qp') qpFile=file; else akFile=file;
+  async function terminateOcrWorker() {
+    if (_ocrWorker) { await _ocrWorker.terminate(); _ocrWorker = null; }
+  }
+  async function ocrImageData(imageData, onProgress) {
+    const worker = await getOcrWorker(onProgress);
+    const { data: { text } } = await worker.recognize(imageData);
+    return text;
+  }
+
+  function setupDZ(dropId, inputId, type) {
+    const drop = document.getElementById(dropId), input = document.getElementById(inputId);
+    input.addEventListener('change', () => handleFile(input.files[0], type));
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag-over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], type); });
+  }
+  function handleFile(file, type) {
+    if (!file) return;
+    if (file.size > 30*1024*1024) { showToast('File too large (max 30 MB)', 'error'); return; }
+    if (type === 'qp') qpFile = file; else akFile = file;
     document.getElementById(type+'-drop').classList.add('has-file');
-    document.getElementById(type+'-preview').style.display='flex';
-    document.getElementById(type+'-name').textContent=file.name+' ('+(file.size/1024).toFixed(0)+' KB)';
+    document.getElementById(type+'-preview').style.display = 'flex';
+    document.getElementById(type+'-name').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
   }
-  function clearFile(e,type) {
+  function clearFile(e, type) {
     e.stopPropagation();
-    if(type==='qp'){qpFile=null;document.getElementById('qp-file').value='';}
-    else{akFile=null;document.getElementById('ak-file').value='';}
+    if (type === 'qp') { qpFile = null; document.getElementById('qp-file').value = ''; }
+    else { akFile = null; document.getElementById('ak-file').value = ''; }
     document.getElementById(type+'-drop').classList.remove('has-file');
-    document.getElementById(type+'-preview').style.display='none';
+    document.getElementById(type+'-preview').style.display = 'none';
   }
 
-  const STEPS=[
-    {id:'s1',label:'Rendering question paper'},
-    {id:'s2',label:'OCR: Reading questions'},
-    {id:'s3',label:'Parsing MCQ questions'},
-    {id:'s4',label:'Rendering answer key'},
-    {id:'s5',label:'OCR: Reading answer key'},
-    {id:'s6',label:'Mapping answers'},
-    {id:'s7',label:'Uploading PDFs to Firebase Storage'},
-    {id:'s8',label:'Saving to Firestore database'},
+  const STEPS = [
+    {id:'s1', label:'Rendering question paper'},
+    {id:'s2', label:'OCR: Reading questions'},
+    {id:'s3', label:'Parsing MCQ questions'},
+    {id:'s4', label:'Rendering answer key'},
+    {id:'s5', label:'OCR: Reading answer key'},
+    {id:'s6', label:'Mapping answers'},
+    {id:'s7', label:'Saving to local storage'},
   ];
   function initOcrUI() {
     document.getElementById('ocr-box').classList.add('active');
-    document.getElementById('ocr-steps').innerHTML=STEPS.map(s=>`<div class="ocr-step" id="${s.id}"><span class="step-icon">⭕</span><span>${s.label}</span></div>`).join('');
-    document.getElementById('ocr-result').style.display='none';
+    document.getElementById('ocr-steps').innerHTML = STEPS.map(s =>
+      `<div class="ocr-step" id="${s.id}"><span class="step-icon">⭕</span><span>${s.label}</span></div>`
+    ).join('');
+    document.getElementById('ocr-result').style.display = 'none';
   }
-  function setStep(id,state,detail) {
-    const el=document.getElementById(id); if(!el) return;
-    const icons={pending:'⭕',active:'🔄',done:'✅',error:'❌',skip:'⏭️'};
-    el.className='ocr-step '+(state==='pending'?'':state);
-    el.querySelector('.step-icon').textContent=icons[state]||'⭕';
-    if(detail) document.getElementById('ocr-msg').textContent=detail;
-    const done=document.querySelectorAll('.ocr-step.done,.ocr-step.skip').length;
-    document.getElementById('ocr-bar').style.width=(done/STEPS.length*100)+'%';
-  }
-
-  function updateMarkingPreview() {
-    const c = parseFloat(document.getElementById('marks-correct').value)||4;
-    const w = parseFloat(document.getElementById('marks-wrong').value)||0;
-    const s = parseFloat(document.getElementById('marks-skipped').value)||0;
-    const txt = `+${c} correct  |  −${w} wrong  |  ${s>=0?'+':''}${s} skipped`;
-    document.getElementById('ms-preview-text').textContent = txt;
-    // Auto-calculate total marks hint
-    const hint = document.getElementById('total-marks-hint');
-    hint.textContent = '';
+  function setStep(id, state, detail) {
+    const el = document.getElementById(id); if (!el) return;
+    const icons = {pending:'⭕', active:'🔄', done:'✅', error:'❌', skip:'⏭️'};
+    el.className = 'ocr-step ' + (state === 'pending' ? '' : state);
+    el.querySelector('.step-icon').textContent = icons[state] || '⭕';
+    if (detail) document.getElementById('ocr-msg').textContent = detail;
+    const done = document.querySelectorAll('.ocr-step.done,.ocr-step.skip').length;
+    document.getElementById('ocr-bar').style.width = (done / STEPS.length * 100) + '%';
   }
 
-  function autoCalcTotal(qCount) {
-    const c = parseFloat(document.getElementById('marks-correct').value)||4;
-    const totalInput = document.getElementById('total-marks');
-    if (!totalInput.value) {
-      totalInput.value = qCount * c;
-      document.getElementById('total-marks-hint').textContent =
-        `Auto-calculated: ${qCount} questions × ${c} marks = ${qCount*c}`;
-    }
+  function updateMsPreview() {
+    const c = parseFloat(document.getElementById('marks-correct').value) || 4;
+    const w = parseFloat(document.getElementById('marks-wrong').value) || 0;
+    const s = parseFloat(document.getElementById('marks-skipped').value) || 0;
+    document.getElementById('ms-preview-text').textContent =
+      '+' + c + ' correct\u00a0\u00a0|\u00a0\u00a0\u2212' + w + ' wrong\u00a0\u00a0|\u00a0\u00a0' + s + ' skipped';
   }
 
-  document.addEventListener('DOMContentLoaded',()=>{
-    const sel=document.getElementById('year');
-    for(let y=2026;y>=2000;y--) sel.insertAdjacentHTML('beforeend',`<option value="${y}">${y}</option>`);
+  document.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('year');
+    for (let y = 2026; y >= 2000; y--) sel.insertAdjacentHTML('beforeend', `<option value="${y}">${y}</option>`);
     setupDZ('qp-drop','qp-file','qp');
     setupDZ('ak-drop','ak-file','ak');
-    updateMarkingPreview();
-    ['marks-correct','marks-wrong','marks-skipped'].forEach(id=>
-      document.getElementById(id).addEventListener('input', updateMarkingPreview));
+    ['marks-correct','marks-wrong','marks-skipped'].forEach(id =>
+      document.getElementById(id).addEventListener('input', updateMsPreview));
+    updateMsPreview();
   });
 
   document.getElementById('upload-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    const subject=document.getElementById('subject').value.trim();
-    const examName=document.getElementById('exam-name').value.trim();
-    const year=document.getElementById('year').value;
-    const duration=parseInt(document.getElementById('duration').value)||180;
-    if(!subject){showToast('Please enter a subject','error');return;}
-    if(!examName){showToast('Please enter exam name','error');return;}
-    if(!year){showToast('Please select a year','error');return;}
-    if(!qpFile){showToast('Please upload the question paper','error');return;}
+    const subject  = document.getElementById('subject').value.trim();
+    const examName = document.getElementById('exam-name').value.trim();
+    const year     = document.getElementById('year').value;
+    const duration = parseInt(document.getElementById('duration').value) || 180;
+    const marksCorrect = parseFloat(document.getElementById('marks-correct').value) || 4;
+    const marksWrong   = parseFloat(document.getElementById('marks-wrong').value) || 0;
+    const marksSkipped = parseFloat(document.getElementById('marks-skipped').value) || 0;
 
-    document.getElementById('submit-text').style.display='none';
-    document.getElementById('submit-loader').style.display='inline';
-    document.getElementById('submit-btn').disabled=true;
+    if (!subject)  { showToast('Please enter a subject', 'error'); return; }
+    if (!examName) { showToast('Please enter exam name', 'error'); return; }
+    if (!year)     { showToast('Please select a year', 'error'); return; }
+    if (!qpFile)   { showToast('Please upload the question paper', 'error'); return; }
+
+    document.getElementById('submit-text').style.display = 'none';
+    document.getElementById('submit-loader').style.display = 'inline';
+    document.getElementById('submit-btn').disabled = true;
     initOcrUI();
 
     try {
-      // OCR question paper
-      setStep('s1','active');
-      let qpText='';
-      const qpImages = await pdfToImages(qpFile, msg=>setStep('s1','active',msg));
-      setStep('s1','done');
-      setStep('s2','active',`OCR: loading engine…`);
-      for(let i=0;i<qpImages.length;i++){
-        setStep('s2','active',`OCR page ${i+1} of ${qpImages.length}…`);
+      // ── Render + OCR question paper ──
+      setStep('s1', 'active');
+      const qpImages = await pdfToImages(qpFile, msg => setStep('s1', 'active', msg));
+      setStep('s1', 'done');
+
+      setStep('s2', 'active', 'Loading OCR engine…');
+      let qpText = '';
+      for (let i = 0; i < qpImages.length; i++) {
+        setStep('s2', 'active', 'Page ' + (i+1) + '/' + qpImages.length + '…');
         qpText += await ocrImageData(qpImages[i],
-          msg => setStep('s2','active',`Page ${i+1}/${qpImages.length} — ${msg}`)
+          msg => setStep('s2', 'active', 'Page ' + (i+1) + '/' + qpImages.length + ' — ' + msg)
         ) + '\n\n';
       }
-      setStep('s2','done');
-      setStep('s3','active','Parsing questions…');
-      const questions=parseQuestions(qpText);
-      setStep('s3','done',`Found ${questions.length} questions`);
+      setStep('s2', 'done');
 
-      // OCR answer key
-      let answerKey={};
-      if(akFile){
-        setStep('s4','active','Reading answer key PDF…');
-        let akText='';
-        if (akFile.type === 'application/pdf') {
-          akText = await extractPdfText(akFile);
-          setStep('s4','done');
-          setStep('s5','skip','PDF text extracted directly');
-        } else {
-          const akImages = await pdfToImages(akFile, msg=>setStep('s4','active',msg));
-          setStep('s4','done');
-          setStep('s5','active');
-          setStep('s5','active','OCR: reading answer key…');
-          for(let i=0;i<akImages.length;i++){
-            setStep('s5','active',`AK page ${i+1} of ${akImages.length}…`);
-            akText += await ocrImageData(akImages[i],
-              msg => setStep('s5','active',`AK page ${i+1}/${akImages.length} — ${msg}`)
-            ) + '\n\n';
-          }
-          setStep('s5','done');
+      setStep('s3', 'active', 'Parsing questions…');
+      const questions = parseQuestions(qpText);
+      setStep('s3', 'done', 'Found ' + questions.length + ' questions');
+
+      // ── Render + OCR answer key ──
+      let answerKey = {};
+      if (akFile) {
+        setStep('s4', 'active');
+        const akImages = await pdfToImages(akFile, msg => setStep('s4', 'active', msg));
+        setStep('s4', 'done');
+
+        setStep('s5', 'active', 'Reading answer key…');
+        let akText = '';
+        for (let i = 0; i < akImages.length; i++) {
+          setStep('s5', 'active', 'AK page ' + (i+1) + '/' + akImages.length + '…');
+          akText += await ocrImageData(akImages[i],
+            msg => setStep('s5', 'active', 'AK page ' + (i+1) + '/' + akImages.length + ' — ' + msg)
+          ) + '\n\n';
         }
-        setStep('s6','active','Mapping answers...');
-        answerKey=parseAnswerKey(akText);
-        setStep('s6','done',`Matched ${questions.filter(q=>answerKey[String(q.number)]).length}/${questions.length} answers`);
+        setStep('s5', 'done');
+
+        setStep('s6', 'active', 'Mapping answers…');
+        answerKey = parseAnswerKey(akText);
+        const matched = questions.filter(q => answerKey[q.number.toString()]).length;
+        setStep('s6', 'done', 'Matched ' + matched + '/' + questions.length + ' answers');
       } else {
-        setStep('s4','skip'); setStep('s5','skip'); setStep('s6','skip');
+        setStep('s4', 'skip'); setStep('s5', 'skip'); setStep('s6', 'skip');
       }
 
-      // Upload to Firebase
-      const id=Date.now().toString();
-      const marksCorrect = parseFloat(document.getElementById('marks-correct').value)||4;
-      const marksWrong   = parseFloat(document.getElementById('marks-wrong').value)||0;
-      const marksSkipped = parseFloat(document.getElementById('marks-skipped').value)||0;
-      const totalMarks   = parseFloat(document.getElementById('total-marks').value)||(questions.length*marksCorrect);
-      autoCalcTotal(questions.length);
-      const meta={
-        id, subject, examName, year, duration,
-        board:document.getElementById('board').value.trim(),
-        description:document.getElementById('description').value.trim(),
-        hasAnswerKey:!!akFile, hasExam:questions.length>0,
-        questionCount:questions.length, questions, answerKey,
-        markingScheme:{ correct:marksCorrect, wrong:marksWrong, skipped:marksSkipped, total:totalMarks },
-        uploadedAt:new Date().toISOString(),
-        uploadedBy: window._fbUser ? window._fbUser.uid : 'anonymous'
-      };
-
-      // Terminate OCR worker now that all recognition is done
       await terminateOcrWorker();
-      setStep('s7','active','Uploading PDFs to Firebase Storage…');
-      await waitFB(async ()=>{});
-      const qpInfo=await fbUploadFile(id,qpFile,'qp');
-      meta.qpUrl=qpInfo.url; meta.qpPath=qpInfo.path; meta.qpName=qpInfo.name; meta.qpType=qpInfo.mimeType;
-      if(akFile){
-        const akInfo=await fbUploadFile(id,akFile,'ak');
-        meta.akUrl=akInfo.url; meta.akPath=akInfo.path; meta.akName=akInfo.name; meta.akType=akInfo.mimeType;
-      }
-      setStep('s7','done');
 
-      setStep('s8','active','Saving to Firestore…');
-      await fbSavePaper(meta);
-      setStep('s8','done');
-      document.getElementById('ocr-bar').style.width='100%';
+      // ── Save to localStorage ──
+      setStep('s7', 'active', 'Saving…');
+      const id = Date.now().toString();
+      const totalMarks = questions.length * marksCorrect;
+      const meta = {
+        id, subject, examName, year, duration,
+        board: document.getElementById('board').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        hasAnswerKey: !!akFile,
+        hasExam: questions.length > 0,
+        questionCount: questions.length,
+        questions, answerKey,
+        markingScheme: { correct: marksCorrect, wrong: marksWrong, skipped: marksSkipped, total: totalMarks },
+        uploadedAt: new Date().toISOString()
+      };
+      lsSavePaper(meta);
+      setStep('s7', 'done');
+      document.getElementById('ocr-bar').style.width = '100%';
 
-      const resultEl=document.getElementById('ocr-result');
-      resultEl.style.display='block';
-      resultEl.innerHTML=`
-        <h4 style="margin-bottom:.75rem;">✅ Published to Firebase!</h4>
+      const resultEl = document.getElementById('ocr-result');
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = `
+        <h4 style="margin-bottom:.75rem;">✅ Saved successfully!</h4>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center;">
           <div><div class="q-count-big">${questions.length}</div><div style="font-size:.8rem;color:var(--text-muted);">Questions</div></div>
           <div><div class="q-count-big">${Object.keys(answerKey).length}</div><div style="font-size:.8rem;color:var(--text-muted);">Answers Mapped</div></div>
           <div><div class="q-count-big">${duration}m</div><div style="font-size:.8rem;color:var(--text-muted);">Duration</div></div>
         </div>`;
 
-      showToast('Paper published to Firebase! 🎉','success');
-      setTimeout(()=>window.location.href='viewer.html?id='+id, 2000);
+      showToast('Paper saved! Redirecting…', 'success');
+      setTimeout(() => window.location.href = 'viewer.html?id=' + id, 1800);
 
     } catch(err) {
-      await terminateOcrWorker(); // clean up worker on error
+      await terminateOcrWorker();
       console.error(err);
-      showToast('Error: '+(err.message||'Unknown error'),'error');
-      document.getElementById('submit-text').style.display='inline';
-      document.getElementById('submit-loader').style.display='none';
-      document.getElementById('submit-btn').disabled=false;
+      showToast('Error: ' + (err.message || 'Unknown error'), 'error');
+      document.getElementById('submit-text').style.display = 'inline';
+      document.getElementById('submit-loader').style.display = 'none';
+      document.getElementById('submit-btn').disabled = false;
     }
   });
-
-  async function waitFB(cb) {
-    return new Promise(resolve=>{
-      function check(){if(window._fb){cb&&cb();resolve();}else setTimeout(check,80);}
-      check();
-    });
-  }
 
 </script>
 </body>

@@ -987,23 +987,6 @@ footer a:hover { text-decoration: underline; }
     .marks-breakdown{margin-top:.75rem;font-size:.82rem;color:var(--text-muted);display:flex;justify-content:center;gap:1.25rem;flex-wrap:wrap;}
     .marks-breakdown span{display:inline-flex;align-items:center;gap:4px;}
 </style>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBezh9TEnrJClfofeeMd-bXeoGiSBPyaYo",
-      authDomain: "paperbase-94ed6.firebaseapp.com",
-      projectId: "paperbase-94ed6",
-      storageBucket: "paperbase-94ed6.firebasestorage.app",
-      messagingSenderId: "168232626521",
-      appId: "1:168232626521:web:dc71365868bb068aa2c448"
-    };
-    const fbApp=initializeApp(FIREBASE_CONFIG);
-    const auth=getAuth(fbApp), db=getFirestore(fbApp);
-    window._fb={auth,db,doc,getDoc};
-    onAuthStateChanged(auth,u=>{ if(!u) signInAnonymously(auth).catch(console.error); else window._fbUser=u; });
-  </script>
 </head>
 <body>
 <nav class="navbar">
@@ -1151,7 +1134,226 @@ footer a:hover { text-decoration: underline; }
 /**
  * PYQ Portal — Core Shared Logic v3
  * OCR, parsers, card builder, toast, utils.
- * Firebase calls are handled inline in each page.
+ * Data stored in localStorage.
+ */
+
+// ── PDF → IMAGES ──────────────────────────────
+async function pdfToImages(file, onProgress) {
+  const pdfjsLib = window['pdfjs-dist/build/pdf'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const images = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 2.5 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    images.push(canvas.toDataURL('image/png'));
+  }
+  return images;
+}
+
+// ── OCR ───────────────────────────────────────
+async function ocrImageData(imageData) {
+  const worker = await Tesseract.createWorker('eng');
+  const { data: { text } } = await worker.recognize(imageData);
+  await worker.terminate();
+  return text;
+}
+
+// ── QUESTION PARSER ───────────────────────────
+function parseQuestions(ocrText) {
+  const questions = [];
+  const lines = ocrText.split('\n');
+  let currentQ = null;
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
+
+  // Patterns — handles both "Q1." prefix and bare "1." numbered styles
+  const qStartQ     = /^Q(\d{1,3})[.)]\s+(.+)/i;
+  const qStartN     = /^(\d{1,3})[.)]\s+(.+)/;
+  const optNumParen = /^\(([1-4])\)\s+(.+)/;           // "(1) text"
+  const optLetParen = /^\(([A-Da-d])\)\s+(.+)/;        // "(A) text"
+  const optLetBare  = /^([A-Da-d])[.)]\s+(.+)/;        // "A) text" or "A. text"
+  // Two options on one line: "(1) 628    (2) 812"
+  const twoOpts     = /\(([1-4])\)\s+(.+?)\s{3,}\(([1-4])\)\s+(.+)/;
+
+  function saveQ() {
+    if (currentQ && Object.keys(currentQ.options).length >= 2 && currentQ.text.length > 5) {
+      questions.push(currentQ);
+    }
+  }
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+
+    // Two options on one line
+    const m2 = line.match(twoOpts);
+    if (m2 && currentQ) {
+      const k1 = NUM_TO_LETTER[m2[1]], k2 = NUM_TO_LETTER[m2[3]];
+      if (k1 && !(k1 in currentQ.options)) currentQ.options[k1] = m2[2].trim();
+      if (k2 && !(k2 in currentQ.options)) currentQ.options[k2] = m2[4].trim();
+      continue;
+    }
+
+    // Q-prefix question: "Q1. text"
+    const mQ = line.match(qStartQ);
+    if (mQ) {
+      saveQ();
+      currentQ = { number: parseInt(mQ[1]), text: mQ[2].trim(), options: {} };
+      continue;
+    }
+
+    // Numbered question: "1. text" (require meaningful length to avoid matching answer lines)
+    const mN = line.match(qStartN);
+    if (mN && parseInt(mN[1]) <= 200) {
+      const rest = mN[2].trim();
+      const looksLikeOpt = /^\([1-4]\)|^[A-D][.)]\s/.test(rest);
+      if (rest.length > 12 && !looksLikeOpt) {
+        saveQ();
+        currentQ = { number: parseInt(mN[1]), text: rest, options: {} };
+        continue;
+      }
+    }
+
+    if (currentQ) {
+      // Option: "(1) text"
+      const mON = line.match(optNumParen);
+      if (mON) {
+        const letter = NUM_TO_LETTER[mON[1]];
+        if (letter && !(letter in currentQ.options)) currentQ.options[letter] = mON[2].trim();
+        continue;
+      }
+      // Option: "(A) text"
+      const mOL = line.match(optLetParen);
+      if (mOL) {
+        const letter = mOL[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOL[2].trim();
+        continue;
+      }
+      // Option: "A) text" or "A. text"
+      const mOB = line.match(optLetBare);
+      if (mOB) {
+        const letter = mOB[1].toUpperCase();
+        if (['A','B','C','D'].includes(letter) && !(letter in currentQ.options))
+          currentQ.options[letter] = mOB[2].trim();
+        continue;
+      }
+      // Continuation of question text (before options arrive)
+      if (Object.keys(currentQ.options).length === 0 && !/^[(\d]/.test(line)) {
+        currentQ.text += ' ' + line;
+      }
+    }
+  }
+
+  saveQ();
+  return questions.filter(q => q.text.length > 5 && Object.keys(q.options).length >= 2);
+}
+
+// ── ANSWER KEY PARSER ─────────────────────────
+function parseAnswerKey(ocrText) {
+  const answers = {};
+  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
+  const skipLine = /^(SI|No\.|Key|Answer|Serial|Sl\.)/i;
+  const cleaned  = ocrText.replace(/[|\\]/g, ' ');
+
+  // Format 1: "1. (A)" or "1. (a)" — letter in parens
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([A-Da-d])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = m[2].toUpperCase();
+  }
+
+  // Format 2: "1. (4)" — number 1-4 in parens meaning option choice
+  // Ignore values > 4 (those are integer answers like (34), (216))
+  for (const m of cleaned.matchAll(/\b(\d{1,3})[.)]\s*\(([1-4])\)/g)) {
+    const num = String(parseInt(m[1]));
+    if (!answers[num]) answers[num] = NUM_TO_LETTER[m[2]];
+  }
+
+  // Format 3: "1 A", "31 B" — bare letter after number (table format)
+  for (const line of cleaned.split('\n')) {
+    const t = line.trim();
+    if (!t || skipLine.test(t)) continue;
+    // Any whitespace between number and letter
+    for (const m of t.matchAll(/\b(\d{1,3})\s+([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
+    // Stuck together: "1A"
+    for (const m of t.matchAll(/\b(\d{1,3})([ABCDabcd])\b/g)) {
+      const num = String(parseInt(m[1]));
+      if (!answers[num]) answers[num] = m[2].toUpperCase();
+    }
+  }
+
+  return answers;
+}
+
+// ── CARD BUILDER ──────────────────────────────
+function buildPaperCard(paper) {
+  const date = paper.uploadedAt ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '';
+  const badges = [
+    `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
+    paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
+    paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
+    paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
+    paper.questionCount ? `<span class="badge badge-cyan">${paper.questionCount} Q</span>` : '',
+  ].filter(Boolean).join('');
+  return `
+  <div class="paper-card" onclick="window.location.href='viewer.html?id=${paper.id}'">
+    <div class="paper-card-header">
+      <div class="paper-card-title">${escapeHtml(paper.subject)} — ${escapeHtml(paper.examName)}</div>
+      <span class="badge badge-cyan">${escapeHtml(paper.year || '')}</span>
+    </div>
+    <div class="paper-card-body">
+      <div class="paper-card-meta">${badges}</div>
+      ${paper.description ? `<p class="paper-card-desc">${escapeHtml(paper.description)}</p>` : ''}
+    </div>
+    <div class="paper-card-footer">
+      <span class="paper-card-date">📅 ${date}</span>
+      <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.location.href='viewer.html?id=${paper.id}'">View →</button>
+    </div>
+  </div>`;
+}
+
+// ── TOAST ─────────────────────────────────────
+function showToast(message, type = 'info') {
+  const icon = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' }[type] || 'ℹ️';
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 350); }, 3500);
+}
+
+// ── UTILS ─────────────────────────────────────
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function formatTime(s) {
+  return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
+
+
+  function lsGetPaper(id) {
+    try {
+      const papers = JSON.parse(localStorage.getItem('pyq_papers') || '[]');
+      return papers.find(p => p.id === id) || null;
+    } catch(e) { return null; }
+  }
+
+
+/**
+ * PYQ Portal — Core Shared Logic v3
+ * OCR, parsers, card builder, toast, utils.
+ * Data stored in localStorage.
  */
 
 // ── PDF → IMAGES ──────────────────────────────
@@ -1363,20 +1565,15 @@ function formatTime(s) {
   let paper = null, questions = [], userAnswers = {}, currentIndex = 0;
   let timerInterval = null, secondsLeft = 0, examSubmitted = false;
 
-  function waitFB(cb) { if(window._fb) cb(); else setTimeout(()=>waitFB(cb),80); }
+  
 
-  async function fbGetPaper(id) {
-    const {db,doc,getDoc}=window._fb;
-    const snap=await getDoc(doc(db,'papers',id));
-    return snap.exists()?snap.data():null;
-  }
+  
 
   // ── Init ──
   document.addEventListener('DOMContentLoaded', () => {
-    waitFB(async () => {
-      const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
-      paper = id ? await fbGetPaper(id) : null;
+      paper = id ? lsGetPaper(id) : null;
 
       if (!paper || !paper.questions || paper.questions.length === 0) {
         document.getElementById('exam-nav-info').textContent = 'Exam not found';
@@ -1410,7 +1607,6 @@ function formatTime(s) {
           '<div style="margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);' +
           'color:var(--text-secondary);font-size:.8rem;">Max: ' + ms.total + ' marks</div>';
       }
-    });
   });
 
   // ── Timer ──
@@ -1613,6 +1809,7 @@ function formatTime(s) {
       </div>`;
     }).join('');
   }
+
 
 </script>
 </body>

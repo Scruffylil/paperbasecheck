@@ -332,38 +332,20 @@ footer a:hover { text-decoration: underline; }
   .sort-btn{font-size:.82rem;padding:5px 12px;}
   .sort-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
 </style>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBezh9TEnrJClfofeeMd-bXeoGiSBPyaYo",
-      authDomain: "paperbase-94ed6.firebaseapp.com",
-      projectId: "paperbase-94ed6",
-      storageBucket: "paperbase-94ed6.firebasestorage.app",
-      messagingSenderId: "168232626521",
-      appId: "1:168232626521:web:dc71365868bb068aa2c448"
-    };
-    const fbApp=initializeApp(FIREBASE_CONFIG);
-    const auth=getAuth(fbApp), db=getFirestore(fbApp), store=getStorage(fbApp);
-    window._fb={auth,db,store,doc,setDoc,getDoc,getDocs,deleteDoc,collection,query,orderBy,ref,uploadBytes,getDownloadURL,deleteObject};
-    onAuthStateChanged(auth,u=>{ if(!u) signInAnonymously(auth).catch(console.error); else window._fbUser=u; });
-  </script>
+  
 </head>
 <body>
 <nav class="navbar">
   <a href="index.html" class="nav-logo"><div class="logo-icon">📚</div>PYQ Portal</a>
   <div class="nav-links"><a href="index.html">Home</a><a href="browse.html" class="active">Browse</a><a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a></div>
 </nav>
-<div class="page-hero"><div class="container"><h1>🔍 Browse Papers</h1><p>All papers stored in Firebase — accessible from anywhere in the world</p></div></div>
+<div class="page-hero"><div class="container"><h1>🔍 Browse Papers</h1><p>All papers saved on this device</p></div></div>
 <section class="section">
   <div class="container">
     <div class="filter-bar">
       <div class="search-bar"><span class="search-icon">🔍</span><input class="form-input" id="search-input" type="text" placeholder="Search by subject, exam, board…"/></div>
       <select class="form-select" id="filter-subject" style="width:auto;"><option value="">All Subjects</option></select>
       <select class="form-select" id="filter-year" style="width:auto;"><option value="">All Years</option></select>
-      <select class="form-select" id="filter-board" style="width:auto;"><option value="">All Boards</option></select>
       <button class="btn btn-outline btn-sm" id="clear-filters">Clear</button>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
@@ -374,12 +356,12 @@ footer a:hover { text-decoration: underline; }
         <button class="btn btn-outline sort-btn" data-sort="subject">Subject</button>
       </div>
     </div>
-    <div id="loading-state" style="text-align:center;padding:3rem;color:var(--text-muted);">
-      <div style="font-size:2rem;">⏳</div><p style="margin-top:.5rem;">Loading from Firebase…</p>
-    </div>
     <div class="grid-auto" id="papers-grid"></div>
-    <div id="empty-state" class="empty-state" style="display:none;"><div class="empty-icon">📭</div><h3>No papers found</h3><p id="empty-message">Try adjusting your filters</p></div>
-    <div id="firebase-error" class="empty-state" style="display:none;"><div class="empty-icon">🔥</div><h3>Firebase not configured</h3><p>Add your Firebase config values to the HTML files.</p></div>
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div class="empty-icon">📭</div><h3>No papers found</h3>
+      <p id="empty-message">Try adjusting your filters or upload a paper</p>
+      <br><a href="upload.html" class="btn btn-primary">Upload Paper</a>
+    </div>
   </div>
 </section>
 <footer><div class="container"><p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="upload.html">Upload</a></p></div></footer>
@@ -388,7 +370,7 @@ footer a:hover { text-decoration: underline; }
 /**
  * PYQ Portal — Core Shared Logic v3
  * OCR, parsers, card builder, toast, utils.
- * Firebase calls are handled inline in each page.
+ * Data stored in localStorage.
  */
 
 // ── PDF → IMAGES ──────────────────────────────
@@ -596,97 +578,65 @@ function formatTime(s) {
 }
 
 
-  function waitFB(cb) { if(window._fb) cb(); else setTimeout(()=>waitFB(cb),80); }
-  async function fbGetAllPapers() {
-    const {db,collection,query,orderBy,getDocs}=window._fb;
-    const snap=await getDocs(query(collection(db,'papers'),orderBy('uploadedAt','desc')));
-    return snap.docs.map(d=>d.data());
+  function lsGetAllPapers() {
+    try { return JSON.parse(localStorage.getItem('pyq_papers') || '[]'); } catch(e) { return []; }
   }
-  async function fbGetPaper(id) {
-    const {db,doc,getDoc}=window._fb;
-    const snap=await getDoc(doc(db,'papers',id));
-    return snap.exists()?snap.data():null;
+  function lsGetPaper(id) { return lsGetAllPapers().find(p => p.id === id) || null; }
+  function lsSavePaper(meta) {
+    const papers = lsGetAllPapers().filter(p => p.id !== meta.id);
+    papers.unshift(meta);
+    localStorage.setItem('pyq_papers', JSON.stringify(papers));
   }
-  async function fbSavePaper(meta) {
-    const {db,doc,setDoc}=window._fb;
-    await setDoc(doc(db,'papers',meta.id),meta);
-  }
-  async function fbDeletePaper(paper) {
-    const {db,doc,deleteDoc,store,ref,deleteObject}=window._fb;
-    if(paper.qpPath){try{await deleteObject(ref(store,paper.qpPath));}catch(e){}}
-    if(paper.akPath){try{await deleteObject(ref(store,paper.akPath));}catch(e){}}
-    await deleteDoc(doc(db,'papers',paper.id));
-  }
-  async function fbUploadFile(paperId,file,type) {
-    const {store,ref,uploadBytes,getDownloadURL}=window._fb;
-    const ext=file.name.split('.').pop();
-    const path='papers/'+paperId+'/'+type+'.'+ext;
-    const sRef=ref(store,path);
-    await uploadBytes(sRef,file);
-    const url=await getDownloadURL(sRef);
-    return {url,path,name:file.name,mimeType:file.type};
+  function lsDeletePaper(id) {
+    localStorage.setItem('pyq_papers', JSON.stringify(lsGetAllPapers().filter(p => p.id !== id)));
   }
 
 
   let currentSort = 'newest', allPapers = [];
 
   function populateFilters(papers) {
-    const sub  = document.getElementById('filter-subject');
-    const yr   = document.getElementById('filter-year');
-    const brd  = document.getElementById('filter-board');
-    [...new Set(papers.map(p=>p.subject).filter(Boolean))].sort().forEach(s=>sub.insertAdjacentHTML('beforeend',`<option value="${s}">${s}</option>`));
-    [...new Set(papers.map(p=>p.year).filter(Boolean))].sort((a,b)=>b-a).forEach(y=>yr.insertAdjacentHTML('beforeend',`<option value="${y}">${y}</option>`));
-    [...new Set(papers.map(p=>p.board).filter(Boolean))].sort().forEach(b=>brd.insertAdjacentHTML('beforeend',`<option value="${b}">${b}</option>`));
+    const sub = document.getElementById('filter-subject');
+    const yr  = document.getElementById('filter-year');
+    [...new Set(papers.map(p=>p.subject).filter(Boolean))].sort()
+      .forEach(s => sub.insertAdjacentHTML('beforeend', `<option value="${s}">${s}</option>`));
+    [...new Set(papers.map(p=>p.year).filter(Boolean))].sort((a,b)=>b-a)
+      .forEach(y => yr.insertAdjacentHTML('beforeend', `<option value="${y}">${y}</option>`));
   }
 
   function renderPapers() {
     const q   = document.getElementById('search-input').value.toLowerCase();
     const sub = document.getElementById('filter-subject').value;
     const yr  = document.getElementById('filter-year').value;
-    const brd = document.getElementById('filter-board').value;
     let filtered = allPapers.filter(p => {
       const t = (p.subject+' '+p.examName+' '+(p.board||'')+' '+(p.description||'')).toLowerCase();
-      return (!q||t.includes(q)) && (!sub||p.subject===sub) && (!yr||p.year===yr) && (!brd||p.board===brd);
+      return (!q||t.includes(q)) && (!sub||p.subject===sub) && (!yr||p.year===yr);
     });
     if (currentSort==='newest')  filtered.sort((a,b)=>new Date(b.uploadedAt)-new Date(a.uploadedAt));
     if (currentSort==='oldest')  filtered.sort((a,b)=>new Date(a.uploadedAt)-new Date(b.uploadedAt));
     if (currentSort==='subject') filtered.sort((a,b)=>a.subject.localeCompare(b.subject));
     const grid  = document.getElementById('papers-grid');
     const empty = document.getElementById('empty-state');
-    const meta  = document.getElementById('results-meta');
     grid.innerHTML = '';
+    document.getElementById('results-meta').textContent = filtered.length + ' paper' + (filtered.length!==1?'s':'') + ' found';
     if (filtered.length === 0) {
       empty.style.display = 'block';
-      meta.textContent = '0 papers';
-      document.getElementById('empty-message').textContent = allPapers.length===0 ? 'No papers uploaded yet — be the first!' : 'Try adjusting your filters';
+      document.getElementById('empty-message').textContent = allPapers.length===0 ? 'No papers uploaded yet!' : 'Try adjusting your filters';
     } else {
       empty.style.display = 'none';
-      meta.textContent = filtered.length + ' paper' + (filtered.length!==1?'s':'') + ' found';
       filtered.forEach(p => grid.insertAdjacentHTML('beforeend', buildPaperCard(p)));
     }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    waitFB(async () => {
-      try {
-        allPapers = await fbGetAllPapers();
-        document.getElementById('loading-state').style.display = 'none';
-        populateFilters(allPapers);
-        renderPapers();
-      } catch(err) {
-        document.getElementById('loading-state').style.display = 'none';
-        document.getElementById('firebase-error').style.display = 'block';
-        console.error('Firebase error:', err);
-      }
-    });
-
+    allPapers = lsGetAllPapers();
+    populateFilters(allPapers);
+    renderPapers();
     document.getElementById('search-input').addEventListener('input', renderPapers);
     document.getElementById('filter-subject').addEventListener('change', renderPapers);
     document.getElementById('filter-year').addEventListener('change', renderPapers);
-    document.getElementById('filter-board').addEventListener('change', renderPapers);
     document.getElementById('clear-filters').addEventListener('click', () => {
       document.getElementById('search-input').value = '';
-      ['filter-subject','filter-year','filter-board'].forEach(id => document.getElementById(id).value = '');
+      ['filter-subject','filter-year'].forEach(id => document.getElementById(id).value = '');
       renderPapers();
     });
     document.querySelectorAll('.sort-btn').forEach(btn => btn.addEventListener('click', () => {

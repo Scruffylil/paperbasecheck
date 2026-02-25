@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <style>
-/* =========================================================
+  <title>PYQ Portal — Home</title>
+  <style>/* =========================================================
    PYQ PORTAL — Global Design System
    ========================================================= */
 
@@ -325,43 +325,8 @@ footer a:hover { text-decoration: underline; }
 }
 .page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
 .page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
-
-
-  </style>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-
-    // 🔥 REPLACE THESE WITH YOUR FIREBASE PROJECT VALUES
-    // Get them from: https://console.firebase.google.com → Project Settings → Web App
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBezh9TEnrJClfofeeMd-bXeoGiSBPyaYo",
-      authDomain: "paperbase-94ed6.firebaseapp.com",
-      projectId: "paperbase-94ed6",
-      storageBucket: "paperbase-94ed6.firebasestorage.app",
-      messagingSenderId: "168232626521",
-      appId: "1:168232626521:web:dc71365868bb068aa2c448"
-    };
-
-    const fbApp  = initializeApp(FIREBASE_CONFIG);
-    const auth   = getAuth(fbApp);
-    const db     = getFirestore(fbApp);
-    const store  = getStorage(fbApp);
-
-    // Expose to global scope for use by non-module scripts
-    window._fb = { auth, db, store,
-      doc, setDoc, getDoc, getDocs, deleteDoc, collection, query, orderBy,
-      ref, uploadBytes, getDownloadURL, deleteObject };
-
-    // Sign in anonymously so reads/writes are authenticated
-    onAuthStateChanged(auth, user => {
-      if (!user) signInAnonymously(auth).catch(console.error);
-      else window._fbUser = user;
-    });
-  </script>
-
+</style>
+  
 </head>
 <body>
 <nav class="navbar">
@@ -372,11 +337,10 @@ footer a:hover { text-decoration: underline; }
     <a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a>
   </div>
 </nav>
-
 <section class="hero">
   <div class="hero-glow"></div>
   <div class="container">
-    <div class="hero-badge">🎓 Student-Powered Question Bank</div>
+    <div class="hero-badge">🎓 Local Question Bank</div>
     <h1 class="hero-title">Master Your Exams with<br><span class="gradient">Previous Year Papers</span></h1>
     <p class="hero-sub">Upload PDFs — OCR extracts every MCQ automatically and generates an online exam with instant auto-grading.</p>
     <div class="hero-actions">
@@ -385,38 +349,28 @@ footer a:hover { text-decoration: underline; }
     </div>
   </div>
 </section>
-
 <section class="section" style="padding-top:0;">
   <div class="container">
     <div class="grid-4">
-      <div class="card stat-card card-glow"><div class="stat-num" id="stat-papers">—</div><div class="stat-label">Papers Online</div></div>
+      <div class="card stat-card card-glow"><div class="stat-num" id="stat-papers">—</div><div class="stat-label">Papers Saved</div></div>
       <div class="card stat-card card-glow"><div class="stat-num" id="stat-subjects">—</div><div class="stat-label">Subjects</div></div>
       <div class="card stat-card card-glow"><div class="stat-num" id="stat-exams">—</div><div class="stat-label">Online Exams</div></div>
       <div class="card stat-card card-glow"><div class="stat-num">100%</div><div class="stat-label">Free Forever</div></div>
     </div>
   </div>
 </section>
-
 <section class="section">
   <div class="container">
     <h2 class="section-title">🕐 Recently Uploaded</h2>
-    <p class="section-sub">Latest papers from the community — available to everyone</p>
-    <div id="loading-state" style="text-align:center;padding:2rem;color:var(--text-muted);">
-      <div style="font-size:2rem;">⏳</div><p style="margin-top:.5rem;">Loading from cloud…</p>
-    </div>
+    <p class="section-sub">Papers saved on this device</p>
     <div class="grid-auto" id="recent-papers"></div>
     <div id="recent-empty" class="empty-state" style="display:none;">
       <div class="empty-icon">📋</div><h3>No papers yet</h3>
-      <p>Be the first to upload a PYQ paper!</p><br>
+      <p>Upload your first PYQ paper to get started!</p><br>
       <a href="upload.html" class="btn btn-primary">Upload Now</a>
-    </div>
-    <div id="firebase-error" class="empty-state" style="display:none;">
-      <div class="empty-icon">🔥</div><h3>Firebase not configured yet</h3>
-      <p>Open any HTML file, find <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;">FIREBASE_CONFIG</code> near the top, and paste your project values.</p>
     </div>
   </div>
 </section>
-
 <section class="section" style="background:var(--bg-secondary);">
   <div class="container">
     <h2 class="section-title" style="text-align:center;">How It Works</h2>
@@ -430,49 +384,23 @@ footer a:hover { text-decoration: underline; }
       <div class="card card-glow" style="text-align:center;padding:2rem;">
         <div style="font-size:2.5rem;margin-bottom:1rem;">🤖</div>
         <h3 style="margin-bottom:.5rem;">2. OCR Extracts</h3>
-        <p style="color:var(--text-secondary);font-size:.9rem;">Tesseract OCR reads every question, option A–D, and answer key automatically.</p>
+        <p style="color:var(--text-secondary);font-size:.9rem;">Tesseract OCR reads every question, option, and answer key automatically.</p>
       </div>
       <div class="card card-glow" style="text-align:center;padding:2rem;">
         <div style="font-size:2.5rem;margin-bottom:1rem;">🎯</div>
         <h3 style="margin-bottom:.5rem;">3. Take & Get Graded</h3>
-        <p style="color:var(--text-secondary);font-size:.9rem;">Students anywhere take the exam with a live timer and get instant scores.</p>
+        <p style="color:var(--text-secondary);font-size:.9rem;">Take the exam with a live timer and get instant scores with full review.</p>
       </div>
     </div>
   </div>
 </section>
-
 <footer><div class="container"><p>© 2026 PYQ Portal · <a href="browse.html">Browse</a> · <a href="upload.html">Upload</a></p></div></footer>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    waitFB(async () => {
-      try {
-        const papers = await fbGetAllPapers();
-        document.getElementById('loading-state').style.display = 'none';
-        document.getElementById('stat-papers').textContent   = papers.length;
-        document.getElementById('stat-subjects').textContent = new Set(papers.map(p => p.subject)).size;
-        document.getElementById('stat-exams').textContent    = papers.filter(p => p.hasExam).length;
-        const container = document.getElementById('recent-papers');
-        const recent = papers.slice(0, 6);
-        if (recent.length === 0) {
-          document.getElementById('recent-empty').style.display = 'block';
-        } else {
-          recent.forEach(p => container.insertAdjacentHTML('beforeend', buildPaperCard(p)));
-        }
-      } catch(err) {
-        document.getElementById('loading-state').style.display = 'none';
-        document.getElementById('firebase-error').style.display = 'block';
-        console.error('Firebase error:', err);
-      }
-    });
-  });
-</script>
 <div id="toast-container"></div>
 <script>
 /**
  * PYQ Portal — Core Shared Logic v3
  * OCR, parsers, card builder, toast, utils.
- * Firebase calls are handled inline in each page.
+ * Data stored in localStorage.
  */
 
 // ── PDF → IMAGES ──────────────────────────────
@@ -680,47 +608,38 @@ function formatTime(s) {
 }
 
 
-  // ── Wait for Firebase SDK to be ready ────────────────────────
-  function waitFB(cb) {
-    if (window._fb) cb();
-    else setTimeout(() => waitFB(cb), 80);
+  // ── Local Storage DB ─────────────────────────────────────────────
+  function lsGetAllPapers() {
+    try { return JSON.parse(localStorage.getItem('pyq_papers') || '[]'); } catch(e) { return []; }
+  }
+  function lsGetPaper(id) {
+    return lsGetAllPapers().find(p => p.id === id) || null;
+  }
+  function lsSavePaper(meta) {
+    const papers = lsGetAllPapers().filter(p => p.id !== meta.id);
+    papers.unshift(meta);
+    localStorage.setItem('pyq_papers', JSON.stringify(papers));
+  }
+  function lsDeletePaper(id) {
+    const papers = lsGetAllPapers().filter(p => p.id !== id);
+    localStorage.setItem('pyq_papers', JSON.stringify(papers));
   }
 
-  // ── Firestore helpers ─────────────────────────────────────────
-  async function fbGetAllPapers() {
-    const { db, collection, query, orderBy, getDocs } = window._fb;
-    const snap = await getDocs(query(collection(db, 'papers'), orderBy('uploadedAt', 'desc')));
-    return snap.docs.map(d => d.data());
-  }
 
-  async function fbGetPaper(id) {
-    const { db, doc, getDoc } = window._fb;
-    const snap = await getDoc(doc(db, 'papers', id));
-    return snap.exists() ? snap.data() : null;
+document.addEventListener('DOMContentLoaded', () => {
+  const papers = lsGetAllPapers();
+  document.getElementById('stat-papers').textContent   = papers.length;
+  document.getElementById('stat-subjects').textContent = new Set(papers.map(p=>p.subject)).size;
+  document.getElementById('stat-exams').textContent    = papers.filter(p=>p.hasExam).length;
+  const container = document.getElementById('recent-papers');
+  const empty     = document.getElementById('recent-empty');
+  const recent    = papers.slice(0, 6);
+  if (recent.length === 0) {
+    empty.style.display = 'block';
+  } else {
+    recent.forEach(p => container.insertAdjacentHTML('beforeend', buildPaperCard(p)));
   }
-
-  async function fbSavePaper(meta) {
-    const { db, doc, setDoc } = window._fb;
-    await setDoc(doc(db, 'papers', meta.id), meta);
-  }
-
-  async function fbDeletePaper(paper) {
-    const { db, doc, deleteDoc, store, ref, deleteObject } = window._fb;
-    if (paper.qpPath) { try { await deleteObject(ref(store, paper.qpPath)); } catch(e){} }
-    if (paper.akPath) { try { await deleteObject(ref(store, paper.akPath)); } catch(e){} }
-    await deleteDoc(doc(db, 'papers', paper.id));
-  }
-
-  // ── Storage: upload a file, return { url, path, name, mimeType } ──
-  async function fbUploadFile(paperId, file, type) {
-    const { store, ref, uploadBytes, getDownloadURL } = window._fb;
-    const ext  = file.name.split('.').pop();
-    const path = 'papers/' + paperId + '/' + type + '.' + ext;
-    const sRef = ref(store, path);
-    await uploadBytes(sRef, file);
-    const url = await getDownloadURL(sRef);
-    return { url, path, name: file.name, mimeType: file.type };
-  }
+});
 
 </script>
 </body>

@@ -326,44 +326,18 @@ footer a:hover { text-decoration: underline; }
 .page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
 .page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
 
-  .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:.88rem;margin-bottom:1.5rem;}
-  .back-link:hover{color:var(--accent);}
   .paper-title{font-size:1.7rem;font-weight:900;letter-spacing:-.5px;margin-bottom:.25rem;}
-  .viewer-meta{display:flex;flex-wrap:wrap;gap:10px;margin:1rem 0 1.5rem;align-items:center;}
+  .viewer-meta{display:flex;flex-wrap:wrap;gap:10px;margin:1rem 0 1.5rem;}
   .detail-grid{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;}
   .info-row h4{font-size:.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;}
   .info-row p{font-size:.95rem;font-weight:600;}
   .exam-cta-card{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(6,182,212,.06));border:1px solid rgba(59,130,246,.25);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;text-align:center;}
-  .exam-cta-card .big-icon{font-size:2.5rem;margin-bottom:.5rem;}
   .q-preview{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.8rem 1rem;font-size:.85rem;color:var(--text-secondary);margin-bottom:.5rem;line-height:1.5;}
   .q-preview strong{color:var(--text-primary);}
   .q-options-mini{margin-top:.3rem;display:flex;gap:.5rem;flex-wrap:wrap;}
   .q-opt-chip{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:.78rem;}
-  .file-viewer{background:var(--bg-secondary);border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);}
-  .file-viewer iframe{width:100%;height:600px;border:none;display:block;}
-  .file-viewer img{width:100%;height:auto;display:block;}
-  .no-file-msg{text-align:center;padding:3rem;color:var(--text-muted);}
-  .tab-pane2,.tab-pane3{display:none;} .tab-pane2.active,.tab-pane3.active{display:block;}
   @media(max-width:768px){.detail-grid{grid-template-columns:1fr;}}
 </style>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-    const FIREBASE_CONFIG = {
-      apiKey: "AIzaSyBezh9TEnrJClfofeeMd-bXeoGiSBPyaYo",
-      authDomain: "paperbase-94ed6.firebaseapp.com",
-      projectId: "paperbase-94ed6",
-      storageBucket: "paperbase-94ed6.firebasestorage.app",
-      messagingSenderId: "168232626521",
-      appId: "1:168232626521:web:dc71365868bb068aa2c448"
-    };
-    const fbApp=initializeApp(FIREBASE_CONFIG);
-    const auth=getAuth(fbApp), db=getFirestore(fbApp), store=getStorage(fbApp);
-    window._fb={auth,db,store,doc,setDoc,getDoc,getDocs,deleteDoc,collection,query,orderBy,ref,uploadBytes,getDownloadURL,deleteObject};
-    onAuthStateChanged(auth,u=>{ if(!u) signInAnonymously(auth).catch(console.error); else window._fbUser=u; });
-  </script>
 </head>
 <body>
 <nav class="navbar">
@@ -371,22 +345,22 @@ footer a:hover { text-decoration: underline; }
   <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="upload.html" class="nav-cta btn btn-sm">+ Upload Paper</a></div>
 </nav>
 <section class="section">
-  <div id="loading-view" class="container" style="text-align:center;padding:4rem 1rem;color:var(--text-muted);">
-    <div style="font-size:2rem;">⏳</div><p style="margin-top:.5rem;">Loading paper from Firebase…</p>
+  <div class="container" id="not-found" style="display:none;">
+    <div class="empty-state"><div class="empty-icon">🔍</div><h3>Paper not found</h3><p>This paper may have been deleted.</p><br><a href="browse.html" class="btn btn-primary">Browse All Papers</a></div>
   </div>
   <div class="container" id="viewer-content" style="display:none;">
-    <a href="browse.html" class="back-link">← Back to Browse</a>
+    <a href="browse.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:.88rem;margin-bottom:1.5rem;">← Back to Browse</a>
     <div class="detail-grid">
       <div style="position:sticky;top:80px;">
         <div class="exam-cta-card" id="exam-cta" style="display:none;">
-          <div class="big-icon">🎯</div>
+          <div style="font-size:2.5rem;margin-bottom:.5rem;">🎯</div>
           <h3>Take Online Exam</h3>
-          <p id="exam-cta-desc" style="color:var(--text-secondary);font-size:.85rem;margin-bottom:1rem;"></p>
+          <p id="exam-cta-desc" style="color:var(--text-secondary);font-size:.85rem;margin:.5rem 0 1rem;"></p>
           <a class="btn btn-primary" style="width:100%;justify-content:center;" id="start-exam-btn" href="#">🚀 Start Exam</a>
         </div>
         <div class="card" id="no-exam-card" style="margin-bottom:1rem;text-align:center;padding:1.25rem;display:none;">
           <div style="font-size:1.5rem;margin-bottom:.5rem;">🤖</div>
-          <p style="font-size:.85rem;color:var(--text-muted);">No exam generated — re-upload with OCR to create one.</p>
+          <p style="font-size:.85rem;color:var(--text-muted);">No questions extracted — try re-uploading.</p>
         </div>
         <div class="card" style="margin-bottom:1rem;">
           <div class="paper-title" id="v-title"></div>
@@ -397,54 +371,24 @@ footer a:hover { text-decoration: underline; }
             <div class="info-row"><h4>Board</h4><p id="v-board">—</p></div>
             <div class="info-row"><h4>Questions</h4><p id="v-qcount">—</p></div>
             <div class="info-row"><h4>Duration</h4><p id="v-duration">—</p></div>
-            <div class="info-row"><h4>✅ Correct</h4><p id="v-marks-c">—</p></div>
-            <div class="info-row"><h4>❌ Wrong</h4><p id="v-marks-w">—</p></div>
+          </div>
+          <div class="info-row" id="v-marking-row" style="margin-bottom:1rem;display:none;">
+            <h4>Marking Scheme</h4><p id="v-marking">—</p>
           </div>
           <p style="color:var(--text-secondary);font-size:.9rem;" id="v-desc"></p>
           <div class="divider"></div>
-          <p style="font-size:.78rem;color:var(--text-muted);">Uploaded on <span id="v-date"></span></p>
-        </div>
-        <div class="card" style="margin-bottom:1rem;">
-          <h4 style="font-size:.85rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Downloads</h4>
-          <div style="display:flex;flex-direction:column;gap:.5rem;">
-            <button class="btn btn-primary btn-sm" onclick="downloadFile('qp')">⬇️ Question Paper</button>
-            <button class="btn btn-outline btn-sm" id="dl-ak" onclick="downloadFile('ak')">⬇️ Answer Key</button>
-          </div>
+          <p style="font-size:.78rem;color:var(--text-muted);">Uploaded <span id="v-date"></span></p>
         </div>
         <button class="btn btn-danger btn-sm" onclick="deletePaper()" style="width:100%;">🗑️ Delete Paper</button>
       </div>
       <div>
-        <div id="questions-preview" style="margin-bottom:1.5rem;display:none;">
-          <div class="tab-list">
-            <button class="tab-btn active" data-tab="exam-tab">🎯 Questions Preview</button>
-            <button class="tab-btn" data-tab="pdf-tab">📄 PDF Viewer</button>
-          </div>
-          <div class="tab-pane active" id="tab-exam-tab">
-            <div id="q-preview-list"></div>
-            <p style="font-size:.82rem;color:var(--text-muted);text-align:center;margin-top:.5rem;">Showing first 5 questions.</p>
-          </div>
-          <div class="tab-pane" id="tab-pdf-tab">
-            <div class="tab-list" style="margin-bottom:1rem;">
-              <button class="tab-btn2 active" data-tab2="qp">📄 Question Paper</button>
-              <button class="tab-btn2" data-tab2="ak">🔑 Answer Key</button>
-            </div>
-            <div class="tab-pane2 active" id="tab2-qp"><div class="file-viewer" id="qp-viewer"></div></div>
-            <div class="tab-pane2" id="tab2-ak"><div class="file-viewer" id="ak-viewer"></div></div>
-          </div>
-        </div>
-        <div id="pdf-only-view" style="display:none;">
-          <div class="tab-list">
-            <button class="tab-btn3 active" data-tab3="qp">📄 Question Paper</button>
-            <button class="tab-btn3" data-tab3="ak">🔑 Answer Key</button>
-          </div>
-          <div class="tab-pane3 active" id="tab3-qp"><div class="file-viewer" id="qp-viewer2"></div></div>
-          <div class="tab-pane3" id="tab3-ak"><div class="file-viewer" id="ak-viewer2"></div></div>
+        <div id="questions-preview">
+          <h3 style="margin-bottom:1rem;font-size:1rem;">📋 Questions Preview</h3>
+          <div id="q-preview-list"></div>
+          <p style="font-size:.82rem;color:var(--text-muted);text-align:center;margin-top:.5rem;" id="preview-note"></p>
         </div>
       </div>
     </div>
-  </div>
-  <div class="container" id="not-found" style="display:none;">
-    <div class="empty-state"><div class="empty-icon">🔍</div><h3>Paper not found</h3><p>This paper may have been deleted.</p><br><a href="browse.html" class="btn btn-primary">Browse All Papers</a></div>
   </div>
 </section>
 <footer><div class="container"><p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="browse.html">Browse</a></p></div></footer>
@@ -453,7 +397,7 @@ footer a:hover { text-decoration: underline; }
 /**
  * PYQ Portal — Core Shared Logic v3
  * OCR, parsers, card builder, toast, utils.
- * Firebase calls are handled inline in each page.
+ * Data stored in localStorage.
  */
 
 // ── PDF → IMAGES ──────────────────────────────
@@ -661,163 +605,88 @@ function formatTime(s) {
 }
 
 
-  function waitFB(cb) { if(window._fb) cb(); else setTimeout(()=>waitFB(cb),80); }
-  async function fbGetPaper(id) {
-    const {db,doc,getDoc}=window._fb;
-    const snap=await getDoc(doc(db,'papers',id));
-    return snap.exists()?snap.data():null;
+  function lsGetAllPapers() {
+    try { return JSON.parse(localStorage.getItem('pyq_papers') || '[]'); } catch(e) { return []; }
   }
-  async function fbDeletePaper(paper) {
-    const {db,doc,deleteDoc,store,ref,deleteObject}=window._fb;
-    if(paper.qpPath){try{await deleteObject(ref(store,paper.qpPath));}catch(e){}}
-    if(paper.akPath){try{await deleteObject(ref(store,paper.akPath));}catch(e){}}
-    await deleteDoc(doc(db,'papers',paper.id));
+  function lsGetPaper(id) { return lsGetAllPapers().find(p => p.id === id) || null; }
+  function lsSavePaper(meta) {
+    const papers = lsGetAllPapers().filter(p => p.id !== meta.id);
+    papers.unshift(meta);
+    localStorage.setItem('pyq_papers', JSON.stringify(papers));
+  }
+  function lsDeletePaper(id) {
+    localStorage.setItem('pyq_papers', JSON.stringify(lsGetAllPapers().filter(p => p.id !== id)));
   }
 
 
   let currentPaper = null;
 
-  function renderViewerUrl(url, mimeType, containerId) {
-    const c = document.getElementById(containerId);
-    if (!c) return;
-    if (!url) { c.innerHTML = '<div class="no-file-msg">No file available</div>'; return; }
-    c.innerHTML = mimeType && mimeType.startsWith('image/')
-      ? `<img src="${url}" alt="Document" style="width:100%;height:auto;"/>`
-      : `<iframe src="${url}" title="Document"></iframe>`;
+  function deletePaper() {
+    if (!currentPaper || !confirm('Delete this paper? This cannot be undone.')) return;
+    lsDeletePaper(currentPaper.id);
+    showToast('Paper deleted', 'success');
+    setTimeout(() => window.location.href = 'browse.html', 1000);
   }
-
-  async function downloadFile(type) {
-    if (!currentPaper) return;
-    const url  = type === 'qp' ? currentPaper.qpUrl  : currentPaper.akUrl;
-    const name = type === 'qp' ? currentPaper.qpName : currentPaper.akName;
-    if (!url) { showToast('No file available', 'error'); return; }
-    try {
-      showToast('Preparing download…', 'info');
-      const resp = await fetch(url);
-      const blob = await resp.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl; a.download = name || 'download'; a.click();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
-    } catch(e) {
-      window.open(url, '_blank');
-    }
-  }
-
-  async function deletePaper() {
-    if (!currentPaper || !confirm('Delete this paper from Firebase? This cannot be undone.')) return;
-    try {
-      await waitFBReady();
-      await fbDeletePaper(currentPaper);
-      showToast('Paper deleted', 'success');
-      setTimeout(() => window.location.href = 'browse.html', 1200);
-    } catch(err) {
-      showToast('Delete failed: ' + err.message, 'error');
-    }
-  }
-
-  function waitFBReady() {
-    return new Promise(resolve => { waitFB(resolve); });
-  }
-
-  // Tab setups
-  document.querySelectorAll('[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-    });
-  });
-
-  document.addEventListener('click', e => {
-    if (e.target.dataset.tab2) {
-      document.querySelectorAll('[data-tab2]').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.tab-pane2').forEach(p=>p.classList.remove('active'));
-      e.target.classList.add('active');
-      document.getElementById('tab2-'+e.target.dataset.tab2).classList.add('active');
-    }
-    if (e.target.dataset.tab3) {
-      document.querySelectorAll('[data-tab3]').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.tab-pane3').forEach(p=>p.classList.remove('active'));
-      e.target.classList.add('active');
-      document.getElementById('tab3-'+e.target.dataset.tab3).classList.add('active');
-    }
-  });
 
   document.addEventListener('DOMContentLoaded', () => {
     const id = new URLSearchParams(window.location.search).get('id');
-    if (!id) { document.getElementById('not-found').style.display='block'; return; }
+    const paper = id ? lsGetPaper(id) : null;
 
-    waitFB(async () => {
-      try {
-        const paper = await fbGetPaper(id);
-        document.getElementById('loading-view').style.display = 'none';
-        if (!paper) { document.getElementById('not-found').style.display='block'; return; }
+    if (!paper) { document.getElementById('not-found').style.display = 'block'; return; }
+    currentPaper = paper;
 
-        currentPaper = paper;
-        document.title = paper.subject + ' — ' + paper.examName + ' ' + paper.year + ' | PYQ Portal';
-        document.getElementById('viewer-content').style.display = 'block';
+    document.title = paper.subject + ' — ' + paper.examName + ' | PYQ Portal';
+    document.getElementById('viewer-content').style.display = 'block';
 
-        document.getElementById('v-title').textContent   = paper.subject + ' — ' + paper.examName;
-        document.getElementById('v-year').textContent    = paper.year || '—';
-        document.getElementById('v-board').textContent   = paper.board || '—';
-        document.getElementById('v-qcount').textContent  = paper.questionCount ? paper.questionCount + ' MCQs' : '—';
-        document.getElementById('v-duration').textContent= paper.duration ? paper.duration + ' min' : '—';
-        if (paper.markingScheme) {
-          document.getElementById('v-marks-c').textContent = '+' + paper.markingScheme.correct + ' marks';
-          document.getElementById('v-marks-w').textContent = paper.markingScheme.wrong > 0
-            ? '−' + paper.markingScheme.wrong + ' marks' : 'No penalty';
-        }
-        document.getElementById('v-desc').textContent    = paper.description || '';
-        document.getElementById('v-date').textContent    = paper.uploadedAt
-          ? new Date(paper.uploadedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+    document.getElementById('v-title').textContent    = paper.subject + ' — ' + paper.examName;
+    document.getElementById('v-year').textContent     = paper.year || '—';
+    document.getElementById('v-board').textContent    = paper.board || '—';
+    document.getElementById('v-qcount').textContent   = paper.questionCount ? paper.questionCount + ' MCQs' : '—';
+    document.getElementById('v-duration').textContent = paper.duration ? paper.duration + ' min' : '—';
+    document.getElementById('v-desc').textContent     = paper.description || '';
+    document.getElementById('v-date').textContent     = paper.uploadedAt
+      ? new Date(paper.uploadedAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) : '—';
 
-        const badges = document.getElementById('v-badges');
-        [
-          `<span class="badge badge-blue">${escapeHtml(paper.subject)}</span>`,
-          `<span class="badge badge-cyan">${escapeHtml(paper.year||'')}</span>`,
-          paper.board ? `<span class="badge badge-purple">${escapeHtml(paper.board)}</span>` : '',
-          paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
-          paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
-        ].filter(Boolean).forEach(b => badges.insertAdjacentHTML('beforeend', b));
+    if (paper.markingScheme) {
+      const ms = paper.markingScheme;
+      document.getElementById('v-marking-row').style.display = 'block';
+      document.getElementById('v-marking').textContent =
+        '+' + ms.correct + ' correct / −' + ms.wrong + ' wrong / ' + ms.skipped + ' skipped';
+    }
 
-        if (!paper.hasAnswerKey) document.getElementById('dl-ak').disabled = true;
+    const badges = document.getElementById('v-badges');
+    [
+      '<span class="badge badge-blue">' + escapeHtml(paper.subject) + '</span>',
+      '<span class="badge badge-cyan">' + escapeHtml(paper.year||'') + '</span>',
+      paper.board ? '<span class="badge badge-purple">' + escapeHtml(paper.board) + '</span>' : '',
+      paper.hasAnswerKey ? '<span class="badge badge-green">🔑 Answer Key</span>' : '',
+      paper.hasExam ? '<span class="badge badge-yellow">🎯 Online Exam</span>' : '',
+    ].filter(Boolean).forEach(b => badges.insertAdjacentHTML('beforeend', b));
 
-        if (paper.hasExam && paper.questions && paper.questions.length > 0) {
-          document.getElementById('exam-cta').style.display = 'block';
-          document.getElementById('start-exam-btn').href = 'exam.html?id=' + paper.id;
-          const ms = paper.markingScheme;
-          const msText = ms ? ' · +' + ms.correct + '/' + (ms.wrong>0?'−'+ms.wrong:'no') + ' neg' : '';
-          document.getElementById('exam-cta-desc').textContent =
-            paper.questions.length + ' questions · ' + (paper.duration||180) + ' min · ' +
-            (Object.keys(paper.answerKey||{}).length > 0 ? 'Auto-graded' : 'No answer key') + msText;
-          document.getElementById('questions-preview').style.display = 'block';
-          const previewList = document.getElementById('q-preview-list');
-          paper.questions.slice(0,5).forEach(q => {
-            const opts = Object.entries(q.options).map(([l,t]) =>
-              `<span class="q-opt-chip">${l}: ${escapeHtml(t.substring(0,30))}${t.length>30?'…':''}</span>`).join('');
-            previewList.insertAdjacentHTML('beforeend', `
-              <div class="q-preview">
-                <strong>Q${q.number}.</strong> ${escapeHtml(q.text.substring(0,120))}${q.text.length>120?'…':''}
-                <div class="q-options-mini">${opts}</div>
-              </div>`);
-          });
-          renderViewerUrl(paper.qpUrl, paper.qpType, 'qp-viewer');
-          if (paper.akUrl) renderViewerUrl(paper.akUrl, paper.akType, 'ak-viewer');
-        } else {
-          document.getElementById('no-exam-card').style.display = 'block';
-          document.getElementById('pdf-only-view').style.display = 'block';
-          renderViewerUrl(paper.qpUrl, paper.qpType, 'qp-viewer2');
-          if (paper.akUrl) renderViewerUrl(paper.akUrl, paper.akType, 'ak-viewer2');
-        }
+    if (paper.hasExam && paper.questions && paper.questions.length > 0) {
+      document.getElementById('exam-cta').style.display = 'block';
+      document.getElementById('start-exam-btn').href = 'exam.html?id=' + paper.id;
+      document.getElementById('exam-cta-desc').textContent =
+        paper.questions.length + ' questions · ' + (paper.duration||180) + ' min · ' +
+        (Object.keys(paper.answerKey||{}).length > 0 ? 'Auto-graded' : 'No answer key');
 
-      } catch(err) {
-        document.getElementById('loading-view').style.display = 'none';
-        document.getElementById('not-found').style.display = 'block';
-        console.error('Firebase error:', err);
-      }
-    });
+      const previewList = document.getElementById('q-preview-list');
+      const previewCount = Math.min(5, paper.questions.length);
+      paper.questions.slice(0, previewCount).forEach(q => {
+        const opts = Object.entries(q.options).map(([l,t]) =>
+          '<span class="q-opt-chip">' + l + ': ' + escapeHtml(t.substring(0,30)) + (t.length>30?'…':'') + '</span>'
+        ).join('');
+        previewList.insertAdjacentHTML('beforeend',
+          '<div class="q-preview"><strong>Q' + q.number + '.</strong> ' +
+          escapeHtml(q.text.substring(0,120)) + (q.text.length>120?'…':'') +
+          '<div class="q-options-mini">' + opts + '</div></div>');
+      });
+      document.getElementById('preview-note').textContent =
+        'Showing ' + previewCount + ' of ' + paper.questions.length + ' questions.';
+    } else {
+      document.getElementById('no-exam-card').style.display = 'block';
+      document.getElementById('questions-preview').style.display = 'none';
+    }
   });
 
 </script>
