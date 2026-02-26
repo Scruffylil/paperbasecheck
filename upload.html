@@ -326,10 +326,6 @@ footer a:hover { text-decoration: underline; }
 .page-hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.4rem; }
 .page-hero p { color: var(--text-secondary); font-size: 0.95rem; }
 
-  .method-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;}
-  .method-tab{flex:1;padding:.75rem 1rem;text-align:center;font-size:.88rem;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--text-muted);transition:var(--transition);}
-  .method-tab.active{background:var(--accent);color:#fff;}
-  .method-panel{display:none;}.method-panel.active{display:block;}
   .ocr-progress-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:var(--radius);padding:1.5rem;margin-top:1.5rem;display:none;}
   .ocr-progress-box.active{display:block;}
   .ocr-step{display:flex;align-items:center;gap:.75rem;padding:.55rem 0;font-size:.88rem;color:var(--text-secondary);border-bottom:1px solid var(--border);}
@@ -344,23 +340,14 @@ footer a:hover { text-decoration: underline; }
   .q-count-big{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
   .marking-scheme-box{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--radius);padding:1.25rem;margin-top:1rem;}
   .ms-header{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.25rem;}
-  .ms-title{font-weight:700;font-size:.95rem;}.ms-subtitle{font-size:.8rem;color:var(--text-muted);}
+  .ms-title{font-weight:700;font-size:.95rem;}
+  .ms-subtitle{font-size:.8rem;color:var(--text-muted);}
   .marks-input-wrap{position:relative;display:flex;align-items:center;}
   .marks-sign{position:absolute;left:10px;font-weight:900;font-size:1rem;z-index:1;}
   .marks-sign.plus{color:var(--green);}.marks-sign.minus{color:var(--red);}.marks-sign.neutral{color:var(--text-muted);}
   .marks-input{padding-left:28px !important;}
   .marks-hint{font-size:.75rem;color:var(--text-muted);margin-top:.3rem;}
   .ms-preview{margin-top:.75rem;padding:.6rem 1rem;background:rgba(255,255,255,.04);border-radius:var(--radius-sm);font-size:.85rem;color:var(--text-secondary);}
-  .ai-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(59,130,246,.2));border:1px solid rgba(139,92,246,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#a78bfa;margin-bottom:1rem;}
-  .section-row{display:flex;gap:.75rem;align-items:center;margin-bottom:.75rem;padding:.75rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--radius-sm);}
-  .section-row select,.section-row input{flex:1;}
-  .add-section-btn{margin-top:.5rem;}
-  .manual-q-list{margin-top:1rem;}
-  .manual-q-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.75rem;}
-  .manual-q-item textarea{width:100%;margin-bottom:.5rem;min-height:60px;}
-  .manual-opts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;}
-  .opt-row{display:flex;align-items:center;gap:.5rem;}
-  .opt-label{font-weight:700;width:20px;color:var(--text-muted);font-size:.85rem;}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
@@ -370,120 +357,85 @@ footer a:hover { text-decoration: underline; }
   <a href="index.html" class="nav-logo"><div class="logo-icon">📚</div>PYQ Portal</a>
   <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="upload.html" class="active nav-cta btn btn-sm">+ Upload Paper</a></div>
 </nav>
-<div class="page-hero"><div class="container"><h1>⬆️ Upload a Question Paper</h1><p>Use AI extraction for clean results, or OCR as a fallback.</p></div></div>
+<div class="page-hero"><div class="container"><h1>⬆️ Upload a Question Paper</h1><p>Upload your PDF — OCR extracts questions and answer key automatically.</p></div></div>
 <section class="section">
   <div class="container"><div style="max-width:760px;margin:0 auto;">
+    <form id="upload-form" novalidate>
 
-    <!-- Paper Details (always shown) -->
-    <div class="card" style="margin-bottom:1.5rem;" id="details-card">
-      <h3 style="margin-bottom:1.25rem;font-size:1.05rem;">📋 Paper Details</h3>
-      <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
-        <div class="form-group"><label class="form-label">Subject *</label><input class="form-input" id="subject" type="text" placeholder="e.g. Mathematics, Physics"/></div>
-        <div class="form-group"><label class="form-label">Exam / Course *</label><input class="form-input" id="exam-name" type="text" placeholder="e.g. JEE Advanced 2024"/></div>
-      </div>
-      <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
-        <div class="form-group"><label class="form-label">Year *</label><select class="form-select" id="year"></select></div>
-        <div class="form-group"><label class="form-label">Board / University</label><input class="form-input" id="board" type="text" placeholder="e.g. NTA, CBSE"/></div>
-      </div>
-      <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
-        <div class="form-group"><label class="form-label">Duration (minutes)</label><input class="form-input" id="duration" type="number" value="180" min="10" max="360"/></div>
-        <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="description" type="text" placeholder="e.g. Set A, Paper 1"/></div>
-      </div>
-      <div class="marking-scheme-box">
-        <div class="ms-header"><span class="ms-title">🎯 Marking Scheme</span><span class="ms-subtitle">Define marks per correct / wrong / skipped</span></div>
-        <div class="grid-3" style="gap:1rem;margin-top:1rem;">
-          <div class="form-group"><label class="form-label">✅ Correct</label><div class="marks-input-wrap"><span class="marks-sign plus">+</span><input class="form-input marks-input" id="marks-correct" type="number" value="4" min="0.5" max="100" step="0.5"/></div></div>
-          <div class="form-group"><label class="form-label">❌ Wrong</label><div class="marks-input-wrap"><span class="marks-sign minus">−</span><input class="form-input marks-input" id="marks-wrong" type="number" value="1" min="0" max="100" step="0.25"/></div><div class="marks-hint">0 = no negative marking</div></div>
-          <div class="form-group"><label class="form-label">⏭️ Skipped</label><div class="marks-input-wrap"><span class="marks-sign neutral">0</span><input class="form-input marks-input" id="marks-skipped" type="number" value="0" min="-10" max="0" step="0.25"/></div></div>
-        </div>
-        <div class="ms-preview"><span>📊 </span><span id="ms-preview-text"></span></div>
-      </div>
-    </div>
-
-    <!-- Method Tabs -->
-    <div class="method-tabs" id="method-tabs">
-      <button class="method-tab active" data-tab="ai">🤖 AI Extraction (Best)</button>
-      <button class="method-tab" data-tab="ocr">📷 OCR Fallback</button>
-    </div>
-
-    <!-- AI METHOD -->
-    <div class="method-panel active" id="tab-ai">
       <div class="card" style="margin-bottom:1.5rem;">
-        <div class="ai-badge">📷 Powered by Tesseract OCR</div>
-        <h3 style="margin-bottom:.4rem;font-size:1.05rem;">📄 Upload PDF — AI will extract all questions</h3>
-        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">
-          Tesseract OCR reads the PDF pages and extracts every question, all 4 options, and sections (Physics/Chemistry/Maths). Works best on clean, digital exam papers.
-        </p>
-        <div class="dropzone" id="ai-qp-drop" onclick="document.getElementById('ai-qp-file').click()">
-          <span class="dz-icon">📄</span>
-          <div class="dz-label">Drop question paper PDF here</div>
-          <div class="dz-sub">or click to browse · PDF only · Max 30 MB</div>
-          <input type="file" id="ai-qp-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none"/>
-          <div class="dz-preview" id="ai-qp-preview" style="display:none;"><span>✅</span><span class="dz-preview-name" id="ai-qp-name"></span><button type="button" class="btn btn-ghost btn-sm" onclick="clearFile(event,'ai-qp')">✕</button></div>
+        <h3 style="margin-bottom:1.25rem;font-size:1.05rem;">📋 Paper Details</h3>
+        <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
+          <div class="form-group"><label class="form-label">Subject *</label><input class="form-input" id="subject" type="text" placeholder="e.g. Mathematics, Physics" required/></div>
+          <div class="form-group"><label class="form-label">Exam / Course *</label><input class="form-input" id="exam-name" type="text" placeholder="e.g. JEE Advanced, CBSE Class 12" required/></div>
+        </div>
+        <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
+          <div class="form-group"><label class="form-label">Year *</label><select class="form-select" id="year" required><option value="">Select year</option></select></div>
+          <div class="form-group"><label class="form-label">Board / University</label><input class="form-input" id="board" type="text" placeholder="e.g. NTA, CBSE"/></div>
+        </div>
+        <div class="grid-2" style="gap:1rem;margin-bottom:1rem;">
+          <div class="form-group"><label class="form-label">Duration (minutes)</label><input class="form-input" id="duration" type="number" value="180" min="10" max="360"/></div>
+          <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="description" type="text" placeholder="e.g. Set A, Paper 1"/></div>
+        </div>
+        <!-- Marking Scheme -->
+        <div class="marking-scheme-box">
+          <div class="ms-header"><span class="ms-title">🎯 Marking Scheme</span><span class="ms-subtitle">Define marks per correct / wrong / skipped</span></div>
+          <div class="grid-3" style="gap:1rem;margin-top:1rem;">
+            <div class="form-group">
+              <label class="form-label">✅ Correct</label>
+              <div class="marks-input-wrap"><span class="marks-sign plus">+</span><input class="form-input marks-input" id="marks-correct" type="number" value="4" min="0.5" max="100" step="0.5"/></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">❌ Wrong</label>
+              <div class="marks-input-wrap"><span class="marks-sign minus">−</span><input class="form-input marks-input" id="marks-wrong" type="number" value="1" min="0" max="100" step="0.25"/></div>
+              <div class="marks-hint">0 = no negative marking</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">⏭️ Skipped</label>
+              <div class="marks-input-wrap"><span class="marks-sign neutral">0</span><input class="form-input marks-input" id="marks-skipped" type="number" value="0" min="-10" max="0" step="0.25"/></div>
+            </div>
+          </div>
+          <div class="ms-preview" id="ms-preview">
+            <span>📊 </span><span id="ms-preview-text">+4 correct &nbsp;|&nbsp; −1 wrong &nbsp;|&nbsp; 0 skipped</span>
+          </div>
         </div>
       </div>
-      <div class="card" style="margin-bottom:1.5rem;">
-        <h3 style="margin-bottom:.4rem;font-size:1.05rem;">🔑 Answer Key <span style="color:var(--text-muted);font-weight:400;">(optional)</span></h3>
-        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">AI will also extract answers and match them to questions.</p>
-        <div class="dropzone" id="ai-ak-drop" onclick="document.getElementById('ai-ak-file').click()">
-          <span class="dz-icon">🔑</span>
-          <div class="dz-label">Drop answer key here</div>
-          <div class="dz-sub">or click to browse · PDF, JPG, PNG</div>
-          <input type="file" id="ai-ak-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none"/>
-          <div class="dz-preview" id="ai-ak-preview" style="display:none;"><span>✅</span><span class="dz-preview-name" id="ai-ak-name"></span><button type="button" class="btn btn-ghost btn-sm" onclick="clearFile(event,'ai-ak')">✕</button></div>
-        </div>
-      </div>
-      <div class="ocr-progress-box" id="ai-progress-box">
-        <h3 style="font-size:1rem;margin-bottom:1rem;">🤖 AI Processing…</h3>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="ai-bar"></div></div>
-        <div id="ai-steps"></div>
-        <div style="font-size:.78rem;color:var(--text-muted);margin-top:.25rem;" id="ai-msg"></div>
-        <div class="ocr-result-preview" id="ai-result" style="display:none;"></div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;gap:1rem;margin-top:1.5rem;">
-        <a href="browse.html" class="btn btn-outline">Cancel</a>
-        <button class="btn btn-primary btn-lg" id="ai-submit-btn" onclick="runAiExtraction()">
-          <span id="ai-submit-text">🤖 Extract with AI</span>
-          <span id="ai-submit-loader" style="display:none;" class="spin">⏳</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- OCR METHOD -->
-    <div class="method-panel" id="tab-ocr">
       <div class="card" style="margin-bottom:1.5rem;">
         <h3 style="margin-bottom:.4rem;font-size:1.05rem;">📄 Question Paper *</h3>
-        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">OCR works best on clean, digital PDFs. May struggle with math symbols.</p>
+        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">PDF or image. OCR will extract all MCQ questions. Max 30 MB.</p>
         <div class="dropzone" id="qp-drop" onclick="document.getElementById('qp-file').click()">
           <span class="dz-icon">📄</span><div class="dz-label">Drop question paper here</div><div class="dz-sub">or click to browse · PDF, JPG, PNG</div>
           <input type="file" id="qp-file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none"/>
           <div class="dz-preview" id="qp-preview" style="display:none;"><span>✅</span><span class="dz-preview-name" id="qp-name"></span><button type="button" class="btn btn-ghost btn-sm" onclick="clearFile(event,'qp')">✕</button></div>
         </div>
       </div>
+
       <div class="card" style="margin-bottom:1.5rem;">
         <h3 style="margin-bottom:.4rem;font-size:1.05rem;">🔑 Answer Key <span style="color:var(--text-muted);font-weight:400;">(optional)</span></h3>
+        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">OCR reads the answer table — enables auto-grading.</p>
         <div class="dropzone" id="ak-drop" onclick="document.getElementById('ak-file').click()">
-          <span class="dz-icon">🔑</span><div class="dz-label">Drop answer key here</div><div class="dz-sub">or click to browse</div>
+          <span class="dz-icon">🔑</span><div class="dz-label">Drop answer key here</div><div class="dz-sub">or click to browse · PDF, JPG, PNG</div>
           <input type="file" id="ak-file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none"/>
           <div class="dz-preview" id="ak-preview" style="display:none;"><span>✅</span><span class="dz-preview-name" id="ak-name"></span><button type="button" class="btn btn-ghost btn-sm" onclick="clearFile(event,'ak')">✕</button></div>
         </div>
       </div>
+
       <div class="ocr-progress-box" id="ocr-box">
-        <h3 style="font-size:1rem;margin-bottom:1rem;">🔍 OCR Processing…</h3>
+        <h3 style="font-size:1rem;margin-bottom:1rem;">🤖 Processing…</h3>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="ocr-bar"></div></div>
         <div id="ocr-steps"></div>
         <div style="font-size:.78rem;color:var(--text-muted);margin-top:.25rem;" id="ocr-msg"></div>
         <div class="ocr-result-preview" id="ocr-result" style="display:none;"></div>
       </div>
+
       <div style="display:flex;justify-content:flex-end;gap:1rem;margin-top:1.5rem;">
         <a href="browse.html" class="btn btn-outline">Cancel</a>
-        <button class="btn btn-primary btn-lg" id="ocr-submit-btn" onclick="runOcrExtraction()">
-          <span id="ocr-submit-text">📷 Extract with OCR</span>
-          <span id="ocr-submit-loader" style="display:none;" class="spin">⏳</span>
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+          <span id="submit-text">🚀 Process &amp; Save</span>
+          <span id="submit-loader" style="display:none;" class="spin">⏳</span>
         </button>
       </div>
-    </div>
-
+    </form>
   </div></div>
 </section>
 <footer><div class="container"><p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="browse.html">Browse</a></p></div></footer>
@@ -507,7 +459,7 @@ async function pdfToImages(file, onProgress) {
   const pdf    = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
   const images = [];
 
-  async function renderPage(page, scale) {
+  function renderToCanvas(page, scale) {
     const viewport = page.getViewport({ scale });
     const canvas   = document.createElement('canvas');
     canvas.width   = viewport.width;
@@ -515,16 +467,17 @@ async function pdfToImages(file, onProgress) {
     const ctx      = canvas.getContext('2d');
     ctx.fillStyle  = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    // Convert to greyscale
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-    for (let j = 0; j < d.length; j += 4) {
-      const g = 0.299*d[j] + 0.587*d[j+1] + 0.114*d[j+2];
-      d[j] = d[j+1] = d[j+2] = g;
-    }
-    ctx.putImageData(imgData, 0, 0);
-    return canvas;
+    return page.render({ canvasContext: ctx, viewport }).promise.then(() => {
+      // Greyscale — improves Tesseract accuracy on printed text
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imgData.data;
+      for (let j = 0; j < d.length; j += 4) {
+        const g = 0.299*d[j] + 0.587*d[j+1] + 0.114*d[j+2];
+        d[j] = d[j+1] = d[j+2] = g;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return canvas;
+    });
   }
 
   function cropCanvas(src, x, y, w, h) {
@@ -534,48 +487,28 @@ async function pdfToImages(file, onProgress) {
     return dst.toDataURL('image/png');
   }
 
-  // Detect two-column layout by comparing text density left vs right
-  // A two-column page has significant content on both halves
-  function detectColumns(canvas) {
-    const ctx   = canvas.getContext('2d');
-    const w     = canvas.width, h = canvas.height;
-    const mid   = Math.floor(w / 2);
-    // Sample a strip in the middle-vertical zone (skip headers/footers)
-    const top   = Math.floor(h * 0.15), bot = Math.floor(h * 0.85);
-    const sampleH = bot - top;
-    // Count dark pixels (text) on left and right halves
-    const leftData  = ctx.getImageData(0,    top, mid,     sampleH).data;
-    const rightData = ctx.getImageData(mid,  top, mid,     sampleH).data;
-    let leftDark = 0, rightDark = 0;
-    for (let j = 0; j < leftData.length; j += 4)  if (leftData[j]  < 100) leftDark++;
-    for (let j = 0; j < rightData.length; j += 4) if (rightData[j] < 100) rightDark++;
-    const leftDensity  = leftDark  / (leftData.length  / 4);
-    const rightDensity = rightDark / (rightData.length / 4);
-    // Two-column if both halves have meaningful text density
-    return leftDensity > 0.01 && rightDensity > 0.01 && Math.min(leftDensity,rightDensity) / Math.max(leftDensity,rightDensity) > 0.3;
+  // Detect if page is two-column by checking text width vs height ratio
+  // Most JEE/exam papers in A4 landscape or two-column portrait are wide
+  function isTwoColumn(canvas) {
+    // Heuristic: if width > 1.2× height it's likely landscape/two-column
+    // OR if width > 2000px (high-res A4 portrait with two columns)
+    return canvas.width > canvas.height * 1.15 || canvas.width > 2200;
   }
 
   for (let i = 1; i <= pdf.numPages; i++) {
     if (onProgress) onProgress('Rendering page ' + i + ' of ' + pdf.numPages + '…');
-    try {
-      const page = await pdf.getPage(i);
-      // Try scale 3.5 first; if render fails, fall back to 2.5
-      let canvas;
-      try {
-        canvas = await renderPage(page, 3.5);
-      } catch(e) {
-        canvas = await renderPage(page, 2.5);
-      }
+    const page   = await pdf.getPage(i);
+    const canvas = await renderToCanvas(page, 3.5);
 
-      if (detectColumns(canvas)) {
-        const mid = Math.floor(canvas.width / 2);
-        images.push(cropCanvas(canvas, 0,   0, mid,                canvas.height));
-        images.push(cropCanvas(canvas, mid, 0, canvas.width - mid, canvas.height));
-      } else {
-        images.push(canvas.toDataURL('image/png'));
-      }
-    } catch(pageErr) {
-      console.warn('Page ' + i + ' render failed, skipping:', pageErr);
+    if (isTwoColumn(canvas)) {
+      // Split into left column and right column — OCR each separately
+      // This prevents Tesseract from interleaving both columns
+      const mid = Math.floor(canvas.width / 2);
+      images.push(cropCanvas(canvas, 0,    0, mid,                 canvas.height)); // left
+      images.push(cropCanvas(canvas, mid,  0, canvas.width - mid,  canvas.height)); // right
+    } else {
+      // Single column — OCR the full page
+      images.push(canvas.toDataURL('image/png'));
     }
   }
   return images;
@@ -599,26 +532,30 @@ async function ocrImageData(imageData, onProgress) {
 
 // ── QUESTION PARSER ───────────────────────────
 function parseQuestions(ocrText) {
-  const questions = [];
-  const lines = ocrText.split('\n');
-  let currentQ = null;
-  let currentSection = '';
+  const questions   = [];
+  const lines       = ocrText.split('\n');
+  let   currentQ    = null;
+  let   currentSection = '';
+
   const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
 
-  const sectionPat = /\b(PHYSICS|CHEMISTRY|MATHEMATICS|MATHS|BIOLOGY|BOTANY|ZOOLOGY|SECTION[\s\-]+\w+)\b/i;
-  const qStartQ   = /^Q\.?\s*(\d{1,3})[\s.):\-]\s*(.*)/i;
-  const qStartN   = /^(\d{1,3})[.)]\s+(.+)/;
+  // Section header detection
+  const sectionPat = /\b(PHYSICS|CHEMISTRY|MATHEMATICS|MATHS|BIOLOGY|BOTANY|ZOOLOGY)\b/i;
 
-  // Relaxed option extractor — handles (, [, {, | as bracket chars
+  // Question start patterns
+  const qStartQ = /^Q\.?\s*(\d{1,3})[\s.):\-]\s*(.*)/i;   // Q1. Q.1 Q1:
+  const qStartN = /^(\d{1,3})[.)]\s+(.+)/;                  // 1.  1)
+
   function extractOpts(line) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/g;
+    // Find ALL (A)/(B)/(C)/(D)/(1)/(2)/(3)/(4) markers and split text between them
+    const pat = /\(([A-Da-d1-4])\)\s*/g;
     const matches = [...line.matchAll(pat)];
     if (!matches.length) return {};
     const result = {};
     matches.forEach((m, i) => {
       let label = m[1].toUpperCase();
       if (NUM_TO_LETTER[label]) label = NUM_TO_LETTER[label];
-      if (!'ABCD'.includes(label)) return;
+      if (!['A','B','C','D'].includes(label)) return;
       const textStart = m.index + m[0].length;
       const textEnd   = i + 1 < matches.length ? matches[i+1].index : line.length;
       const text      = line.slice(textStart, textEnd).trim();
@@ -627,34 +564,20 @@ function parseQuestions(ocrText) {
     return result;
   }
 
-  // If question text itself contains embedded options (all on one line after Q text)
-  function splitQFromOpts(text) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/;
-    const m = pat.exec(text);
-    if (!m) return [text, {}];
-    return [text.slice(0, m.index).trim(), extractOpts(text.slice(m.index))];
+  function isOptLine(line) {
+    return /^\s*\(?[A-Da-d1-4][).]\s/.test(line);
   }
 
-  function isOptLine(line) {
-    return /^[\(\[\{|]?[A-Da-d1-4][\)\]\}|.]\s/.test(line);
-  }
   function isHeader(line) {
-    if (!line || line.length < 2) return true;
-    if (/^(SECTION|PART|CHAPTER|INSTRUCTION|NOTE:|PAGE\s*\d|Time Allowed|Maximum Marks|Read the)/i.test(line)) return true;
-    if (/^\d+\s*$/.test(line)) return true;
+    const l = line.trim();
+    if (!l || l.length < 2) return true;
+    if (/^(SECTION|PART|CHAPTER|INSTRUCTION|NOTE:|PAGE\s*\d|Time Allowed|Maximum Marks|\*{2,})/i.test(l)) return true;
+    if (/^\d+\s*$/.test(l)) return true;
     return false;
   }
 
   function saveQ() {
-    if (currentQ && currentQ.text.trim().length > 3) {
-      // Post-process: if text contains embedded options, split them out
-      if (Object.keys(currentQ.options).length === 0) {
-        const [qtext, opts] = splitQFromOpts(currentQ.text);
-        if (Object.keys(opts).length > 0) {
-          currentQ.text = qtext;
-          currentQ.options = opts;
-        }
-      }
+    if (currentQ && Object.keys(currentQ.options).length >= 2 && currentQ.text.trim().length > 3) {
       questions.push(currentQ);
     }
   }
@@ -663,27 +586,27 @@ function parseQuestions(ocrText) {
     const line = raw.trim();
     if (!line) continue;
 
-    // Section header
+    // Detect section heading
     const sm = sectionPat.exec(line);
     if (sm && line.length < 80) {
       const s = sm[1].toUpperCase();
-      currentSection = s.includes('MATH') ? 'Mathematics'
-                     : s.includes('PHYS') ? 'Physics'
-                     : s.includes('CHEM') ? 'Chemistry'
-                     : s.includes('BIO') || s.includes('BOT') || s.includes('ZOO') ? 'Biology'
+      currentSection = s.startsWith('MATH') ? 'Mathematics'
+                     : s.startsWith('PHYS') ? 'Physics'
+                     : s.startsWith('CHEM') ? 'Chemistry'
+                     : s.startsWith('BIO') || s.startsWith('BOT') || s.startsWith('ZOO') ? 'Biology'
                      : sm[1];
     }
 
     if (isHeader(line)) continue;
 
-    // Option line with brackets: (A), [A], {A}, |A|
+    // Try extracting options from this line (handles all layouts)
     const opts = extractOpts(line);
     if (Object.keys(opts).length > 0 && currentQ) {
       Object.entries(opts).forEach(([k,v]) => { if (!currentQ.options[k]) currentQ.options[k] = v; });
       continue;
     }
 
-    // Bare "A) text" or "A. text"
+    // Bare letter option: "A) text" or "A. text"
     const mOB = /^([A-Da-d])[.)]\s+(.+)/.exec(line);
     if (mOB && currentQ) {
       const letter = mOB[1].toUpperCase();
@@ -693,539 +616,33 @@ function parseQuestions(ocrText) {
       continue;
     }
 
-    // Bare "A text" — OCR dropped bracket entirely (last resort for options)
-    const mBare = /^([A-Da-d])\s{1,4}(\S.+)/.exec(line);
-    if (mBare && currentQ && Object.keys(currentQ.options).length > 0) {
-      // Only use bare if we already found some options (confirms context)
-      const letter = mBare[1].toUpperCase();
-      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
-        currentQ.options[letter] = mBare[2].trim();
-      }
-      continue;
-    }
-
-    // Q-prefix: Q1. Q.1 Q1:
+    // Q-prefix question: Q1. / Q.1 / Q1:
     const mQ = qStartQ.exec(line);
     if (mQ) {
       saveQ();
-      const [qtext, embOpts] = splitQFromOpts(mQ[2].trim());
-      currentQ = { number: parseInt(mQ[1]), text: qtext, options: embOpts, section: currentSection };
+      currentQ = { number: parseInt(mQ[1]), text: mQ[2].trim(), options: {}, section: currentSection };
       continue;
     }
 
-    // Numbered: "1. text"
+    // Numbered question: "1. text"
     const mN = qStartN.exec(line);
     if (mN && parseInt(mN[1]) <= 300) {
       const rest = mN[2].trim();
       if (rest.length > 8 && !isOptLine(rest)) {
         saveQ();
-        const [qtext, embOpts] = splitQFromOpts(rest);
-        currentQ = { number: parseInt(mN[1]), text: qtext, options: embOpts, section: currentSection };
+        currentQ = { number: parseInt(mN[1]), text: rest, options: {}, section: currentSection };
         continue;
       }
     }
 
-    // Continuation of question text (before any options)
+    // Continuation of question text (before any options arrive)
     if (currentQ && Object.keys(currentQ.options).length === 0 && !isOptLine(line)) {
       currentQ.text += ' ' + line;
     }
   }
 
   saveQ();
-
-  // ── GUARANTEE: always return at least 10 questions ──────────────
-  // If parsing found < 10, generate placeholder stubs so exam can load
-  // This should happen < 0.1% of the time with robust OCR above
-  const MIN_Q = 10;
-  if (questions.length < MIN_Q) {
-    const existing = new Set(questions.map(q => q.number));
-    for (let n = 1; questions.length < MIN_Q; n++) {
-      if (!existing.has(n)) {
-        questions.push({
-          number: n,
-          text: '[Question ' + n + ' could not be extracted — OCR may have failed on this page]',
-          options: { A: '—', B: '—', C: '—', D: '—' },
-          section: currentSection || '',
-          partial: true
-        });
-        existing.add(n);
-      }
-    }
-    questions.sort((a,b) => a.number - b.number);
-  }
-
-  return questions;
-}function parseQuestions(ocrText) {
-  const questions = [];
-  const lines = ocrText.split('\n');
-  let currentQ = null;
-  let currentSection = '';
-  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
-
-  const sectionPat = /\b(PHYSICS|CHEMISTRY|MATHEMATICS|MATHS|BIOLOGY|BOTANY|ZOOLOGY|SECTION[\s\-]+\w+)\b/i;
-  const qStartQ   = /^Q\.?\s*(\d{1,3})[\s.):\-]\s*(.*)/i;
-  const qStartN   = /^(\d{1,3})[.)]\s+(.+)/;
-
-  // Relaxed option extractor — handles (, [, {, | as bracket chars
-  function extractOpts(line) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/g;
-    const matches = [...line.matchAll(pat)];
-    if (!matches.length) return {};
-    const result = {};
-    matches.forEach((m, i) => {
-      let label = m[1].toUpperCase();
-      if (NUM_TO_LETTER[label]) label = NUM_TO_LETTER[label];
-      if (!'ABCD'.includes(label)) return;
-      const textStart = m.index + m[0].length;
-      const textEnd   = i + 1 < matches.length ? matches[i+1].index : line.length;
-      const text      = line.slice(textStart, textEnd).trim();
-      if (text && !result[label]) result[label] = text;
-    });
-    return result;
-  }
-
-  // If question text itself contains embedded options (all on one line after Q text)
-  function splitQFromOpts(text) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/;
-    const m = pat.exec(text);
-    if (!m) return [text, {}];
-    return [text.slice(0, m.index).trim(), extractOpts(text.slice(m.index))];
-  }
-
-  function isOptLine(line) {
-    return /^[\(\[\{|]?[A-Da-d1-4][\)\]\}|.]\s/.test(line);
-  }
-  function isHeader(line) {
-    if (!line || line.length < 2) return true;
-    if (/^(SECTION|PART|CHAPTER|INSTRUCTION|NOTE:|PAGE\s*\d|Time Allowed|Maximum Marks|Read the)/i.test(line)) return true;
-    if (/^\d+\s*$/.test(line)) return true;
-    return false;
-  }
-
-  function saveQ() {
-    if (currentQ && currentQ.text.trim().length > 3) {
-      // Post-process: if text contains embedded options, split them out
-      if (Object.keys(currentQ.options).length === 0) {
-        const [qtext, opts] = splitQFromOpts(currentQ.text);
-        if (Object.keys(opts).length > 0) {
-          currentQ.text = qtext;
-          currentQ.options = opts;
-        }
-      }
-      questions.push(currentQ);
-    }
-  }
-
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) continue;
-
-    // Section header
-    const sm = sectionPat.exec(line);
-    if (sm && line.length < 80) {
-      const s = sm[1].toUpperCase();
-      currentSection = s.includes('MATH') ? 'Mathematics'
-                     : s.includes('PHYS') ? 'Physics'
-                     : s.includes('CHEM') ? 'Chemistry'
-                     : s.includes('BIO') || s.includes('BOT') || s.includes('ZOO') ? 'Biology'
-                     : sm[1];
-    }
-
-    if (isHeader(line)) continue;
-
-    // Option line with brackets: (A), [A], {A}, |A|
-    const opts = extractOpts(line);
-    if (Object.keys(opts).length > 0 && currentQ) {
-      Object.entries(opts).forEach(([k,v]) => { if (!currentQ.options[k]) currentQ.options[k] = v; });
-      continue;
-    }
-
-    // Bare "A) text" or "A. text"
-    const mOB = /^([A-Da-d])[.)]\s+(.+)/.exec(line);
-    if (mOB && currentQ) {
-      const letter = mOB[1].toUpperCase();
-      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
-        currentQ.options[letter] = mOB[2].trim();
-      }
-      continue;
-    }
-
-    // Bare "A text" — OCR dropped bracket entirely (last resort for options)
-    const mBare = /^([A-Da-d])\s{1,4}(\S.+)/.exec(line);
-    if (mBare && currentQ && Object.keys(currentQ.options).length > 0) {
-      // Only use bare if we already found some options (confirms context)
-      const letter = mBare[1].toUpperCase();
-      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
-        currentQ.options[letter] = mBare[2].trim();
-      }
-      continue;
-    }
-
-    // Q-prefix: Q1. Q.1 Q1:
-    const mQ = qStartQ.exec(line);
-    if (mQ) {
-      saveQ();
-      const [qtext, embOpts] = splitQFromOpts(mQ[2].trim());
-      currentQ = { number: parseInt(mQ[1]), text: qtext, options: embOpts, section: currentSection };
-      continue;
-    }
-
-    // Numbered: "1. text"
-    const mN = qStartN.exec(line);
-    if (mN && parseInt(mN[1]) <= 300) {
-      const rest = mN[2].trim();
-      if (rest.length > 8 && !isOptLine(rest)) {
-        saveQ();
-        const [qtext, embOpts] = splitQFromOpts(rest);
-        currentQ = { number: parseInt(mN[1]), text: qtext, options: embOpts, section: currentSection };
-        continue;
-      }
-    }
-
-    // Continuation of question text (before any options)
-    if (currentQ && Object.keys(currentQ.options).length === 0 && !isOptLine(line)) {
-      currentQ.text += ' ' + line;
-    }
-  }
-
-  saveQ();
-
-  // ── GUARANTEE: always return at least 10 questions ──────────────
-  // If parsing found < 10, generate placeholder stubs so exam can load
-  // This should happen < 0.1% of the time with robust OCR above
-  const MIN_Q = 10;
-  if (questions.length < MIN_Q) {
-    const existing = new Set(questions.map(q => q.number));
-    for (let n = 1; questions.length < MIN_Q; n++) {
-      if (!existing.has(n)) {
-        questions.push({
-          number: n,
-          text: '[Question ' + n + ' could not be extracted — OCR may have failed on this page]',
-          options: { A: '—', B: '—', C: '—', D: '—' },
-          section: currentSection || '',
-          partial: true
-        });
-        existing.add(n);
-      }
-    }
-    questions.sort((a,b) => a.number - b.number);
-  }
-
-  return questions;
-}function parseQuestions(ocrText) {
-  const questions = [];
-  const lines = ocrText.split('\n');
-  let currentQ = null;
-  let currentSection = '';
-  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
-
-  const sectionPat = /\b(PHYSICS|CHEMISTRY|MATHEMATICS|MATHS|BIOLOGY|BOTANY|ZOOLOGY|SECTION[\s\-]+\w+)\b/i;
-  const qStartQ   = /^Q\.?\s*(\d{1,3})[\s.):\-]\s*(.*)/i;
-  const qStartN   = /^(\d{1,3})[.)]\s+(.+)/;
-
-  // Relaxed option extractor — handles (, [, {, | as bracket chars
-  function extractOpts(line) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/g;
-    const matches = [...line.matchAll(pat)];
-    if (!matches.length) return {};
-    const result = {};
-    matches.forEach((m, i) => {
-      let label = m[1].toUpperCase();
-      if (NUM_TO_LETTER[label]) label = NUM_TO_LETTER[label];
-      if (!'ABCD'.includes(label)) return;
-      const textStart = m.index + m[0].length;
-      const textEnd   = i + 1 < matches.length ? matches[i+1].index : line.length;
-      const text      = line.slice(textStart, textEnd).trim();
-      if (text && !result[label]) result[label] = text;
-    });
-    return result;
-  }
-
-  // If question text itself contains embedded options (all on one line after Q text)
-  function splitQFromOpts(text) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/;
-    const m = pat.exec(text);
-    if (!m) return [text, {}];
-    return [text.slice(0, m.index).trim(), extractOpts(text.slice(m.index))];
-  }
-
-  function isOptLine(line) {
-    return /^[\(\[\{|]?[A-Da-d1-4][\)\]\}|.]\s/.test(line);
-  }
-  function isHeader(line) {
-    if (!line || line.length < 2) return true;
-    if (/^(SECTION|PART|CHAPTER|INSTRUCTION|NOTE:|PAGE\s*\d|Time Allowed|Maximum Marks|Read the)/i.test(line)) return true;
-    if (/^\d+\s*$/.test(line)) return true;
-    return false;
-  }
-
-  function saveQ() {
-    if (currentQ && currentQ.text.trim().length > 3) {
-      // Post-process: if text contains embedded options, split them out
-      if (Object.keys(currentQ.options).length === 0) {
-        const [qtext, opts] = splitQFromOpts(currentQ.text);
-        if (Object.keys(opts).length > 0) {
-          currentQ.text = qtext;
-          currentQ.options = opts;
-        }
-      }
-      questions.push(currentQ);
-    }
-  }
-
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) continue;
-
-    // Section header
-    const sm = sectionPat.exec(line);
-    if (sm && line.length < 80) {
-      const s = sm[1].toUpperCase();
-      currentSection = s.includes('MATH') ? 'Mathematics'
-                     : s.includes('PHYS') ? 'Physics'
-                     : s.includes('CHEM') ? 'Chemistry'
-                     : s.includes('BIO') || s.includes('BOT') || s.includes('ZOO') ? 'Biology'
-                     : sm[1];
-    }
-
-    if (isHeader(line)) continue;
-
-    // Option line with brackets: (A), [A], {A}, |A|
-    const opts = extractOpts(line);
-    if (Object.keys(opts).length > 0 && currentQ) {
-      Object.entries(opts).forEach(([k,v]) => { if (!currentQ.options[k]) currentQ.options[k] = v; });
-      continue;
-    }
-
-    // Bare "A) text" or "A. text"
-    const mOB = /^([A-Da-d])[.)]\s+(.+)/.exec(line);
-    if (mOB && currentQ) {
-      const letter = mOB[1].toUpperCase();
-      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
-        currentQ.options[letter] = mOB[2].trim();
-      }
-      continue;
-    }
-
-    // Bare "A text" — OCR dropped bracket entirely (last resort for options)
-    const mBare = /^([A-Da-d])\s{1,4}(\S.+)/.exec(line);
-    if (mBare && currentQ && Object.keys(currentQ.options).length > 0) {
-      // Only use bare if we already found some options (confirms context)
-      const letter = mBare[1].toUpperCase();
-      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
-        currentQ.options[letter] = mBare[2].trim();
-      }
-      continue;
-    }
-
-    // Q-prefix: Q1. Q.1 Q1:
-    const mQ = qStartQ.exec(line);
-    if (mQ) {
-      saveQ();
-      const [qtext, embOpts] = splitQFromOpts(mQ[2].trim());
-      currentQ = { number: parseInt(mQ[1]), text: qtext, options: embOpts, section: currentSection };
-      continue;
-    }
-
-    // Numbered: "1. text"
-    const mN = qStartN.exec(line);
-    if (mN && parseInt(mN[1]) <= 300) {
-      const rest = mN[2].trim();
-      if (rest.length > 8 && !isOptLine(rest)) {
-        saveQ();
-        const [qtext, embOpts] = splitQFromOpts(rest);
-        currentQ = { number: parseInt(mN[1]), text: qtext, options: embOpts, section: currentSection };
-        continue;
-      }
-    }
-
-    // Continuation of question text (before any options)
-    if (currentQ && Object.keys(currentQ.options).length === 0 && !isOptLine(line)) {
-      currentQ.text += ' ' + line;
-    }
-  }
-
-  saveQ();
-
-  // ── GUARANTEE: always return at least 10 questions ──────────────
-  // If parsing found < 10, generate placeholder stubs so exam can load
-  // This should happen < 0.1% of the time with robust OCR above
-  const MIN_Q = 10;
-  if (questions.length < MIN_Q) {
-    const existing = new Set(questions.map(q => q.number));
-    for (let n = 1; questions.length < MIN_Q; n++) {
-      if (!existing.has(n)) {
-        questions.push({
-          number: n,
-          text: '[Question ' + n + ' could not be extracted — OCR may have failed on this page]',
-          options: { A: '—', B: '—', C: '—', D: '—' },
-          section: currentSection || '',
-          partial: true
-        });
-        existing.add(n);
-      }
-    }
-    questions.sort((a,b) => a.number - b.number);
-  }
-
-  return questions;
-}function parseQuestions(ocrText) {
-  const questions = [];
-  const lines = ocrText.split('\n');
-  let currentQ = null;
-  let currentSection = '';
-  const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
-
-  const sectionPat = /\b(PHYSICS|CHEMISTRY|MATHEMATICS|MATHS|BIOLOGY|BOTANY|ZOOLOGY|SECTION[\s\-]+\w+)\b/i;
-  const qStartQ   = /^Q\.?\s*(\d{1,3})[\s.):\-]\s*(.*)/i;
-  const qStartN   = /^(\d{1,3})[.)]\s+(.+)/;
-
-  // Relaxed option extractor — handles (, [, {, | as bracket chars
-  function extractOpts(line) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/g;
-    const matches = [...line.matchAll(pat)];
-    if (!matches.length) return {};
-    const result = {};
-    matches.forEach((m, i) => {
-      let label = m[1].toUpperCase();
-      if (NUM_TO_LETTER[label]) label = NUM_TO_LETTER[label];
-      if (!'ABCD'.includes(label)) return;
-      const textStart = m.index + m[0].length;
-      const textEnd   = i + 1 < matches.length ? matches[i+1].index : line.length;
-      const text      = line.slice(textStart, textEnd).trim();
-      if (text && !result[label]) result[label] = text;
-    });
-    return result;
-  }
-
-  // If question text itself contains embedded options (all on one line after Q text)
-  function splitQFromOpts(text) {
-    const pat = /[\(\[\{|]([A-Da-d1-4])[\)\]\}|.]\s*/;
-    const m = pat.exec(text);
-    if (!m) return [text, {}];
-    return [text.slice(0, m.index).trim(), extractOpts(text.slice(m.index))];
-  }
-
-  function isOptLine(line) {
-    return /^[\(\[\{|]?[A-Da-d1-4][\)\]\}|.]\s/.test(line);
-  }
-  function isHeader(line) {
-    if (!line || line.length < 2) return true;
-    if (/^(SECTION|PART|CHAPTER|INSTRUCTION|NOTE:|PAGE\s*\d|Time Allowed|Maximum Marks|Read the)/i.test(line)) return true;
-    if (/^\d+\s*$/.test(line)) return true;
-    return false;
-  }
-
-  function saveQ() {
-    if (currentQ && currentQ.text.trim().length > 3) {
-      // Post-process: if text contains embedded options, split them out
-      if (Object.keys(currentQ.options).length === 0) {
-        const [qtext, opts] = splitQFromOpts(currentQ.text);
-        if (Object.keys(opts).length > 0) {
-          currentQ.text = qtext;
-          currentQ.options = opts;
-        }
-      }
-      questions.push(currentQ);
-    }
-  }
-
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) continue;
-
-    // Section header
-    const sm = sectionPat.exec(line);
-    if (sm && line.length < 80) {
-      const s = sm[1].toUpperCase();
-      currentSection = s.includes('MATH') ? 'Mathematics'
-                     : s.includes('PHYS') ? 'Physics'
-                     : s.includes('CHEM') ? 'Chemistry'
-                     : s.includes('BIO') || s.includes('BOT') || s.includes('ZOO') ? 'Biology'
-                     : sm[1];
-    }
-
-    if (isHeader(line)) continue;
-
-    // Option line with brackets: (A), [A], {A}, |A|
-    const opts = extractOpts(line);
-    if (Object.keys(opts).length > 0 && currentQ) {
-      Object.entries(opts).forEach(([k,v]) => { if (!currentQ.options[k]) currentQ.options[k] = v; });
-      continue;
-    }
-
-    // Bare "A) text" or "A. text"
-    const mOB = /^([A-Da-d])[.)]\s+(.+)/.exec(line);
-    if (mOB && currentQ) {
-      const letter = mOB[1].toUpperCase();
-      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
-        currentQ.options[letter] = mOB[2].trim();
-      }
-      continue;
-    }
-
-    // Bare "A text" — OCR dropped bracket entirely (last resort for options)
-    const mBare = /^([A-Da-d])\s{1,4}(\S.+)/.exec(line);
-    if (mBare && currentQ && Object.keys(currentQ.options).length > 0) {
-      // Only use bare if we already found some options (confirms context)
-      const letter = mBare[1].toUpperCase();
-      if ('ABCD'.includes(letter) && !currentQ.options[letter]) {
-        currentQ.options[letter] = mBare[2].trim();
-      }
-      continue;
-    }
-
-    // Q-prefix: Q1. Q.1 Q1:
-    const mQ = qStartQ.exec(line);
-    if (mQ) {
-      saveQ();
-      const [qtext, embOpts] = splitQFromOpts(mQ[2].trim());
-      currentQ = { number: parseInt(mQ[1]), text: qtext, options: embOpts, section: currentSection };
-      continue;
-    }
-
-    // Numbered: "1. text"
-    const mN = qStartN.exec(line);
-    if (mN && parseInt(mN[1]) <= 300) {
-      const rest = mN[2].trim();
-      if (rest.length > 8 && !isOptLine(rest)) {
-        saveQ();
-        const [qtext, embOpts] = splitQFromOpts(rest);
-        currentQ = { number: parseInt(mN[1]), text: qtext, options: embOpts, section: currentSection };
-        continue;
-      }
-    }
-
-    // Continuation of question text (before any options)
-    if (currentQ && Object.keys(currentQ.options).length === 0 && !isOptLine(line)) {
-      currentQ.text += ' ' + line;
-    }
-  }
-
-  saveQ();
-
-  // ── GUARANTEE: always return at least 10 questions ──────────────
-  // If parsing found < 10, generate placeholder stubs so exam can load
-  // This should happen < 0.1% of the time with robust OCR above
-  const MIN_Q = 10;
-  if (questions.length < MIN_Q) {
-    const existing = new Set(questions.map(q => q.number));
-    for (let n = 1; questions.length < MIN_Q; n++) {
-      if (!existing.has(n)) {
-        questions.push({
-          number: n,
-          text: '[Question ' + n + ' could not be extracted — OCR may have failed on this page]',
-          options: { A: '—', B: '—', C: '—', D: '—' },
-          section: currentSection || '',
-          partial: true
-        });
-        existing.add(n);
-      }
-    }
-    questions.sort((a,b) => a.number - b.number);
-  }
-
-  return questions;
+  return questions.filter(q => q.text.trim().length > 3 && Object.keys(q.options).length >= 2);
 }
 
 // ── ANSWER KEY PARSER ─────────────────────────
@@ -1315,8 +732,7 @@ function formatTime(s) {
   return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
 }
 
-
-  function lsGetAllPapers() {
+function lsGetAllPapers() {
     try { return JSON.parse(localStorage.getItem('pyq_papers') || '[]'); } catch(e) { return []; }
   }
   function lsGetPaper(id) { return lsGetAllPapers().find(p => p.id === id) || null; }
@@ -1330,47 +746,81 @@ function formatTime(s) {
   }
 
 
-  // ── File state ───────────────────────────────────────────────
-  const files = {};
+  let qpFile = null, akFile = null;
+  let _ocrWorker = null;
 
-  function setupDZ(dropId, inputId, key) {
-    const drop = document.getElementById(dropId);
-    const input = document.getElementById(inputId);
-    input.addEventListener('change', () => handleFile(input.files[0], key));
+  async function getOcrWorker(onProgress) {
+    if (_ocrWorker) return _ocrWorker;
+    _ocrWorker = await Tesseract.createWorker('eng', 1, {
+      logger: m => {
+        if (onProgress && m.status === 'recognizing text')
+          onProgress('OCR: ' + Math.round(m.progress * 100) + '%');
+      }
+    });
+    return _ocrWorker;
+  }
+  async function terminateOcrWorker() {
+    if (_ocrWorker) { await _ocrWorker.terminate(); _ocrWorker = null; }
+  }
+  async function ocrImageData(imageData, onProgress) {
+    const worker = await getOcrWorker(onProgress);
+    // PSM 6: treat image as a single uniform block of text
+    // PSM 4: treat as single column — better for each half of a split page
+    const { data: { text } } = await worker.recognize(imageData, {}, {
+      tessedit_pageseg_mode: '4'
+    });
+    return text;
+  }
+
+  function setupDZ(dropId, inputId, type) {
+    const drop = document.getElementById(dropId), input = document.getElementById(inputId);
+    input.addEventListener('change', () => handleFile(input.files[0], type));
     drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
     drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
-    drop.addEventListener('drop', e => {
-      e.preventDefault(); drop.classList.remove('drag-over');
-      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], key);
-    });
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag-over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], type); });
   }
-  function handleFile(file, key) {
+  function handleFile(file, type) {
     if (!file) return;
     if (file.size > 30*1024*1024) { showToast('File too large (max 30 MB)', 'error'); return; }
-    files[key] = file;
-    document.getElementById(key+'-drop').classList.add('has-file');
-    document.getElementById(key+'-preview').style.display = 'flex';
-    document.getElementById(key+'-name').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+    if (type === 'qp') qpFile = file; else akFile = file;
+    document.getElementById(type+'-drop').classList.add('has-file');
+    document.getElementById(type+'-preview').style.display = 'flex';
+    document.getElementById(type+'-name').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
   }
-  function clearFile(e, key) {
+  function clearFile(e, type) {
     e.stopPropagation();
-    files[key] = null;
-    document.getElementById(key+'-file').value = '';
-    document.getElementById(key+'-drop').classList.remove('has-file');
-    document.getElementById(key+'-preview').style.display = 'none';
+    if (type === 'qp') { qpFile = null; document.getElementById('qp-file').value = ''; }
+    else { akFile = null; document.getElementById('ak-file').value = ''; }
+    document.getElementById(type+'-drop').classList.remove('has-file');
+    document.getElementById(type+'-preview').style.display = 'none';
   }
 
-  // ── Method tabs ───────────────────────────────────────────────
-  document.querySelectorAll('.method-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.method-panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-    });
-  });
+  const STEPS = [
+    {id:'s1', label:'Rendering question paper'},
+    {id:'s2', label:'OCR: Reading questions'},
+    {id:'s3', label:'Parsing MCQ questions'},
+    {id:'s4', label:'Rendering answer key'},
+    {id:'s5', label:'OCR: Reading answer key'},
+    {id:'s6', label:'Mapping answers'},
+    {id:'s7', label:'Saving to local storage'},
+  ];
+  function initOcrUI() {
+    document.getElementById('ocr-box').classList.add('active');
+    document.getElementById('ocr-steps').innerHTML = STEPS.map(s =>
+      `<div class="ocr-step" id="${s.id}"><span class="step-icon">⭕</span><span>${s.label}</span></div>`
+    ).join('');
+    document.getElementById('ocr-result').style.display = 'none';
+  }
+  function setStep(id, state, detail) {
+    const el = document.getElementById(id); if (!el) return;
+    const icons = {pending:'⭕', active:'🔄', done:'✅', error:'❌', skip:'⏭️'};
+    el.className = 'ocr-step ' + (state === 'pending' ? '' : state);
+    el.querySelector('.step-icon').textContent = icons[state] || '⭕';
+    if (detail) document.getElementById('ocr-msg').textContent = detail;
+    const done = document.querySelectorAll('.ocr-step.done,.ocr-step.skip').length;
+    document.getElementById('ocr-bar').style.width = (done / STEPS.length * 100) + '%';
+  }
 
-  // ── Marking scheme preview ────────────────────────────────────
   function updateMsPreview() {
     const c = parseFloat(document.getElementById('marks-correct').value) || 4;
     const w = parseFloat(document.getElementById('marks-wrong').value) || 0;
@@ -1381,10 +831,7 @@ function formatTime(s) {
 
   document.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('year');
-    for (let y = 2026; y >= 2000; y--)
-      sel.insertAdjacentHTML('beforeend', `<option value="${y}">${y}</option>`);
-    setupDZ('ai-qp-drop','ai-qp-file','ai-qp');
-    setupDZ('ai-ak-drop','ai-ak-file','ai-ak');
+    for (let y = 2026; y >= 2000; y--) sel.insertAdjacentHTML('beforeend', `<option value="${y}">${y}</option>`);
     setupDZ('qp-drop','qp-file','qp');
     setupDZ('ak-drop','ak-file','ak');
     ['marks-correct','marks-wrong','marks-skipped'].forEach(id =>
@@ -1392,468 +839,114 @@ function formatTime(s) {
     updateMsPreview();
   });
 
-  // ── Shared: get paper details ────────────────────────────────
-  function getPaperDetails() {
+  document.getElementById('upload-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
     const subject  = document.getElementById('subject').value.trim();
     const examName = document.getElementById('exam-name').value.trim();
     const year     = document.getElementById('year').value;
-    if (!subject)  { showToast('Please enter a subject', 'error'); return null; }
-    if (!examName) { showToast('Please enter exam name', 'error'); return null; }
-    if (!year)     { showToast('Please select a year', 'error'); return null; }
-    return {
-      subject, examName, year,
-      board: document.getElementById('board').value.trim(),
-      description: document.getElementById('description').value.trim(),
-      duration: parseInt(document.getElementById('duration').value) || 180,
-      marksCorrect: parseFloat(document.getElementById('marks-correct').value) || 4,
-      marksWrong:   parseFloat(document.getElementById('marks-wrong').value)   || 0,
-      marksSkipped: parseFloat(document.getElementById('marks-skipped').value) || 0,
-    };
-  }
+    const duration = parseInt(document.getElementById('duration').value) || 180;
+    const marksCorrect = parseFloat(document.getElementById('marks-correct').value) || 4;
+    const marksWrong   = parseFloat(document.getElementById('marks-wrong').value) || 0;
+    const marksSkipped = parseFloat(document.getElementById('marks-skipped').value) || 0;
 
-  function savePaper(questions, answerKey, details) {
-    const id = Date.now().toString();
-    const meta = {
-      id,
-      subject:       details.subject,
-      examName:      details.examName,
-      year:          details.year,
-      board:         details.board,
-      description:   details.description,
-      duration:      details.duration,
-      hasAnswerKey:  Object.keys(answerKey).length > 0,
-      hasExam:       questions.length > 0,
-      questionCount: questions.length,
-      questions,
-      answerKey,
-      markingScheme: {
-        correct: details.marksCorrect,
-        wrong:   details.marksWrong,
-        skipped: details.marksSkipped,
-        total:   questions.length * details.marksCorrect
-      },
-      uploadedAt: new Date().toISOString()
-    };
-    lsSavePaper(meta);
-    return id;
-  }
+    if (!subject)  { showToast('Please enter a subject', 'error'); return; }
+    if (!examName) { showToast('Please enter exam name', 'error'); return; }
+    if (!year)     { showToast('Please select a year', 'error'); return; }
+    if (!qpFile)   { showToast('Please upload the question paper', 'error'); return; }
 
-  function showResult(boxId, barId, questions, answerKey) {
-    document.getElementById(barId).style.width = '100%';
-    const el = document.getElementById(boxId + '-result');
-    el.style.display = 'block';
-
-    // Group by section
-    const sections = {};
-    questions.forEach(q => {
-      const s = q.section || 'General';
-      if (!sections[s]) sections[s] = 0;
-      sections[s]++;
-    });
-    const sectionHtml = Object.entries(sections)
-      .map(([s,n]) => `<span class="badge badge-blue">${s}: ${n}q</span>`).join(' ');
-
-    el.innerHTML = `
-      <h4 style="margin-bottom:.75rem;">✅ Saved successfully!</h4>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center;margin-bottom:1rem;">
-        <div><div class="q-count-big">${questions.length}</div><div style="font-size:.8rem;color:var(--text-muted);">Questions</div></div>
-        <div><div class="q-count-big">${Object.keys(answerKey).length}</div><div style="font-size:.8rem;color:var(--text-muted);">Answers</div></div>
-        <div><div class="q-count-big">${Object.keys(sections).length}</div><div style="font-size:.8rem;color:var(--text-muted);">Sections</div></div>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:.5rem;">${sectionHtml}</div>`;
-  }
-
-  // ══════════════════════════════════════════════════════════════
-  // EXTRACTION using Tesseract OCR
-  // ══════════════════════════════════════════════════════════════
-  const AI_STEPS = [
-    {id:'a1', label:'Rendering PDF pages'},
-    {id:'a2', label:'Running OCR on pages'},
-    {id:'a3', label:'Extracting questions & sections'},
-    {id:'a4', label:'Processing answer key'},
-    {id:'a5', label:'Saving paper'},
-  ];
-
-  function initProgress(boxId, stepsId, steps) {
-    document.getElementById(boxId).classList.add('active');
-    document.getElementById(stepsId).innerHTML = steps.map(s =>
-      `<div class="ocr-step" id="${s.id}"><span class="step-icon">⭕</span><span>${s.label}</span></div>`
-    ).join('');
-  }
-  function setStep(id, state, detail) {
-    const el = document.getElementById(id); if (!el) return;
-    const icons = {pending:'⭕',active:'🔄',done:'✅',error:'❌',skip:'⏭️'};
-    el.className = 'ocr-step ' + (state==='pending' ? '' : state);
-    el.querySelector('.step-icon').textContent = icons[state] || '⭕';
-    if (detail) {
-      const msgEl = document.getElementById('ai-msg') || document.getElementById('ocr-msg');
-      if (msgEl) msgEl.textContent = detail;
-    }
-  }
-  function updateBar(barId, done, total) {
-    document.getElementById(barId).style.width = (done/total*100) + '%';
-  }
-
-  // Convert file to base64 for Claude API
-  async function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // Render PDF pages to base64 images
-  async function pdfToBase64Images(file, onProgress) {
-    const pdfjsLib = window['pdfjs-dist/build/pdf'];
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const images = [];
-    for (let i = 1; i <= pdf.numPages; i++) {
-      if (onProgress) onProgress(`Rendering page ${i} of ${pdf.numPages}…`);
-      const page     = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 2.5 });
-      const canvas   = document.createElement('canvas');
-      canvas.width   = viewport.width;
-      canvas.height  = viewport.height;
-      const ctx      = canvas.getContext('2d');
-      ctx.fillStyle  = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: ctx, viewport }).promise;
-      // Get base64 without the data:image/png;base64, prefix
-      images.push(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
-    }
-    return images;
-  }
-
-  // Call Claude API to extract questions from images
-  async function extractWithClaude(images, isAnswerKey) {
-    const imageContent = images.map(b64 => ({
-      type: 'image',
-      source: { type: 'base64', media_type: 'image/jpeg', data: b64 }
-    }));
-
-    const prompt = isAnswerKey
-      ? `This is an answer key for a multiple choice exam. Extract the answer for every question number.
-Return ONLY a JSON object mapping question number (as string) to answer letter (A/B/C/D).
-If the answer key uses numbers (1/2/3/4), convert: 1→A, 2→B, 3→C, 4→D.
-Example: {"1":"A","2":"C","3":"B"}
-Return ONLY the JSON, no other text.`
-      : `This is a multiple choice exam paper. Extract EVERY question with ALL 4 options (A, B, C, D).
-Also detect section headers like "MATHEMATICS SINGLE CORRECT", "PHYSICS NUMERICAL", "CHEMISTRY SINGLE CORRECT", etc.
-
-Return ONLY a JSON array. Each element:
-{
-  "number": 1,
-  "section": "Mathematics Single Correct",
-  "text": "full question text here",
-  "options": {"A": "option text", "B": "option text", "C": "option text", "D": "option text"}
-}
-
-Rules:
-- Include ALL questions, do not skip any
-- Keep mathematical expressions as readable text (e.g. "x^2 + 3x" not LaTeX)
-- If only 2 options visible on a page, still include them, others will come from next page
-- section field: use the section name from the nearest section header above the question
-- If no section header found, use "General"
-Return ONLY the JSON array, no other text.`;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 8000,
-        messages: [{
-          role: 'user',
-          content: [
-            ...imageContent,
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error('Claude API error: ' + (err.error?.message || response.status));
-    }
-
-    const data = await response.json();
-    const text = data.content.map(b => b.text || '').join('');
-    // Strip markdown code fences if present
-    const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    return JSON.parse(clean);
-  }
-
-  async function runAiExtraction() {
-    const details = getPaperDetails();
-    if (!details) return;
-    const qpFile = files['ai-qp'];
-    if (!qpFile) { showToast('Please upload the question paper', 'error'); return; }
-
-    document.getElementById('ai-submit-text').style.display = 'none';
-    document.getElementById('ai-submit-loader').style.display = 'inline';
-    document.getElementById('ai-submit-btn').disabled = true;
-    initProgress('ai-progress-box', 'ai-steps', AI_STEPS);
+    document.getElementById('submit-text').style.display = 'none';
+    document.getElementById('submit-loader').style.display = 'inline';
+    document.getElementById('submit-btn').disabled = true;
+    initOcrUI();
 
     try {
-      // Step 1: Render PDF pages to images
-      setStep('a1', 'active');
-      let qpImages;
-      if (qpFile.type === 'application/pdf') {
-        qpImages = await pdfToBase64Images(qpFile, msg => setStep('a1', 'active', msg));
-      } else {
-        qpImages = [await fileToBase64(qpFile)];
-      }
-      setStep('a1', 'done');
-      updateBar('ai-bar', 1, 5);
-
-      // Step 2 & 3: Tesseract OCR on each page, then parse questions
-      setStep('a2', 'active', 'Starting OCR on ' + qpImages.length + ' page(s)…');
-      setStep('a3', 'active');
-
-      let fullText = '';
-      for (let i = 0; i < qpImages.length; i++) {
-        setStep('a2', 'active', `OCR: page ${i+1} of ${qpImages.length}…`);
-        const imgDataUrl = 'data:image/jpeg;base64,' + qpImages[i];
-        const pageText = await ocrImageData(imgDataUrl, msg => setStep('a2', 'active', msg));
-        fullText += '\n' + pageText;
-      }
-
-      const allQuestions = parseQuestions(fullText);
-
-      setStep('a2', 'done');
-      setStep('a3', 'done', `Extracted ${allQuestions.length} questions`);
-      updateBar('ai-bar', 3, 5);
-
-      // Step 4: Answer key via OCR
-      let answerKey = {};
-      const akFile = files['ai-ak'];
-      if (akFile) {
-        setStep('a4', 'active', 'Extracting answer key…');
-        let akImages;
-        if (akFile.type === 'application/pdf') {
-          akImages = await pdfToBase64Images(akFile);
-        } else {
-          akImages = [await fileToBase64(akFile)];
-        }
-        let akText = '';
-        for (let i = 0; i < akImages.length; i++) {
-          const imgDataUrl = 'data:image/jpeg;base64,' + akImages[i];
-          akText += '\n' + await ocrImageData(imgDataUrl);
-        }
-        // Parse answer key: look for patterns like "1. A" or "1) B" or "1 - C"
-        const akLines = akText.split('\n');
-        const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
-        for (const line of akLines) {
-          const m = /(\d{1,3})\s*[.):\-]\s*([A-Da-d1-4])/.exec(line.trim());
-          if (m) {
-            let ans = m[2].toUpperCase();
-            if (NUM_TO_LETTER[ans]) ans = NUM_TO_LETTER[ans];
-            answerKey[m[1]] = ans;
-          }
-        }
-        const matched = allQuestions.filter(q => answerKey[String(q.number)]).length;
-        setStep('a4', 'done', `Matched ${matched}/${allQuestions.length} answers`);
-      } else {
-        setStep('a4', 'skip');
-      }
-      updateBar('ai-bar', 4, 5);
-
-      // Step 5: Save
-      setStep('a5', 'active');
-      const id = savePaper(allQuestions, answerKey, details);
-      setStep('a5', 'done');
-      updateBar('ai-bar', 5, 5);
-
-      showResult('ai', 'ai-bar', allQuestions, answerKey);
-      showToast(`Saved! ${allQuestions.length} questions extracted.`, 'success');
-      setTimeout(() => window.location.href = 'viewer.html?id=' + id, 2000);
-
-    } catch(err) {
-      console.error(err);
-      setStep('a2', 'error'); setStep('a3', 'error');
-      showToast('OCR Error: ' + err.message, 'error');
-      document.getElementById('ai-submit-text').style.display = 'inline';
-      document.getElementById('ai-submit-loader').style.display = 'none';
-      document.getElementById('ai-submit-btn').disabled = false;
-    }
-  }
-
-  // ══════════════════════════════════════════════════════════════
-  // OCR FALLBACK (kept for non-math papers)
-  // ══════════════════════════════════════════════════════════════
-  let _ocrWorker = null;
-  let _ocrProgress = null;
-
-  async function _createWorker() {
-    return Tesseract.createWorker('eng', 1, {
-      logger: m => {
-        if (_ocrProgress && m.status === 'recognizing text')
-          _ocrProgress('OCR: ' + Math.round(m.progress * 100) + '%');
-      }
-    });
-  }
-
-  async function getOcrWorker(onProgress) {
-    _ocrProgress = onProgress || null;
-    if (_ocrWorker) return _ocrWorker;
-    _ocrWorker = await _createWorker();
-    return _ocrWorker;
-  }
-
-  async function terminateOcrWorker() {
-    if (_ocrWorker) {
-      try { await _ocrWorker.terminate(); } catch(e) {}
-      _ocrWorker = null;
-    }
-  }
-
-  // Multi-PSM fallback: try each mode until we get real text
-  // PSM 4=single column, PSM 6=uniform block, PSM 3=fully auto, PSM 11=sparse text
-  const _PSM_MODES = ['4', '6', '3', '11'];
-
-  async function ocrImageData(imageData, onProgress) {
-    _ocrProgress = onProgress || null;
-    for (const psm of _PSM_MODES) {
-      try {
-        const worker = await getOcrWorker(onProgress);
-        const { data: { text } } = await worker.recognize(imageData, {}, {
-          tessedit_pageseg_mode: psm
-        });
-        const words = (text.match(/\w{2,}/g) || []).length;
-        if (words >= 5) return text; // good enough
-        console.warn('PSM ' + psm + ': only ' + words + ' words, trying next…');
-      } catch(e) {
-        console.warn('OCR crashed PSM ' + psm + ':', e.message);
-        await terminateOcrWorker(); // recreate worker on next call
-      }
-    }
-    // Final attempt with a fresh worker, default settings
-    try {
-      await terminateOcrWorker();
-      _ocrWorker = await _createWorker();
-      const { data: { text } } = await _ocrWorker.recognize(imageData);
-      return text;
-    } catch(e) {
-      console.error('All OCR attempts failed:', e);
-      return ''; // empty — page skipped, others continue
-    }
-  }
-
-  const OCR_STEPS = [
-    {id:'s1', label:'Rendering question paper'},
-    {id:'s2', label:'OCR: Reading questions'},
-    {id:'s3', label:'Parsing MCQ questions'},
-    {id:'s4', label:'Rendering answer key'},
-    {id:'s5', label:'OCR: Reading answer key'},
-    {id:'s6', label:'Mapping answers'},
-    {id:'s7', label:'Saving'},
-  ];
-
-  async function runOcrExtraction() {
-    const details = getPaperDetails();
-    if (!details) return;
-    const qpFile = files['qp'];
-    if (!qpFile) { showToast('Please upload the question paper', 'error'); return; }
-
-    document.getElementById('ocr-submit-text').style.display = 'none';
-    document.getElementById('ocr-submit-loader').style.display = 'inline';
-    document.getElementById('ocr-submit-btn').disabled = true;
-    initProgress('ocr-box', 'ocr-steps', OCR_STEPS);
-    // redirect msg to ocr-msg
-    window._msgBox = 'ocr-msg';
-
-    try {
+      // ── Render + OCR question paper ──
       setStep('s1', 'active');
-      const qpImages = await pdfToImages(qpFile, msg => { setStep('s1','active',msg); document.getElementById('ocr-msg').textContent=msg; });
+      const qpImages = await pdfToImages(qpFile, msg => setStep('s1', 'active', msg));
       setStep('s1', 'done');
-      updateBar('ocr-bar', 1, OCR_STEPS.length);
 
       setStep('s2', 'active', 'Loading OCR engine…');
       let qpText = '';
       for (let i = 0; i < qpImages.length; i++) {
-        const msg = `Page ${i+1}/${qpImages.length}`;
-        setStep('s2', 'active', msg);
-        document.getElementById('ocr-msg').textContent = msg;
-        qpText += await ocrImageData(qpImages[i], m => { document.getElementById('ocr-msg').textContent = msg + ' — ' + m; }) + '\n\n';
+        setStep('s2', 'active', 'Page ' + (i+1) + '/' + qpImages.length + '…');
+        qpText += await ocrImageData(qpImages[i],
+          msg => setStep('s2', 'active', 'Page ' + (i+1) + '/' + qpImages.length + ' — ' + msg)
+        ) + '\n\n';
       }
       setStep('s2', 'done');
-      updateBar('ocr-bar', 2, OCR_STEPS.length);
 
-      setStep('s3', 'active');
-      let questions = parseQuestions(qpText);
-      setStep('s3', 'done', `Found ${questions.length} questions`);
-      updateBar('ocr-bar', 3, OCR_STEPS.length);
+      setStep('s3', 'active', 'Parsing questions…');
+      const questions = parseQuestions(qpText);
+      setStep('s3', 'done', 'Found ' + questions.length + ' questions');
 
-      // ── MINIMUM GUARANTEE: if < 10 questions, re-OCR with PSM 1 ──────────
-      if (questions.length < 10 && qpImages.length > 0) {
-        setStep('s2', 'active', 'Low yield — retrying with enhanced settings…');
-        await terminateOcrWorker();
-        let retryText = '';
-        for (let i = 0; i < qpImages.length; i++) {
-          setStep('s2', 'active', `Retry page ${i+1}/${qpImages.length}…`);
-          try {
-            _ocrWorker = await _createWorker();
-            const { data: { text } } = await _ocrWorker.recognize(qpImages[i], {}, {
-              tessedit_pageseg_mode: '1'
-            });
-            retryText += text + '\n\n';
-          } catch(e) { console.warn('Retry page', i, 'failed:', e); }
-        }
-        await terminateOcrWorker();
-        const retried = parseQuestions(retryText);
-        if (retried.length > questions.length) {
-          questions = retried;
-          setStep('s2', 'active', `Enhanced retry: ${questions.length} questions`);
-        }
-        setStep('s2', 'done', `Final: ${questions.length} questions extracted`);
-      }
-
+      // ── Render + OCR answer key ──
       let answerKey = {};
-      const akFile = files['ak'];
       if (akFile) {
         setStep('s4', 'active');
-        const akImages = await pdfToImages(akFile);
+        const akImages = await pdfToImages(akFile, msg => setStep('s4', 'active', msg));
         setStep('s4', 'done');
-        setStep('s5', 'active');
+
+        setStep('s5', 'active', 'Reading answer key…');
         let akText = '';
         for (let i = 0; i < akImages.length; i++) {
-          akText += await ocrImageData(akImages[i]) + '\n\n';
+          setStep('s5', 'active', 'AK page ' + (i+1) + '/' + akImages.length + '…');
+          akText += await ocrImageData(akImages[i],
+            msg => setStep('s5', 'active', 'AK page ' + (i+1) + '/' + akImages.length + ' — ' + msg)
+          ) + '\n\n';
         }
         setStep('s5', 'done');
-        setStep('s6', 'active');
+
+        setStep('s6', 'active', 'Mapping answers…');
         answerKey = parseAnswerKey(akText);
-        const matched = questions.filter(q => answerKey[String(q.number)]).length;
-        setStep('s6', 'done', `Matched ${matched}/${questions.length}`);
+        const matched = questions.filter(q => answerKey[q.number.toString()]).length;
+        setStep('s6', 'done', 'Matched ' + matched + '/' + questions.length + ' answers');
       } else {
-        setStep('s4','skip'); setStep('s5','skip'); setStep('s6','skip');
+        setStep('s4', 'skip'); setStep('s5', 'skip'); setStep('s6', 'skip');
       }
-      updateBar('ocr-bar', 6, OCR_STEPS.length);
+
       await terminateOcrWorker();
 
-      setStep('s7', 'active');
-      const id = savePaper(questions, answerKey, details);
+      // ── Save to localStorage ──
+      setStep('s7', 'active', 'Saving…');
+      const id = Date.now().toString();
+      const totalMarks = questions.length * marksCorrect;
+      const meta = {
+        id, subject, examName, year, duration,
+        board: document.getElementById('board').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        hasAnswerKey: !!akFile,
+        hasExam: questions.length > 0,
+        questionCount: questions.length,
+        questions, answerKey,
+        markingScheme: { correct: marksCorrect, wrong: marksWrong, skipped: marksSkipped, total: totalMarks },
+        uploadedAt: new Date().toISOString()
+      };
+      lsSavePaper(meta);
       setStep('s7', 'done');
-      updateBar('ocr-bar', 7, OCR_STEPS.length);
+      document.getElementById('ocr-bar').style.width = '100%';
 
-      showResult('ocr', 'ocr-bar', questions, answerKey);
-      showToast(`Saved! ${questions.length} questions extracted.`, 'success');
-      setTimeout(() => window.location.href = 'viewer.html?id=' + id, 2000);
+      const resultEl = document.getElementById('ocr-result');
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = `
+        <h4 style="margin-bottom:.75rem;">✅ Saved successfully!</h4>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;text-align:center;">
+          <div><div class="q-count-big">${questions.length}</div><div style="font-size:.8rem;color:var(--text-muted);">Questions</div></div>
+          <div><div class="q-count-big">${Object.keys(answerKey).length}</div><div style="font-size:.8rem;color:var(--text-muted);">Answers Mapped</div></div>
+          <div><div class="q-count-big">${duration}m</div><div style="font-size:.8rem;color:var(--text-muted);">Duration</div></div>
+        </div>`;
+
+      showToast('Paper saved! Redirecting…', 'success');
+      setTimeout(() => window.location.href = 'viewer.html?id=' + id, 1800);
 
     } catch(err) {
       await terminateOcrWorker();
       console.error(err);
-      showToast('Error: ' + err.message, 'error');
-      document.getElementById('ocr-submit-text').style.display = 'inline';
-      document.getElementById('ocr-submit-loader').style.display = 'none';
-      document.getElementById('ocr-submit-btn').disabled = false;
+      showToast('Error: ' + (err.message || 'Unknown error'), 'error');
+      document.getElementById('submit-text').style.display = 'inline';
+      document.getElementById('submit-loader').style.display = 'none';
+      document.getElementById('submit-btn').disabled = false;
     }
-  }
+  });
 
 </script>
 </body>
