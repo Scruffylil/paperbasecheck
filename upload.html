@@ -642,7 +642,10 @@ function parseQuestions(ocrText) {
   }
 
   saveQ();
-  return questions.filter(q => q.text.trim().length > 3 && Object.keys(q.options).length >= 2);
+  const filtered = questions.filter(q => q.text.trim().length > 3 && Object.keys(q.options).length >= 2);
+  // Assign sequential index as fallback number in case OCR misread question numbers
+  filtered.forEach((q, i) => { q.seqNumber = i + 1; });
+  return filtered;
 }
 
 // ── ANSWER KEY PARSER ─────────────────────────

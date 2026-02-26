@@ -2346,13 +2346,16 @@ function formatTime(s) {
     let correct=0, wrong=0, skipped=0, marksScored=0;
 
     questions.forEach((q,i) => {
-      const ua = userAnswers[i], ca = ak[String(q.number)];
+      const ua = userAnswers[i];
+      // Try to find correct answer by q.number first, then seqNumber, then by index+1 as fallback
+      const ca = ak[String(q.number)] || ak[String(q.seqNumber)] || ak[String(i+1)];
       if (!ua) {
         skipped++;
         marksScored += mS;
       } else if (hasKey) {
         if (!ca) {
-          skipped++;
+          // Answered but no key for this question — treat as attempted, no marks change
+          // (don't count as skipped since user did answer)
         } else if (ua === ca) {
           correct++;
           marksScored += mC;
@@ -2422,7 +2425,7 @@ function formatTime(s) {
     section.style.display='block';
     const ak = paper.answerKey||{}, hasKey=Object.keys(ak).length>0;
     document.getElementById('review-list').innerHTML = questions.map((q,i) => {
-      const ua=userAnswers[i], ca=ak[String(q.number)];
+      const ua=userAnswers[i], ca=ak[String(q.number)]||ak[String(q.seqNumber)]||ak[String(i+1)];
       const isCorrect=hasKey&&ca&&ua===ca, isWrong=hasKey&&ca&&ua&&ua!==ca, isSkipped=!ua;
       const icon=isSkipped?'⏭️':isCorrect?'✅':isWrong?'❌':'📝';
       const color=isSkipped?'#f59e0b':isCorrect?'var(--green)':isWrong?'var(--red)':'var(--accent)';
