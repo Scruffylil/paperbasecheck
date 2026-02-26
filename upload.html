@@ -409,10 +409,10 @@ footer a:hover { text-decoration: underline; }
     <!-- AI METHOD -->
     <div class="method-panel active" id="tab-ai">
       <div class="card" style="margin-bottom:1.5rem;">
-        <div class="ai-badge">✨ Powered by Claude AI</div>
+        <div class="ai-badge">📷 Powered by Tesseract OCR</div>
         <h3 style="margin-bottom:.4rem;font-size:1.05rem;">📄 Upload PDF — AI will extract all questions</h3>
         <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:1rem;">
-          Claude reads the PDF pages as images and extracts every question, all 4 options, sections (Physics/Chemistry/Maths), and answer key. Works perfectly on JEE, NEET, BITSAT and any structured exam paper.
+          Tesseract OCR reads the PDF pages and extracts every question, all 4 options, and sections (Physics/Chemistry/Maths). Works best on clean, digital exam papers.
         </p>
         <div class="dropzone" id="ai-qp-drop" onclick="document.getElementById('ai-qp-file').click()">
           <span class="dz-icon">📄</span>
@@ -1464,11 +1464,11 @@ function formatTime(s) {
   }
 
   // ══════════════════════════════════════════════════════════════
-  // AI EXTRACTION using Claude API
+  // EXTRACTION using Tesseract OCR
   // ══════════════════════════════════════════════════════════════
   const AI_STEPS = [
     {id:'a1', label:'Rendering PDF pages'},
-    {id:'a2', label:'Sending to Claude AI'},
+    {id:'a2', label:'Running OCR on pages'},
     {id:'a3', label:'Extracting questions & sections'},
     {id:'a4', label:'Processing answer key'},
     {id:'a5', label:'Saving paper'},
@@ -1601,7 +1601,7 @@ Return ONLY the JSON array, no other text.`;
     initProgress('ai-progress-box', 'ai-steps', AI_STEPS);
 
     try {
-      // Step 1: Render PDF
+      // Step 1: Render PDF pages to images
       setStep('a1', 'active');
       let qpImages;
       if (qpFile.type === 'application/pdf') {
@@ -1612,35 +1612,25 @@ Return ONLY the JSON array, no other text.`;
       setStep('a1', 'done');
       updateBar('ai-bar', 1, 5);
 
-      // Step 2 & 3: Claude extracts questions
-      setStep('a2', 'active', 'Sending ' + qpImages.length + ' page(s) to Claude…');
+      // Step 2 & 3: Tesseract OCR on each page, then parse questions
+      setStep('a2', 'active', 'Starting OCR on ' + qpImages.length + ' page(s)…');
       setStep('a3', 'active');
 
-      // Process in batches of 4 pages to stay within token limits
-      let allQuestions = [];
-      const batchSize = 4;
-      for (let b = 0; b < qpImages.length; b += batchSize) {
-        const batch = qpImages.slice(b, b + batchSize);
-        const batchNum = Math.floor(b/batchSize) + 1;
-        const totalBatches = Math.ceil(qpImages.length/batchSize);
-        setStep('a2', 'active', `Processing pages ${b+1}–${Math.min(b+batchSize, qpImages.length)} of ${qpImages.length}…`);
-        const extracted = await extractWithClaude(batch, false);
-        if (Array.isArray(extracted)) allQuestions.push(...extracted);
+      let fullText = '';
+      for (let i = 0; i < qpImages.length; i++) {
+        setStep('a2', 'active', `OCR: page ${i+1} of ${qpImages.length}…`);
+        const imgDataUrl = 'data:image/jpeg;base64,' + qpImages[i];
+        const pageText = await ocrImageData(imgDataUrl, msg => setStep('a2', 'active', msg));
+        fullText += '\n' + pageText;
       }
 
-      // Deduplicate by question number + section
-      const seen = new Set();
-      allQuestions = allQuestions.filter(q => {
-        const key = (q.section||'') + ':' + q.number;
-        if (seen.has(key)) return false;
-        seen.add(key); return true;
-      });
+      const allQuestions = parseQuestions(fullText);
 
       setStep('a2', 'done');
       setStep('a3', 'done', `Extracted ${allQuestions.length} questions`);
       updateBar('ai-bar', 3, 5);
 
-      // Step 4: Answer key
+      // Step 4: Answer key via OCR
       let answerKey = {};
       const akFile = files['ai-ak'];
       if (akFile) {
@@ -1651,9 +1641,21 @@ Return ONLY the JSON array, no other text.`;
         } else {
           akImages = [await fileToBase64(akFile)];
         }
-        const akData = await extractWithClaude(akImages, true);
-        if (akData && typeof akData === 'object' && !Array.isArray(akData)) {
-          answerKey = akData;
+        let akText = '';
+        for (let i = 0; i < akImages.length; i++) {
+          const imgDataUrl = 'data:image/jpeg;base64,' + akImages[i];
+          akText += '\n' + await ocrImageData(imgDataUrl);
+        }
+        // Parse answer key: look for patterns like "1. A" or "1) B" or "1 - C"
+        const akLines = akText.split('\n');
+        const NUM_TO_LETTER = {'1':'A','2':'B','3':'C','4':'D'};
+        for (const line of akLines) {
+          const m = /(\d{1,3})\s*[.):\-]\s*([A-Da-d1-4])/.exec(line.trim());
+          if (m) {
+            let ans = m[2].toUpperCase();
+            if (NUM_TO_LETTER[ans]) ans = NUM_TO_LETTER[ans];
+            answerKey[m[1]] = ans;
+          }
         }
         const matched = allQuestions.filter(q => answerKey[String(q.number)]).length;
         setStep('a4', 'done', `Matched ${matched}/${allQuestions.length} answers`);
@@ -1675,7 +1677,7 @@ Return ONLY the JSON array, no other text.`;
     } catch(err) {
       console.error(err);
       setStep('a2', 'error'); setStep('a3', 'error');
-      showToast('AI Error: ' + err.message, 'error');
+      showToast('OCR Error: ' + err.message, 'error');
       document.getElementById('ai-submit-text').style.display = 'inline';
       document.getElementById('ai-submit-loader').style.display = 'none';
       document.getElementById('ai-submit-btn').disabled = false;
