@@ -350,14 +350,24 @@ footer a:hover { text-decoration: underline; }
   .ms-preview{margin-top:.75rem;padding:.6rem 1rem;background:rgba(255,255,255,.04);border-radius:var(--radius-sm);font-size:.85rem;color:var(--text-secondary);}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6.0.1/dist/tesseract.min.js"></script>
+  <!-- Tesseract removed — OCR handled by PaddleOCR backend server -->
 </head>
 <body>
 <nav class="navbar">
   <a href="index.html" class="nav-logo"><div class="logo-icon">📚</div>PYQ Portal</a>
   <div class="nav-links"><a href="index.html">Home</a><a href="browse.html">Browse</a><a href="upload.html" class="active nav-cta btn btn-sm">+ Upload Paper</a></div>
 </nav>
-<div class="page-hero"><div class="container"><h1>⬆️ Upload a Question Paper</h1><p>Upload your PDF — OCR extracts questions and answer key automatically.</p></div></div>
+<div class="page-hero"><div class="container"><h1>⬆️ Upload a Question Paper</h1><p>Upload your PDF — PaddleOCR extracts questions and answer key automatically.</p></div></div>
+
+<!-- PaddleOCR Server Status Banner -->
+<div id="server-banner" style="background:rgba(245,158,11,.12);border-bottom:1px solid rgba(245,158,11,.3);padding:.6rem 1rem;text-align:center;font-size:.85rem;color:#fbbf24;display:none;">
+  ⚠️ PaddleOCR server not detected at <code>localhost:5000</code> — run <strong>start.sh</strong> (Mac/Linux) or <strong>start.bat</strong> (Windows) before uploading.
+  <button onclick="checkServer()" style="margin-left:.75rem;padding:.2rem .6rem;border:1px solid #fbbf24;border-radius:4px;background:transparent;color:#fbbf24;cursor:pointer;font-size:.8rem;">Retry</button>
+</div>
+<div id="server-ok-banner" style="background:rgba(16,185,129,.1);border-bottom:1px solid rgba(16,185,129,.2);padding:.5rem 1rem;text-align:center;font-size:.82rem;color:#34d399;display:none;">
+  ✅ PaddleOCR server connected
+</div>
+
 <section class="section">
   <div class="container"><div style="max-width:760px;margin:0 auto;">
     <form id="upload-form" novalidate>
@@ -489,19 +499,37 @@ async function loadTexo() {
     return _texoPipeline;
   } catch(e) {
     console.warn('Texo load failed:', e);
-    texoStatus('⚠️ Texo unavailable — using Tesseract only', '#f59e0b');
+    texoStatus('⚠️ Texo unavailable — using PaddleOCR only', '#f59e0b');
     _texoLoading = false;
     return null;
   }
 }
 
 // Pre-load when checkbox is ticked
+// ── PaddleOCR server health check ─────────────
+window.checkServer = async function checkServer() {
+  try {
+    const resp = await fetch('http://localhost:5000/health', { signal: AbortSignal.timeout(3000) });
+    const ok = resp.ok;
+    document.getElementById('server-banner').style.display    = ok ? 'none' : 'block';
+    document.getElementById('server-ok-banner').style.display = ok ? 'block' : 'none';
+    return ok;
+  } catch {
+    document.getElementById('server-banner').style.display    = 'block';
+    document.getElementById('server-ok-banner').style.display = 'none';
+    return false;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const cb = document.getElementById('texo-enable');
   if (cb) cb.addEventListener('change', () => {
     if (cb.checked) loadTexo();
     else { texoStatus(''); }
   });
+
+  // Check if the PaddleOCR server is running
+  checkServer();
 });
 
 // ── Detect if a line of text looks like it contains math/formula garbage ──
@@ -625,7 +653,7 @@ async function pdfToImages(file, onProgress) {
     ctx.fillStyle  = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     return page.render({ canvasContext: ctx, viewport }).promise.then(() => {
-      // Greyscale — improves Tesseract accuracy on printed text
+      // Greyscale — improves OCR accuracy on printed text
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const d = imgData.data;
       for (let j = 0; j < d.length; j += 4) {
@@ -670,19 +698,28 @@ async function pdfToImages(file, onProgress) {
 }
 
 // ── OCR ───────────────────────────────────────
-// NOTE: upload.html provides getOcrWorker/terminateOcrWorker for efficiency.
-// This fallback is used if called outside upload context.
+// ── PaddleOCR server call ─────────────────────
+const PADDLE_URL = 'http://localhost:5000/ocr';
+
 async function ocrImageData(imageData, onProgress) {
-  if (typeof getOcrWorker === 'function') {
-    const worker = await getOcrWorker(onProgress);
-    const { data: { text } } = await worker.recognize(imageData);
-    return text;
+  if (onProgress) onProgress('Sending to PaddleOCR…');
+  try {
+    const resp = await fetch(PADDLE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageData })
+    });
+    if (!resp.ok) throw new Error('Server error: ' + resp.status);
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    return data.text || '';
+  } catch (e) {
+    // If server unreachable, show a clear message
+    if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+      throw new Error('PaddleOCR server not running. Please run start.sh (Mac/Linux) or start.bat (Windows) first.');
+    }
+    throw e;
   }
-  // Fallback: one-shot worker
-  const worker = await Tesseract.createWorker('eng');
-  const { data: { text } } = await worker.recognize(imageData);
-  await worker.terminate();
-  return text;
 }
 
 // ── QUESTION PARSER ───────────────────────────
@@ -901,54 +938,42 @@ function lsGetAllPapers() {
   }
 
 
-  let qpFile = null, akFile = null;
-  let _ocrWorker = null;
 
-  async function getOcrWorker(onProgress) {
-    if (_ocrWorker) return _ocrWorker;
-    _ocrWorker = await Tesseract.createWorker('eng', 1, {
-      logger: m => {
-        if (onProgress && m.status === 'recognizing text')
-          onProgress('OCR: ' + Math.round(m.progress * 100) + '%');
-      }
-    });
-    return _ocrWorker;
-  }
-  async function terminateOcrWorker() {
-    if (_ocrWorker) { await _ocrWorker.terminate(); _ocrWorker = null; }
-  }
-  async function ocrImageData(imageData, onProgress) {
-    const worker = await getOcrWorker(onProgress);
-    // PSM 6: treat image as a single uniform block of text
-    // PSM 4: treat as single column — better for each half of a split page
-    const { data: { text } } = await worker.recognize(imageData, {}, {
-      tessedit_pageseg_mode: '4'
-    });
-    return text;
-  }
+  // ── File state (module-level so clearFile/handleFile can access from HTML) ──
+  // PaddleOCR server — no worker to manage, calls are stateless
+  async function terminateOcrWorker() { /* no-op with PaddleOCR backend */ }
+  // ocrImageData is defined globally above using the PaddleOCR server
 
   function setupDZ(dropId, inputId, type) {
     const drop = document.getElementById(dropId), input = document.getElementById(inputId);
-    input.addEventListener('change', () => handleFile(input.files[0], type));
+    input.addEventListener('change', () => window._handleFile(input.files[0], type));
     drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
     drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
-    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag-over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], type); });
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag-over'); if (e.dataTransfer.files[0]) window._handleFile(e.dataTransfer.files[0], type); });
   }
-  function handleFile(file, type) {
+
+  window._handleFile = function(file, type) {
     if (!file) return;
     if (file.size > 30*1024*1024) { showToast('File too large (max 30 MB)', 'error'); return; }
-    if (type === 'qp') qpFile = file; else akFile = file;
+    if (type === 'qp') window._qpFile = file; else window._akFile = file;
     document.getElementById(type+'-drop').classList.add('has-file');
     document.getElementById(type+'-preview').style.display = 'flex';
     document.getElementById(type+'-name').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
-  }
-  function clearFile(e, type) {
+  };
+
+  window.clearFile = function(e, type) {
     e.stopPropagation();
-    if (type === 'qp') { qpFile = null; document.getElementById('qp-file').value = ''; }
-    else { akFile = null; document.getElementById('ak-file').value = ''; }
+    if (type === 'qp') { window._qpFile = null; document.getElementById('qp-file').value = ''; }
+    else { window._akFile = null; document.getElementById('ak-file').value = ''; }
     document.getElementById(type+'-drop').classList.remove('has-file');
     document.getElementById(type+'-preview').style.display = 'none';
-  }
+  };
+
+  // Aliases for the rest of the script
+  Object.defineProperty(window, 'qpFile', { get: () => window._qpFile, set: v => window._qpFile = v });
+  Object.defineProperty(window, 'akFile', { get: () => window._akFile, set: v => window._akFile = v });
+  window._qpFile = null;
+  window._akFile = null;
 
   const STEPS = [
     {id:'s1', label:'Rendering question paper'},
@@ -1007,7 +1032,7 @@ function lsGetAllPapers() {
     if (!subject)  { showToast('Please enter a subject', 'error'); return; }
     if (!examName) { showToast('Please enter exam name', 'error'); return; }
     if (!year)     { showToast('Please select a year', 'error'); return; }
-    if (!qpFile)   { showToast('Please upload the question paper', 'error'); return; }
+    if (!window._qpFile)   { showToast('Please upload the question paper', 'error'); return; }
 
     document.getElementById('submit-text').style.display = 'none';
     document.getElementById('submit-loader').style.display = 'inline';
@@ -1022,7 +1047,7 @@ function lsGetAllPapers() {
     try {
       // ── Render + OCR question paper ──
       setStep('s1', 'active');
-      const { images: qpImages, canvases: qpCanvases } = await pdfToImages(qpFile, msg => setStep('s1', 'active', msg));
+      const { images: qpImages, canvases: qpCanvases } = await pdfToImages(window._qpFile, msg => setStep('s1', 'active', msg));
       setStep('s1', 'done');
 
       setStep('s2', 'active', 'Loading OCR engine…');
@@ -1052,9 +1077,9 @@ function lsGetAllPapers() {
 
       // ── Render + OCR answer key ──
       let answerKey = {};
-      if (akFile) {
+      if (window._akFile) {
         setStep('s4', 'active');
-        const { images: akImages } = await pdfToImages(akFile, msg => setStep('s4', 'active', msg));
+        const { images: akImages } = await pdfToImages(window._akFile, msg => setStep('s4', 'active', msg));
         setStep('s4', 'done');
 
         setStep('s5', 'active', 'Reading answer key…');
@@ -1085,7 +1110,7 @@ function lsGetAllPapers() {
         id, subject, examName, year, duration,
         board: document.getElementById('board').value.trim(),
         description: document.getElementById('description').value.trim(),
-        hasAnswerKey: !!akFile,
+        hasAnswerKey: !!window._akFile,
         hasExam: questions.length > 0,
         questionCount: questions.length,
         questions, answerKey,
