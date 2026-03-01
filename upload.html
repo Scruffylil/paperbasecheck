@@ -420,6 +420,21 @@ footer a:hover { text-decoration: underline; }
         </div>
       </div>
 
+      <!-- Texo Math Enhancement Toggle -->
+      <div style="margin-top:1.25rem;padding:1rem 1.25rem;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:var(--radius);display:flex;align-items:flex-start;gap:1rem;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem;">
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-weight:700;font-size:.9rem;">
+              <input type="checkbox" id="texo-enable" style="width:16px;height:16px;cursor:pointer;" />
+              🔢 Math Formula Enhancement (Texo)
+            </label>
+            <span style="font-size:.7rem;padding:.15rem .4rem;background:rgba(99,102,241,.2);color:#a5b4fc;border-radius:4px;font-weight:700;">BETA</span>
+          </div>
+          <p style="font-size:.8rem;color:var(--text-muted);margin:0;">Uses Texo (20MB AI model) to convert math symbols and formulas to LaTeX — greatly improves accuracy for JEE/NEET papers. First-time download ~80MB, then cached.</p>
+          <div id="texo-status" style="margin-top:.5rem;font-size:.78rem;color:var(--text-muted);display:none;"></div>
+        </div>
+      </div>
+
       <div class="ocr-progress-box" id="ocr-box">
         <h3 style="font-size:1rem;margin-bottom:1rem;">🤖 Processing…</h3>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="ocr-bar"></div></div>
@@ -440,9 +455,150 @@ footer a:hover { text-decoration: underline; }
 </section>
 <footer><div class="container"><p>© 2026 PYQ Portal · <a href="index.html">Home</a> · <a href="browse.html">Browse</a></p></div></footer>
 <div id="toast-container"></div>
-<script>
-/**
- * PYQ Portal — Core Shared Logic v3
+<script type="module">
+import { pipeline as hfPipeline, env as hfEnv } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
+hfEnv.allowLocalModels = false;
+// ══════════════════════════════════════════════════════════════
+// TEXO — LaTeX Formula OCR via Transformers.js
+// Model: alephpi/FormulaNet (20M params, runs in browser)
+// ══════════════════════════════════════════════════════════════
+let _texoPipeline = null;
+let _texoLoading  = false;
+
+function texoEnabled() {
+  const cb = document.getElementById('texo-enable');
+  return cb && cb.checked;
+}
+
+function texoStatus(msg, color) {
+  const el = document.getElementById('texo-status');
+  if (!el) return;
+  el.style.display = msg ? 'block' : 'none';
+  el.style.color   = color || 'var(--text-muted)';
+  el.textContent   = msg || '';
+}
+
+async function loadTexo() {
+  if (_texoPipeline) return _texoPipeline;
+  if (_texoLoading)  return null;
+  _texoLoading = true;
+  texoStatus('⏳ Loading Texo model (~80MB first time, then cached)…', '#a5b4fc');
+  try {
+    _texoPipeline = await hfPipeline('image-to-text', 'alephpi/FormulaNet', { dtype: 'fp32' });
+    texoStatus('✅ Texo ready — formulas will be converted to LaTeX', '#34d399');
+    return _texoPipeline;
+  } catch(e) {
+    console.warn('Texo load failed:', e);
+    texoStatus('⚠️ Texo unavailable — using Tesseract only', '#f59e0b');
+    _texoLoading = false;
+    return null;
+  }
+}
+
+// Pre-load when checkbox is ticked
+document.addEventListener('DOMContentLoaded', () => {
+  const cb = document.getElementById('texo-enable');
+  if (cb) cb.addEventListener('change', () => {
+    if (cb.checked) loadTexo();
+    else { texoStatus(''); }
+  });
+});
+
+// ── Detect if a line of text looks like it contains math/formula garbage ──
+// Returns true if Tesseract likely mangled a formula
+function looksLikeMath(text) {
+  if (!text || text.length < 2) return false;
+  // High ratio of non-alphanumeric characters (symbols, operators)
+  const nonAlpha = (text.match(/[^a-zA-Z0-9\s,.:;'"!?]/g) || []).length;
+  if (nonAlpha / text.length > 0.35) return true;
+  // Known math indicators
+  if (/[∫∑∏√∞≤≥≠±×÷α-ωΑ-Ω]/.test(text)) return true;
+  // Fractions, exponents, subscripts that OCR botches
+  if (/\d+\s*[\/]\s*\d+/.test(text)) return true;
+  // LaTeX-like remnants OCR might output
+  if (/\\[a-z]+|[_^]\{/.test(text)) return true;
+  return false;
+}
+
+// ── Extract math regions from a canvas image and run Texo on them ──
+// Returns a map of { lineIndex -> latexString }
+async function texoEnhanceLine(canvasDataUrl, pipe) {
+  try {
+    const result = await pipe(canvasDataUrl, { max_new_tokens: 256 });
+    if (result && result[0] && result[0].generated_text) {
+      return result[0].generated_text.trim();
+    }
+  } catch(e) {
+    console.warn('Texo inference error:', e);
+  }
+  return null;
+}
+
+// ── Main enhancement function: takes OCR text + original page canvas data URLs
+//    Finds lines that look like math, crops those regions, runs Texo, replaces them ──
+async function enhanceWithTexo(ocrText, pageCanvases, onProgress) {
+  const pipe = await loadTexo();
+  if (!pipe) return ocrText; // fallback: return as-is
+
+  const lines   = ocrText.split('\n');
+  const result  = [...lines];
+  let enhanced  = 0;
+
+  // Find lines that look like mangled math
+  const mathLineIndices = lines.reduce((acc, line, i) => {
+    if (looksLikeMath(line)) acc.push(i);
+    return acc;
+  }, []);
+
+  if (mathLineIndices.length === 0) return ocrText;
+
+  if (onProgress) onProgress(`Texo: enhancing ${mathLineIndices.length} formula regions…`);
+
+  // For each math-looking line, we crop a strip from the page canvas and send to Texo
+  // We spread lines roughly evenly across pages
+  const linesPerPage = Math.ceil(lines.length / (pageCanvases.length || 1));
+
+  for (let idx = 0; idx < mathLineIndices.length; idx++) {
+    const lineIdx  = mathLineIndices[idx];
+    const pageIdx  = Math.min(Math.floor(lineIdx / linesPerPage), pageCanvases.length - 1);
+    const canvas   = pageCanvases[pageIdx];
+    if (!canvas) continue;
+
+    // Crop a horizontal band from the canvas for this line
+    const lineHeight = canvas.height / linesPerPage;
+    const localLine  = lineIdx - (pageIdx * linesPerPage);
+    const y0 = Math.max(0, Math.floor(localLine * lineHeight) - 4);
+    const y1 = Math.min(canvas.height, Math.ceil((localLine + 1) * lineHeight) + 4);
+    const stripH = y1 - y0;
+
+    if (stripH < 4) continue;
+
+    // Draw the strip to a temp canvas
+    const tmp    = document.createElement('canvas');
+    tmp.width    = canvas.width;
+    tmp.height   = stripH;
+    const tctx   = tmp.getContext('2d');
+    tctx.fillStyle = '#ffffff';
+    tctx.fillRect(0, 0, tmp.width, tmp.height);
+    tctx.drawImage(canvas, 0, y0, canvas.width, stripH, 0, 0, canvas.width, stripH);
+
+    const stripDataUrl = tmp.toDataURL('image/png');
+    const latex = await texoEnhanceLine(stripDataUrl, pipe);
+    if (latex && latex.length > 0) {
+      result[lineIdx] = latex;
+      enhanced++;
+    }
+
+    if (onProgress && (idx % 3 === 0)) {
+      onProgress(`Texo: ${idx + 1}/${mathLineIndices.length} formulas enhanced…`);
+    }
+  }
+
+  if (onProgress) onProgress(`Texo: enhanced ${enhanced} formula regions ✓`);
+  return result.join('\n');
+}
+
+
  * OCR, parsers, card builder, toast, utils.
  * Firebase calls are handled inline in each page.
  */
@@ -457,7 +613,8 @@ async function pdfToImages(file, onProgress) {
     ? await file.arrayBuffer() : file;
 
   const pdf    = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  const images = [];
+  const images = [];   // data URLs for Tesseract
+  const canvases = []; // raw canvases for Texo cropping
 
   function renderToCanvas(page, scale) {
     const viewport = page.getViewport({ scale });
@@ -484,14 +641,11 @@ async function pdfToImages(file, onProgress) {
     const dst = document.createElement('canvas');
     dst.width = w; dst.height = h;
     dst.getContext('2d').drawImage(src, x, y, w, h, 0, 0, w, h);
-    return dst.toDataURL('image/png');
+    return dst;
   }
 
   // Detect if page is two-column by checking text width vs height ratio
-  // Most JEE/exam papers in A4 landscape or two-column portrait are wide
   function isTwoColumn(canvas) {
-    // Heuristic: if width > 1.2× height it's likely landscape/two-column
-    // OR if width > 2000px (high-res A4 portrait with two columns)
     return canvas.width > canvas.height * 1.15 || canvas.width > 2200;
   }
 
@@ -501,17 +655,18 @@ async function pdfToImages(file, onProgress) {
     const canvas = await renderToCanvas(page, 3.5);
 
     if (isTwoColumn(canvas)) {
-      // Split into left column and right column — OCR each separately
-      // This prevents Tesseract from interleaving both columns
       const mid = Math.floor(canvas.width / 2);
-      images.push(cropCanvas(canvas, 0,    0, mid,                 canvas.height)); // left
-      images.push(cropCanvas(canvas, mid,  0, canvas.width - mid,  canvas.height)); // right
+      const leftCanvas  = cropCanvas(canvas, 0,   0, mid,                canvas.height);
+      const rightCanvas = cropCanvas(canvas, mid, 0, canvas.width - mid, canvas.height);
+      images.push(leftCanvas.toDataURL('image/png'));
+      images.push(rightCanvas.toDataURL('image/png'));
+      canvases.push(leftCanvas, rightCanvas);
     } else {
-      // Single column — OCR the full page
       images.push(canvas.toDataURL('image/png'));
+      canvases.push(canvas);
     }
   }
-  return images;
+  return { images, canvases };
 }
 
 // ── OCR ───────────────────────────────────────
@@ -642,10 +797,7 @@ function parseQuestions(ocrText) {
   }
 
   saveQ();
-  const filtered = questions.filter(q => q.text.trim().length > 3 && Object.keys(q.options).length >= 2);
-  // Assign sequential index as fallback number in case OCR misread question numbers
-  filtered.forEach((q, i) => { q.seqNumber = i + 1; });
-  return filtered;
+  return questions.filter(q => q.text.trim().length > 3 && Object.keys(q.options).length >= 2);
 }
 
 // ── ANSWER KEY PARSER ─────────────────────────
@@ -860,12 +1012,17 @@ function lsGetAllPapers() {
     document.getElementById('submit-text').style.display = 'none';
     document.getElementById('submit-loader').style.display = 'inline';
     document.getElementById('submit-btn').disabled = true;
+
+    // Update steps to include Texo if enabled
+    if (texoEnabled()) {
+      STEPS.splice(3, 0, {id:'s2b', label:'Texo: Enhancing math formulas'});
+    }
     initOcrUI();
 
     try {
       // ── Render + OCR question paper ──
       setStep('s1', 'active');
-      const qpImages = await pdfToImages(qpFile, msg => setStep('s1', 'active', msg));
+      const { images: qpImages, canvases: qpCanvases } = await pdfToImages(qpFile, msg => setStep('s1', 'active', msg));
       setStep('s1', 'done');
 
       setStep('s2', 'active', 'Loading OCR engine…');
@@ -878,6 +1035,17 @@ function lsGetAllPapers() {
       }
       setStep('s2', 'done');
 
+      // ── Texo math enhancement (optional) ──
+      if (texoEnabled()) {
+        setStep('s2b', 'active', 'Loading Texo model…');
+        qpText = await enhanceWithTexo(
+          qpText,
+          qpCanvases,
+          msg => setStep('s2b', 'active', msg)
+        );
+        setStep('s2b', 'done');
+      }
+
       setStep('s3', 'active', 'Parsing questions…');
       const questions = parseQuestions(qpText);
       setStep('s3', 'done', 'Found ' + questions.length + ' questions');
@@ -886,7 +1054,7 @@ function lsGetAllPapers() {
       let answerKey = {};
       if (akFile) {
         setStep('s4', 'active');
-        const akImages = await pdfToImages(akFile, msg => setStep('s4', 'active', msg));
+        const { images: akImages } = await pdfToImages(akFile, msg => setStep('s4', 'active', msg));
         setStep('s4', 'done');
 
         setStep('s5', 'active', 'Reading answer key…');
